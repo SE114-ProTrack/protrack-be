@@ -12,14 +12,11 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PhanQuyenDuAnId implements Serializable {
+public class ProjectMemberId implements Serializable {
 
     @Column(name = "ID_DuAn")
     private Integer projectId;
 
     @Column(name = "ID_NguoiDung")
     private Integer userId;
-
-    @Column(name = "ID_ChucNang")
-    private Integer functionId;
 }

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "LOIMOITHANHVIEN")
-public class LoiMoiThanhVien {
+public class Invitation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_LoiMoi")
@@ -19,7 +19,7 @@ public class LoiMoiThanhVien {
 
     @ManyToOne
     @JoinColumn(name = "ID_DuAn", referencedColumnName = "ID_DuAn", nullable = false)
-    private Integer projectId;
+    private Project project;
 
     @Column(name = "Email", nullable = false, length = 500)
     private String invitationEmail;
@@ -29,5 +29,8 @@ public class LoiMoiThanhVien {
 
     @Column(name = "NgayMoi")
     @CreationTimestamp
-    private LocalDateTime invitationDay;
+    private LocalDateTime invitationDate;
+
+    @Column(name = "TrangThai")
+    private int invitationStatus = 0;
 }

@@ -1,30 +1,34 @@
 package com.protrack.protrack_be.model;
 
-import com.protrack.protrack_be.model.id.ThanhVienDuAnId;
+import com.protrack.protrack_be.model.id.ProjectPermissionId;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 import lombok.*;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "THANHVIENDUAN")
-public class ThanhVienDuAn {
+@Table(name = "PHANQUYENDUAN")
+public class ProjectPermission {
 
     @EmbeddedId
-    private ThanhVienDuAnId id;
+    private ProjectPermissionId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("projectId")
     @JoinColumn(name = "ID_DuAn", referencedColumnName = "ID_DuAn", nullable = false)
-    private DuAn projectId;
+    private Project projectId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
     @JoinColumn(name = "ID_NguoiDung", referencedColumnName = "ID_NguoiDung", nullable = false)
     private NguoiDung userId;
 
-    @Column(name = "LaChuDuAn")
-    private Boolean isProjectOwner = false;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("functionId")
+    @JoinColumn(name = "ID_ChucNang", referencedColumnName = "ID_ChucNang", nullable = false)
+    private Function functionId;
+
+    @Column(name = "TrangThai")
+    private Boolean isActive = false;
 }
