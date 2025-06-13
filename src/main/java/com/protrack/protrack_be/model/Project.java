@@ -15,11 +15,11 @@ public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_DuAn")
-    private Integer projectId;
+    private Long projectId;
 
     @ManyToOne
     @JoinColumn(name = "ID_NguoiDung", referencedColumnName = "ID_NguoiDung", nullable = false)
-    private Integer creatorId;
+    private NguoiDung creatorId;
 
     @Column(name = "TenDuAn", nullable = false, length = 100)
     private String projectName;

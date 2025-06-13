@@ -15,7 +15,7 @@ public class Invitation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_LoiMoi")
-    private Integer invitationId;
+    private Long invitationId;
 
     @ManyToOne
     @JoinColumn(name = "ID_DuAn", referencedColumnName = "ID_DuAn", nullable = false)
