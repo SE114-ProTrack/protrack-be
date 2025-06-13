@@ -15,11 +15,11 @@ import java.io.Serializable;
 public class ProjectPermissionId implements Serializable {
 
     @Column(name = "ID_DuAn")
-    private Integer projectId;
+    private Long projectId;
 
     @Column(name = "ID_NguoiDung")
-    private Integer userId;
+    private Long userId;
 
     @Column(name = "ID_ChucNang")
-    private Integer functionId;
+    private Long functionId;
 }
