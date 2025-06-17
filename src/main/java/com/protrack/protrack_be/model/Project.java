@@ -20,7 +20,7 @@ public class Project {
 
     @ManyToOne
     @JoinColumn(name = "ID_NguoiDung", referencedColumnName = "ID_NguoiDung", nullable = false)
-    private NguoiDung creatorId;
+    private User creatorId;
 
     @Column(name = "TenDuAn", nullable = false, length = 100)
     private String projectName;
