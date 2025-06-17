@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Data
@@ -13,9 +14,9 @@ import java.time.LocalDateTime;
 @Table(name = "LOIMOITHANHVIEN")
 public class Invitation {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID_LoiMoi")
-    private Long invitationId;
+    @GeneratedValue
+    @Column(name = "ID_LoiMoi", columnDefinition = "BINARY(16)")
+    private UUID invitationId;
 
     @ManyToOne
     @JoinColumn(name = "ID_DuAn", referencedColumnName = "ID_DuAn", nullable = false)

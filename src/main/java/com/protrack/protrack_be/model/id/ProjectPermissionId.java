@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 @Embeddable
 @Data
@@ -14,12 +15,12 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class ProjectPermissionId implements Serializable {
 
-    @Column(name = "ID_DuAn")
-    private Long projectId;
+    @Column(name = "ID_DuAn", columnDefinition = "BINARY(16)")
+    private UUID projectId;
 
-    @Column(name = "ID_NguoiDung")
-    private Long userId;
+    @Column(name = "ID_NguoiDung", columnDefinition = "BINARY(16)")
+    private UUID userId;
 
-    @Column(name = "ID_ChucNang")
-    private Long functionId;
+    @Column(name = "ID_ChucNang", columnDefinition = "BINARY(16)")
+    private UUID functionId;
 }

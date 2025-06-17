@@ -3,19 +3,21 @@ package com.protrack.protrack_be.dto.request;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.util.UUID;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProjectPermissionRequest {
 
     @NotNull(message = "Mã dự án không được để trống")
-    private Long projectId;
+    private UUID projectId;
 
     @NotNull(message = "Mã người dùng không được để trống")
-    private Long userId;
+    private UUID userId;
 
     @NotNull(message = "Mã chức năng không được để trống")
-    private Long functionId;
+    private UUID functionId;
 
     private Boolean isActive = false;
 }
