@@ -22,7 +22,7 @@ public class ProjectPermission {
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
     @JoinColumn(name = "ID_NguoiDung", referencedColumnName = "ID_NguoiDung", nullable = false)
-    private NguoiDung userId;
+    private User userId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("functionId")

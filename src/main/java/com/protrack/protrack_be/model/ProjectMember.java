@@ -22,7 +22,7 @@ public class ProjectMember {
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
     @JoinColumn(name = "ID_NguoiDung", referencedColumnName = "ID_NguoiDung", nullable = false)
-    private NguoiDung userId;
+    private User userId;
 
     @Column(name = "LaChuDuAn")
     private Boolean isProjectOwner = false;
