@@ -1,25 +1,30 @@
 package com.protrack.protrack_be.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
-
-import java.util.Date;
+import java.time.LocalDate;
+import java.util.UUID;
 
 @Entity
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "NGUOIDUNG")
-public class NguoiDung {
+public class User {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_NguoiDung")
-    private int userId;
+    private UUID userId;
 
     @Column(name = "HoTen")
     @NonNull
     private String name;
 
     @Column(name = "NgaySinh")
-    private Date dob;
+    private LocalDate dob;
 
     @Column(name = "GioiTinh")
     private String gender;
@@ -32,9 +37,9 @@ public class NguoiDung {
 
     @Column(name = "HinhAnh")
     @NonNull
-    private String avatar;
+    private String avatarUrl;
 
     @ManyToOne
     @JoinColumn(name = "ID_TaiKhoan")
-    private int accId;
+    private Account account;
 }
