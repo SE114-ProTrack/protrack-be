@@ -33,5 +33,5 @@ public class Invitation {
     private LocalDateTime invitationDate;
 
     @Column(name = "TrangThai")
-    private int invitationStatus = 0;
+    private int invitationStatus;
 }
