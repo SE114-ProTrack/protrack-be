@@ -32,6 +32,6 @@ public class Invitation {
     @CreationTimestamp
     private LocalDateTime invitationDate;
 
-    @Column(name = "TrangThai")
-    private int invitationStatus;
+    @Column(name = "DaChapNhan")
+    private boolean accepted;
 }

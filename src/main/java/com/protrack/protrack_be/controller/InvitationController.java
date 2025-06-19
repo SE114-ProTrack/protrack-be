@@ -43,6 +43,7 @@ public class InvitationController {
 
     @PatchMapping("/{token}/accept")
     public ResponseEntity<?> acceptInvitation(@PathVariable String token) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        InvitationResponse response = service.accept(token);
+        return ResponseEntity.ok(response);
     }
 }

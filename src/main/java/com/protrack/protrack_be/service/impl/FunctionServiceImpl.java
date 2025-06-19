@@ -35,6 +35,11 @@ public class FunctionServiceImpl implements FunctionService {
     }
 
     @Override
+    public Optional<Function> getEntityById(UUID id){
+        return repo.findById(id);
+    }
+
+    @Override
     public FunctionResponse create(FunctionRequest request){
         Function function = toEntity(request);
         Function saved = repo.save(function);
@@ -46,8 +51,8 @@ public class FunctionServiceImpl implements FunctionService {
         Function function = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy chức năng"));
 
-        function.setFuctionName(request.getFuctionName());
-        function.setScreenName(request.getScreenName());
+        if(request.getFuctionName() != null) function.setFuctionName(request.getFuctionName());
+        if(request.getScreenName() != null) function.setScreenName(request.getScreenName());
 
         Function saved = repo.save(function);
         return toResponse(saved);

@@ -12,6 +12,6 @@ public interface InvitationService {
     List<InvitationResponse> getAll();
     Optional<InvitationResponse> getById(UUID id);
     InvitationResponse create(InvitationRequest request);
-    InvitationResponse update(UUID id, InvitationRequest request);
+    InvitationResponse accept(String token);
     void delete(UUID id);
 }

@@ -2,12 +2,10 @@ package com.protrack.protrack_be.service;
 
 import com.protrack.protrack_be.dto.request.ProjectPermissionRequest;
 import com.protrack.protrack_be.dto.response.ProjectPermissionResponse;
-import com.protrack.protrack_be.model.ProjectPermission;
 import com.protrack.protrack_be.model.id.ProjectPermissionId;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public interface ProjectPermissionService {
     List<ProjectPermissionResponse> getAll();

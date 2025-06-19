@@ -12,7 +12,7 @@ public class InvitationMapper {
                 entity.getInvitationEmail(),
                 entity.getInvitationToken(),
                 entity.getInvitationDate(),
-                entity.getInvitationStatus()
+                entity.isAccepted()
         );
     }
 }

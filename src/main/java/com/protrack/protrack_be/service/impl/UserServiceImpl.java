@@ -9,10 +9,14 @@ import com.protrack.protrack_be.repository.AccountRepository;
 import com.protrack.protrack_be.repository.UserRepository;
 import com.protrack.protrack_be.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static com.protrack.protrack_be.mapper.UserMapper.toResponse;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class UserServiceImpl implements UserService {
@@ -27,10 +31,24 @@ public class UserServiceImpl implements UserService {
     private PasswordEncoder passwordEncoder;
 
     @Override
-    public UserResponse getCurrentUser(UUID userId){
-        User currentUser = repo.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng."));
-        return toResponse(currentUser);
+    public User getCurrentUser(){
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new RuntimeException("Không có người dùng đang đăng nhập");
+        }
+
+        String email = auth.getName(); // hoặc ((CustomUserDetails) auth.getPrincipal()).getEmail()
+        User currentUser = repo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy user với email: " + email));
+
+        return currentUser;
+    }
+
+    @Override
+    public Optional<User> getUserById(UUID id){
+        return repo.findById(id);
     }
 
     @Override
