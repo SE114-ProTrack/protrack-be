@@ -4,6 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -34,4 +35,9 @@ public class TaskRequest {
     private UUID approverId;
 
     private String priority;
+
+    private String status;
+
+    private List<UUID> assigneeIds;
+    private List<String> subTasks;
 }

@@ -10,6 +10,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class FunctionResponse {
     private UUID functionId;
+    private String functionCode;
     private String functionName;
     private String screenName;
 }

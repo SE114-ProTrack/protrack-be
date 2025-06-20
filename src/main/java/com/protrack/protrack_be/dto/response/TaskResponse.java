@@ -28,4 +28,6 @@ public class TaskResponse {
 
     private UUID approverId;
     private String approverName;
+
+    private String status;
 }

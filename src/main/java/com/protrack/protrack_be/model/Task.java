@@ -52,4 +52,7 @@ public class Task {
 
     @Column(name = "MucDoUuTien")
     private String priority;
+
+    @Column(name = "TrangThai")
+    private String status;
 }

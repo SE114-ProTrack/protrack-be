@@ -20,7 +20,8 @@ public class TaskMapper {
                 task.getLabel() != null ? task.getLabel().getLabelName() : null,
                 task.getRelatedTask() != null ? task.getRelatedTask().getTaskId() : null,
                 task.getApprover().getUserId(),
-                task.getApprover().getName()
+                task.getApprover().getName(),
+                task.getStatus()
         );
     }
 }
