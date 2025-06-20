@@ -15,4 +15,6 @@ public interface ProjectMemberService {
     ProjectMemberResponse create(ProjectMemberRequest request);
     ProjectMemberResponse update(ProjectMemberId id, ProjectMemberRequest request);
     void delete(ProjectMemberId id);
+    boolean isProjectOwner(UUID projectId, UUID userId);
+    boolean isMember(UUID projectId, UUID userId);
 }
