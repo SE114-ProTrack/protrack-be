@@ -45,18 +45,16 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     private final ProjectMemberRepository memberRepository;
 
     @Override
-    public Optional<ProjectMemberResponse> getById(ProjectMemberId id){
+    public Optional<ProjectMemberResponse> getById(ProjectMemberId id) {
         return repo.findById(id)
                 .map(ProjectMemberMapper::toResponse);
-    public boolean isProjectOwner(UUID projectId, UUID userId) {
-        return memberRepository.existsByProject_ProjectIdAndUser_UserIdAndIsProjectOwnerTrue(projectId, userId);
     }
 
     @Override
-    public ProjectMemberResponse create(ProjectMemberRequest request){
+    public ProjectMemberResponse create(ProjectMemberRequest request) {
         ProjectMember projectMember = new ProjectMember();
         Project project = projectService.getEntityById(request.getProjectId())
-                        .orElseThrow(() -> new RuntimeException("Can not find project"));
+                .orElseThrow(() -> new RuntimeException("Can not find project"));
         User user = userService.getCurrentUser();
 
         ProjectMemberId id = new ProjectMemberId(project.getProjectId(), user.getUserId());
@@ -67,8 +65,6 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
         ProjectMember saved = repo.save(projectMember);
 
         return toResponse(saved);
-    public boolean isMember(UUID projectId, UUID userId) {
-        return memberRepository.existsByProject_ProjectIdAndUser_UserId(projectId, userId);
     }
 
     @Override
@@ -85,4 +81,14 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
 
     @Override
     public void delete(ProjectMemberId id){ repo.deleteById(id); }
+
+    @Override
+    public boolean isProjectOwner(UUID projectId, UUID userId) {
+        return memberRepository.existsByProject_ProjectIdAndUser_UserIdAndIsProjectOwnerTrue(projectId, userId);
+    }
+
+    @Override
+    public boolean isMember(UUID projectId, UUID userId) {
+        return memberRepository.existsByProject_ProjectIdAndUser_UserId(projectId, userId);
+    }
 }

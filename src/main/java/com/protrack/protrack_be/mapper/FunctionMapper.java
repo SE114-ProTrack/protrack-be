@@ -16,7 +16,7 @@ public class FunctionMapper {
 
     public static Function toEntity(FunctionRequest dto) {
         Function entity = new Function();
-        entity.setFuctionName(dto.getFuctionName());
+        entity.setFunctionName(dto.getFuctionName());
         entity.setScreenName(dto.getScreenName());
         return entity;
     }

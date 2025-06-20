@@ -73,14 +73,6 @@ public class ProjectPermissionServiceImpl implements ProjectPermissionService {
 
         return toResponse(saved);
     }
-
-    @Override
-    public boolean hasPermission(UUID userId, UUID projectId, ProjectFunctionCode functionCode) {
-        return permissionRepository.existsByUser_UserIdAndProject_ProjectIdAndFunction_FunctionCodeAndIsActiveTrue(
-                userId, projectId, functionCode.name()
-        );
-    }
-}
     public ProjectPermissionResponse update(ProjectPermissionId id, ProjectPermissionRequest request){
         ProjectPermission projectPermission = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Can not find project permission"));
@@ -94,4 +86,11 @@ public class ProjectPermissionServiceImpl implements ProjectPermissionService {
 
     @Override
     public void delete(ProjectPermissionId id){ repo.deleteById(id); }
+
+    @Override
+    public boolean hasPermission(UUID userId, UUID projectId, ProjectFunctionCode functionCode) {
+        return permissionRepository.existsByUser_UserIdAndProject_ProjectIdAndFunction_FunctionCodeAndIsActiveTrue(
+                userId, projectId, functionCode.name()
+        );
+    }
 }
