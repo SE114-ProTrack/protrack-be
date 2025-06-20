@@ -14,5 +14,5 @@ public class InvitationResponse {
     private String invitationEmail;
     private String invitationToken;
     private LocalDateTime invitationDate;
-    private Integer invitationStatus;
+    private boolean accepted;
 }

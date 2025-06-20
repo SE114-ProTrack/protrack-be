@@ -1,5 +1,6 @@
 package com.protrack.protrack_be.mapper;
 
+import com.protrack.protrack_be.dto.request.FunctionRequest;
 import com.protrack.protrack_be.dto.response.FunctionResponse;
 import com.protrack.protrack_be.model.Function;
 
@@ -12,4 +13,12 @@ public class FunctionMapper {
                 entity.getScreenName()
         );
     }
+
+    public static Function toEntity(FunctionRequest dto) {
+        Function entity = new Function();
+        entity.setFuctionName(dto.getFuctionName());
+        entity.setScreenName(dto.getScreenName());
+        return entity;
+    }
+
 }
