@@ -11,6 +11,7 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 
@@ -57,6 +58,16 @@ public class JwtUtil {
         Map<String, Object> claims = new HashMap<>();
         return createToken(claims, userDetails.getUsername());
     }
+
+    // Tạo token lời mời
+    public String generateInvitationToken(String email, UUID project) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("type", "INVITE");
+        claims.put("projectId", project);
+
+        return createToken(claims, email);
+    }
+
 
     // Tạo token với claims và subject
     private String createToken(Map<String, Object> claims, String subject) {
