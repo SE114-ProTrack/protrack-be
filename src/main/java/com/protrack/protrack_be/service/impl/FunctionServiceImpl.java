@@ -51,7 +51,7 @@ public class FunctionServiceImpl implements FunctionService {
         Function function = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy chức năng"));
 
-        if(request.getFuctionName() != null) function.setFuctionName(request.getFuctionName());
+        if(request.getFuctionName() != null) function.setFunctionName(request.getFuctionName());
         if(request.getScreenName() != null) function.setScreenName(request.getScreenName());
 
         Function saved = repo.save(function);

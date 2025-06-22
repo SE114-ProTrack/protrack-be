@@ -8,8 +8,8 @@ public class ProjectPermissionMapper {
         return new ProjectPermissionResponse(
                 entity.getProjectId().getProjectId(),
                 entity.getUserId().getUserId(),
-                entity.getFunctionId().getFuctionId(),
-                entity.getFunctionId().getFuctionName(),
+                entity.getFunctionId().getFunctionId(),
+                entity.getFunctionId().getFunctionName(),
                 entity.getIsActive()
         );
     }
