@@ -26,9 +26,19 @@ public class Message {
     @JoinColumn(name = "ID_NguoiGui", nullable = false)
     private User sender;
 
+    @ManyToOne
+    @JoinColumn(name = "ID_NguoiNhan", nullable = false)
+    private User receiver;
+
     @Column(name = "NoiDung", nullable = false)
     private String content;
 
-    @Column(name = "ThoiGian")
+    @Column(name = "ThoiGianGui")
     private LocalDateTime timestamp;
+
+    @Column(name = "DaDoc")
+    private boolean read = false;
+
+    @Column(name = "ThoiGianDoc")
+    private LocalDateTime readAt;
 }
