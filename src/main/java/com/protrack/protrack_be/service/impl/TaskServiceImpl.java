@@ -124,7 +124,7 @@ public class TaskServiceImpl implements TaskService {
 
     // HELPERS
 
-    private Task getTask(UUID taskId) {
+    public Task getTask(UUID taskId) {
         return taskRepository.findById(taskId).orElseThrow(() -> new NotFoundException("Task doesn't exist"));
     }
 

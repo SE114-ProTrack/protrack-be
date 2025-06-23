@@ -46,14 +46,14 @@ public class TaskMemberServiceImpl implements TaskMemberService {
 
     @Override
     public TaskMemberResponse create(TaskMemberRequest request){
-        //Task task = taskService.getTaskById();
+        Task task = taskService.getTask(request.getTaskId());
         User user = userService.getUserById(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("Can not find user"));
         TaskMemberId id = new TaskMemberId(request.getTaskId(), request.getUserId());
         TaskMember taskMember = new TaskMember();
 
         taskMember.setId(id);
-        //taskMember.setTaskId(task);
+        taskMember.setTaskId(task);
         taskMember.setUserId(user);
 
         TaskMember saved = repo.save(taskMember);
