@@ -2,7 +2,10 @@ package com.protrack.protrack_be.controller;
 
 import com.protrack.protrack_be.dto.request.ActivityHistoryRequest;
 import com.protrack.protrack_be.dto.response.ActivityHistoryResponse;
+import com.protrack.protrack_be.model.ActivityHistory;
+import com.protrack.protrack_be.service.ActivityHistoryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,18 +18,25 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ActivityHistoryController {
 
+    @Autowired
+    ActivityHistoryService service;
+
     @GetMapping
     public ResponseEntity<List<ActivityHistoryResponse>> getAllActivityHistory() {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        List<ActivityHistoryResponse> responses = service.getAll();
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ActivityHistoryResponse> getActivityHistoryById(@PathVariable UUID id) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        return service.getById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
     public ResponseEntity<?> createActivityHistory(@RequestBody @Valid ActivityHistoryRequest request) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        ActivityHistoryResponse response = service.create(request);
+        return ResponseEntity.ok(response);
     }
 }

@@ -20,6 +20,4 @@ public class PersonalProductivityRequest {
     @NotNull(message = "Số task hoàn thành không được để trống")
     private Integer completedTasks;
 
-    @NotNull(message = "Ngày cập nhật không được để trống")
-    private LocalDateTime lastUpdated;
 }
