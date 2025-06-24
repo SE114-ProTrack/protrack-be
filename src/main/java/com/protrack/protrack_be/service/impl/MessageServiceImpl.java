@@ -1,0 +1,101 @@
+package com.protrack.protrack_be.service.impl;
+
+import com.protrack.protrack_be.dto.request.MessageRequest;
+import com.protrack.protrack_be.dto.response.MessageResponse;
+import com.protrack.protrack_be.mapper.MessageMapper;
+import com.protrack.protrack_be.model.Message;
+import com.protrack.protrack_be.model.User;
+import com.protrack.protrack_be.repository.MessageRepository;
+import com.protrack.protrack_be.service.MessageService;
+import com.protrack.protrack_be.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static com.protrack.protrack_be.mapper.MessageMapper.toResponse;
+
+public class MessageServiceImpl implements MessageService {
+    @Autowired
+    MessageRepository repo;
+
+    @Autowired
+    UserService userService;
+
+    @Override
+    public List<MessageResponse> getAll(){
+        return repo.findAll().stream()
+                .map(MessageMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<MessageResponse> getById(UUID id){
+        return repo.findById(id)
+                .map(MessageMapper::toResponse);
+    }
+
+    @Override
+    public List<MessageResponse> getConversation(UUID user) {
+        return repo.findMessagesBetweenUsers(user, userService.getCurrentUser().getUserId()).stream()
+                .map(MessageMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public MessageResponse sendMessage(MessageRequest request){
+        Message message = new Message();
+        User currentUser = userService.getCurrentUser();
+
+        message.setSender(currentUser);
+        message.setReceiver(userService.getUserById(request.getReceiverId())
+                .orElseThrow(() -> new RuntimeException("Can not find receiver")));
+        message.setContent(request.getContent());
+        message.setSentAt(LocalDateTime.now());
+
+        Message saved = repo.save(message);
+
+        // actually send the message
+
+        return toResponse(saved);
+    }
+
+    @Override
+    public MessageResponse update(UUID id, MessageRequest request){
+        Message message = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Can not find message"));
+        if(!isVaidUser(message.getSender().getUserId())) throw new RuntimeException("User does not have permission to update");
+        if(message.getReceiver().getUserId() != request.getReceiverId()) throw new RuntimeException("Receiver do not match");
+
+        message.setContent(request.getContent());
+
+        Message saved = repo.save(message);
+        return toResponse(saved);
+    }
+    @Override
+    public void markAsRead(UUID id){
+        Message message = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Can not find message"));
+
+        message.setRead(true);
+        message.setReadAt(LocalDateTime.now());
+
+        Message saved = repo.save(message);
+    }
+
+    @Override
+    public void delete(UUID id){
+        repo.deleteById(id);
+    }
+
+    // HELPERS
+
+    // if the current user is the message sender
+    private boolean isVaidUser(UUID userId){
+        User currentUser = userService.getCurrentUser();
+        return userId == currentUser.getUserId();
+    }
+}

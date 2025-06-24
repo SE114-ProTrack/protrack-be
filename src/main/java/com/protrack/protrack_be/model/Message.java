@@ -19,10 +19,6 @@ public class Message {
     private UUID messageId;
 
     @ManyToOne
-    @JoinColumn(name = "ID_DuAn", nullable = false)
-    private Project project;
-
-    @ManyToOne
     @JoinColumn(name = "ID_NguoiGui", nullable = false)
     private User sender;
 
@@ -34,7 +30,10 @@ public class Message {
     private String content;
 
     @Column(name = "ThoiGianGui")
-    private LocalDateTime timestamp;
+    private LocalDateTime sentAt;
+
+    @Column(name = "ThoiGianSua")
+    private LocalDateTime updatedAt;
 
     @Column(name = "DaDoc")
     private boolean read = false;
