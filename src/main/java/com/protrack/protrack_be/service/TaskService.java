@@ -3,6 +3,8 @@ package com.protrack.protrack_be.service;
 import com.protrack.protrack_be.dto.request.TaskRequest;
 import com.protrack.protrack_be.dto.request.TaskStatusRequest;
 import com.protrack.protrack_be.dto.response.TaskResponse;
+import com.protrack.protrack_be.model.Task;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 import java.util.UUID;
@@ -13,5 +15,6 @@ public interface TaskService {
     TaskResponse getTaskById(UUID taskId, UUID userId);
     TaskResponse updateTask(UUID taskId, TaskRequest request, UUID userId);
     void deleteTask(UUID taskId, UUID userId);
-    public TaskResponse updateTaskStatus(UUID taskId, TaskStatusRequest request, UUID userId);
+    TaskResponse updateTaskStatus(UUID taskId, TaskStatusRequest request, UUID userId);
+    Task getTask(UUID taskId);
 }

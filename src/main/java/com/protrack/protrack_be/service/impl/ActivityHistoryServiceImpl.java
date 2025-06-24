@@ -49,8 +49,7 @@ public class ActivityHistoryServiceImpl implements ActivityHistoryService {
         ActivityHistory activityHistory = new ActivityHistory();
         User user = userService.getUserById(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
-        // not done: get task
-        Task task = new Task();
+        Task task = taskService.getTask(request.getTaskId());
 
         activityHistory.setUser(user);
         activityHistory.setTask(task);

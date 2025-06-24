@@ -40,14 +40,14 @@ public class TaskDetailServiceImpl implements TaskDetailService {
 
     @Override
     public TaskDetailResponse create(TaskDetailRequest request){
-        //Task parent = taskService.getTaskById();
-        //Task child = taskService.getTaskById();
+        Task parent = taskService.getTask(request.getParentTaskId());
+        Task child = taskService.getTask(request.getChildTaskId());
         TaskDetailId id = new TaskDetailId(request.getParentTaskId(), request.getChildTaskId());
         TaskDetail taskDetail = new TaskDetail();
 
         taskDetail.setId(id);
-        //taskDetail.setParentTaskId(parent);
-        //taskDetail.setChildTaskId(child);
+        taskDetail.setParentTaskId(parent);
+        taskDetail.setChildTaskId(child);
 
         TaskDetail saved = repo.save(taskDetail);
 

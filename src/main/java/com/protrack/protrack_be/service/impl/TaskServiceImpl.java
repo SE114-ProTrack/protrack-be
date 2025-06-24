@@ -13,8 +13,10 @@ import com.protrack.protrack_be.repository.*;
 import com.protrack.protrack_be.service.ProjectMemberService;
 import com.protrack.protrack_be.service.ProjectPermissionService;
 import com.protrack.protrack_be.service.TaskService;
+import com.protrack.protrack_be.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -25,18 +27,40 @@ import java.util.*;
 @RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService {
 
+    @Autowired
     private final TaskRepository taskRepository;
-    private final UserRepository userRepository;
+
+    @Autowired
     private final ProjectRepository projectRepository;
+
+    @Autowired
     private final ProjectMemberRepository memberRepository;
+
+    @Autowired
     private final TaskMemberRepository taskMemberRepository;
+
+    @Autowired
     private final ActivityHistoryRepository historyRepository;
+
+    @Autowired
     private final NotificationRepository notificationRepository;
+
+    @Autowired
     private final PersonalProductivityRepository productivityRepository;
+
+    @Autowired
     private final LabelRepository labelRepository;
+
+    @Autowired
     private final TaskDetailRepository taskDetailRepository;
 
+    @Autowired
+    private final UserService userService;
+
+    @Autowired
     private final ProjectMemberService projectMemberService;
+
+    @Autowired
     private final ProjectPermissionService projectPermissionService;
 
     @Override
@@ -65,7 +89,9 @@ public class TaskServiceImpl implements TaskService {
             createSubTasks(task, request.getSubTasks());
         }
 
-        logActivity(task, userId, "CREATE_TASK", "Task \"" + task.getTaskName() + "\" has been created by " + getUser(userId).getName());
+        User user = userService.getUserById(userId)
+                .orElseThrow(() -> new RuntimeException("Can not find user"));
+        logActivity(task, userId, "CREATE_TASK", "Task \"" + task.getTaskName() + "\" has been created by " + user.getName());
         notifyUsers(request.getAssigneeIds(), "ASSIGN_TASK", "You have been assigned a task: " + task.getTaskName());
 
         return TaskMapper.toResponse(task);
@@ -95,8 +121,9 @@ public class TaskServiceImpl implements TaskService {
         for (UUID _userId : oldAssignees) {
             updateProductivity(task.getProject().getProjectId(), _userId, -1);
         }
-
-        logActivity(task, userId, "UPDATE_TASK", "Task \"" + task.getTaskName() + "\" is updated by " + getUser(userId).getName());
+        User user = userService.getUserById(userId)
+                .orElseThrow(() -> new RuntimeException("Can not find user"));
+        logActivity(task, userId, "UPDATE_TASK", "Task \"" + task.getTaskName() + "\" is updated by " + user.getName());
         return TaskMapper.toResponse(task);
     }
 
@@ -116,27 +143,26 @@ public class TaskServiceImpl implements TaskService {
         taskMemberRepository.deleteByTask_TaskId(taskId);
         historyRepository.deleteByTask_TaskId(taskId);
 
+        User user = userService.getUserById(userId)
+                .orElseThrow(() -> new RuntimeException("Can not find user"));
         notifyUsers(getAssigneeIds(task), "DELETE_TASK", "Task \"" + task.getTaskName() + "\" has been deleted");
-        logActivity(task, userId, "DELETE_TASK", "Task \"" + task.getTaskName() + "\" is deleted by " + getUser(userId).getName());
+        logActivity(task, userId, "DELETE_TASK", "Task \"" + task.getTaskName() + "\" is deleted by " + user.getName());
 
         taskRepository.delete(task);
     }
 
     // HELPERS
 
-    private Task getTask(UUID taskId) {
+    public Task getTask(UUID taskId) {
         return taskRepository.findById(taskId).orElseThrow(() -> new NotFoundException("Task doesn't exist"));
     }
 
-    private User getUser(UUID userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User doesn't exist"));
-    }
     private void validateUserIsProjectMember(UUID projectId, UUID userId) {
         if (!memberRepository.existsByProject_ProjectIdAndUser_UserId(projectId, userId)) {
             throw new BadRequestException("User " + userId + " is not a member of project " + projectId);
         }
     }
-    private boolean isVisibleToUser(Task task, UUID userId) {
+    public boolean isVisibleToUser(Task task, UUID userId) {
         UUID projectId = task.getProject().getProjectId();
 
         return taskMemberRepository.existsByTask_TaskIdAndUser_UserId(task.getTaskId(), userId)
@@ -157,6 +183,8 @@ public class TaskServiceImpl implements TaskService {
 
     private Task buildBaseTask(TaskRequest request, UUID projectId) {
         Task task = new Task();
+        User approver = userService.getUserById(request.getApproverId())
+                .orElseThrow(() -> new RuntimeException("Can not find user"));
         task.setProject(projectRepository.getReferenceById(projectId));
         task.setTaskName(request.getTaskName());
         task.setDescription(request.getDescription());
@@ -164,7 +192,7 @@ public class TaskServiceImpl implements TaskService {
         task.setPriority(request.getPriority());
         task.setAttachment(request.getAttachment());
         task.setIsMain(request.getIsMain());
-        task.setApprover(getUser(request.getApproverId()));
+        task.setApprover(approver);
         if (request.getLabelId() != null)
             task.setLabel(labelRepository.findById(request.getLabelId()).orElse(null));
         if (request.getRelatedTaskId() != null)
@@ -183,7 +211,8 @@ public class TaskServiceImpl implements TaskService {
             taskMemberRepository.save(new TaskMember(
                     new TaskMemberId(task.getTaskId(), assigneeId),
                     task,
-                    getUser(assigneeId)
+                    userService.getUserById(assigneeId)
+                            .orElseThrow(() -> new RuntimeException("Can not find user"))
             ));
 
             updateProductivity(task.getProject().getProjectId(), assigneeId, +1);
@@ -217,7 +246,8 @@ public class TaskServiceImpl implements TaskService {
     private void logActivity(Task task, UUID actorId, String type, String description) {
         historyRepository.save(new ActivityHistory(
                 UUID.randomUUID(),
-                getUser(actorId),
+                userService.getUserById(actorId)
+                        .orElseThrow(() -> new RuntimeException("Can not find user")),
                 task,
                 type,
                 description,
@@ -230,7 +260,8 @@ public class TaskServiceImpl implements TaskService {
         for (UUID userId : userIds) {
             notificationRepository.save(new Notification(
                     UUID.randomUUID(),
-                    getUser(userId),
+                    userService.getUserById(userId)
+                            .orElseThrow(() -> new RuntimeException("Can not find user")),
                     type,
                     content,
                     false,
@@ -253,7 +284,8 @@ public class TaskServiceImpl implements TaskService {
             task.setAttachment(request.getAttachment());
 
         if (request.getApproverId() != null)
-            task.setApprover(getUser(request.getApproverId()));
+            task.setApprover(userService.getUserById(request.getApproverId())
+                    .orElseThrow(() -> new RuntimeException("Can not find user")));
 
         if (request.getLabelId() != null)
             task.setLabel(labelRepository.findById(request.getLabelId()).orElse(null));
@@ -295,7 +327,8 @@ public class TaskServiceImpl implements TaskService {
     private void updateProductivity(UUID projectId, UUID userId, int change) {
         PersonalProductivityId id = new PersonalProductivityId(userId, projectId);
         PersonalProductivity productivity = productivityRepository.findById(id)
-                .orElse(new PersonalProductivity(id, getUser(userId), projectRepository.getReferenceById(projectId), 0, LocalDateTime.now()));
+                .orElse(new PersonalProductivity(id, userService.getUserById(userId)
+                        .orElseThrow(() -> new RuntimeException("Can not find user")), projectRepository.getReferenceById(projectId), 0, LocalDateTime.now()));
 
         int updated = productivity.getCompletedTasks() + change;
         productivity.setCompletedTasks(Math.max(updated, 0));
