@@ -9,19 +9,19 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CHUCNANG")
+@Table(name = "chucnang")
 public class Function {
     @Id
     @GeneratedValue
-    @Column(name = "ID_ChucNang", columnDefinition = "BINARY(16)")
+    @Column(name = "id_chucnang", columnDefinition = "BINARY(16)")
     private UUID functionId;
 
-    @Column(name = "FunctionCode", nullable = false, unique = true, length = 100)
+    @Column(name = "functioncode", nullable = false, unique = true, length = 100)
     private String functionCode;
 
-    @Column(name = "TenChucNang", nullable = false, length = 100)
+    @Column(name = "tenchucnang", nullable = false, length = 100)
     private String functionName;
 
-    @Column(name = "TenManHinhDuocLoad", nullable = false, length = 100)
+    @Column(name = "tenmanhinhduocload", nullable = false, length = 100)
     private String screenName;
 }

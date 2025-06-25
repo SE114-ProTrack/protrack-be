@@ -138,8 +138,8 @@ public class TaskServiceImpl implements TaskService {
             updateProductivity(task.getProject().getProjectId(), assignee, -1);
         }
 
-        taskDetailRepository.deleteByParent_TaskId(taskId);
-        taskDetailRepository.deleteByChild_TaskId(taskId);
+        taskDetailRepository.deleteByParentTask_TaskId(taskId);
+        taskDetailRepository.deleteByChildTask_TaskId(taskId);
         taskMemberRepository.deleteByTask_TaskId(taskId);
         historyRepository.deleteByTask_TaskId(taskId);
 
@@ -219,10 +219,10 @@ public class TaskServiceImpl implements TaskService {
         }
     }
 
-    private List<UUID> getAssigneeIds(Task task) {
+    public List<UUID> getAssigneeIds(Task task) {
         return taskMemberRepository.findAll().stream()
-                .filter(tm -> tm.getTaskId().getTaskId().equals(task.getTaskId()))
-                .map(tm -> tm.getUserId().getUserId())
+                .filter(tm -> tm.getTask().getTaskId().equals(task.getTaskId()))
+                .map(tm -> tm.getUser().getUserId())
                 .toList();
     }
 

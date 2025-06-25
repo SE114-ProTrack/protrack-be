@@ -12,13 +12,16 @@ import com.protrack.protrack_be.service.TaskMemberService;
 import com.protrack.protrack_be.service.TaskService;
 import com.protrack.protrack_be.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.protrack.protrack_be.mapper.TaskMemberMapper.toResponse;
 
+@Service
 public class TaskMemberServiceImpl implements TaskMemberService {
 
     @Autowired
@@ -53,8 +56,8 @@ public class TaskMemberServiceImpl implements TaskMemberService {
         TaskMember taskMember = new TaskMember();
 
         taskMember.setId(id);
-        taskMember.setTaskId(task);
-        taskMember.setUserId(user);
+        taskMember.setTask(task);
+        taskMember.setUser(user);
 
         TaskMember saved = repo.save(taskMember);
 
@@ -63,4 +66,16 @@ public class TaskMemberServiceImpl implements TaskMemberService {
 
     @Override
     public void delete(TaskMemberId id){ repo.deleteById(id); }
+
+    @Override
+    public List<TaskMember> getMembersByTask(UUID taskId) {
+        return repo.findByTask_TaskId(taskId);
+    }
+
+    @Override
+    public List<UUID> getAssigneeIds(UUID taskId) {
+        return getMembersByTask(taskId).stream()
+                .map(tm -> tm.getUser().getUserId())
+                .toList();
+    }
 }

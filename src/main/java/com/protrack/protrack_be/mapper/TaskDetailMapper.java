@@ -7,10 +7,10 @@ public class TaskDetailMapper {
 
     public static TaskDetailResponse toResponse(TaskDetail entity) {
         return new TaskDetailResponse(
-                entity.getParentTaskId().getTaskId(),
-                entity.getParentTaskId().getTaskName(),
-                entity.getChildTaskId().getTaskId(),
-                entity.getChildTaskId().getTaskName()
+                entity.getParentTask().getTaskId(),
+                entity.getParentTask().getTaskName(),
+                entity.getChildTask().getTaskId(),
+                entity.getChildTask().getTaskName()
         );
     }
 }

@@ -64,9 +64,9 @@ public class ProjectPermissionServiceImpl implements ProjectPermissionService {
         Function function = functionService.getEntityById(request.getFunctionId())
                 .orElseThrow(() -> new RuntimeException("Can not find function"));
 
-        projectPermission.setProjectId(project);
-        projectPermission.setUserId(user);
-        projectPermission.setFunctionId(function);
+        projectPermission.setProject(project);
+        projectPermission.setUser(user);
+        projectPermission.setFunction(function);
         projectPermission.setIsActive(request.getIsActive());
 
         ProjectPermission saved = repo.save(projectPermission);

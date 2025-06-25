@@ -10,6 +10,7 @@ import com.protrack.protrack_be.repository.TaskDetailRepository;
 import com.protrack.protrack_be.service.TaskDetailService;
 import com.protrack.protrack_be.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 
 import static com.protrack.protrack_be.mapper.TaskDetailMapper.toResponse;
 
+@Service
 public class TaskDetailServiceImpl implements TaskDetailService {
     @Autowired
     TaskDetailRepository repo;
@@ -46,8 +48,8 @@ public class TaskDetailServiceImpl implements TaskDetailService {
         TaskDetail taskDetail = new TaskDetail();
 
         taskDetail.setId(id);
-        taskDetail.setParentTaskId(parent);
-        taskDetail.setChildTaskId(child);
+        taskDetail.setParentTask(parent);
+        taskDetail.setChildTask(child);
 
         TaskDetail saved = repo.save(taskDetail);
 

@@ -12,7 +12,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CHITIETCONGVIEC")
+@Table(name = "chitietcongviec")
 public class TaskDetail {
 
     @EmbeddedId
@@ -20,11 +20,11 @@ public class TaskDetail {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("parentTaskId")
-    @JoinColumn(name = "ID_CVCha", referencedColumnName = "ID_CVCha", nullable = false)
-    private Task parentTaskId;
+    @JoinColumn(name = "id_cvcha", referencedColumnName = "id_congviec", nullable = false)
+    private Task parentTask;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("childTaskId")
-    @JoinColumn(name = "ID_CVCon", referencedColumnName = "ID_CVCon", nullable = false)
-    private Task childTaskId;
+    @JoinColumn(name = "id_cvcon", referencedColumnName = "id_congviec", nullable = false)
+    private Task childTask;
 }

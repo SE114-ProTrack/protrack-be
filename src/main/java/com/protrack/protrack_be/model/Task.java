@@ -12,47 +12,47 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONGVIEC")
+@Table(name = "congviec")
 public class Task {
     @Id
     @GeneratedValue
-    @Column(name = "ID_CongViec", columnDefinition = "BINARY(16)")
+    @Column(name = "id_congviec", columnDefinition = "BINARY(16)")
     private UUID taskId;
 
     @ManyToOne
-    @JoinColumn(name = "ID_DuAn", nullable = false)
+    @JoinColumn(name = "id_duan", nullable = false)
     private Project project;
 
-    @Column(name = "TenCongViec", nullable = false)
+    @Column(name = "tencongviec", nullable = false)
     private String taskName;
 
-    @Column(name = "MoTa")
+    @Column(name = "mota")
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "ID_Nhan")
+    @JoinColumn(name = "id_nhan")
     private Label label;
 
-    @Column(name = "Deadline", nullable = false)
+    @Column(name = "deadline", nullable = false)
     private LocalDateTime deadline;
 
-    @Column(name = "IsProjectMainTask")
+    @Column(name = "isprojectmaintask")
     private Boolean isMain = true;
 
-    @Column(name = "TepDinhKem")
+    @Column(name = "tepdinhkem")
     private String attachment;
 
     @ManyToOne
-    @JoinColumn(name = "CongViecLienQuan")
+    @JoinColumn(name = "congvieclienquan")
     private Task relatedTask;
 
     @ManyToOne
-    @JoinColumn(name = "ID_NguoiDuyet", nullable = false)
+    @JoinColumn(name = "id_nguoiduyet", nullable = false)
     private User approver;
 
-    @Column(name = "MucDoUuTien")
+    @Column(name = "mucdouutien")
     private String priority;
 
-    @Column(name = "TrangThai")
+    @Column(name = "trangthai")
     private String status;
 }

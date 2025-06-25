@@ -12,26 +12,26 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "THONGBAO")
+@Table(name = "thongbao")
 public class Notification {
     @Id
     @GeneratedValue
-    @Column(name = "ID_ThongBao", columnDefinition = "BINARY(16)")
+    @Column(name = "id_thongbao", columnDefinition = "BINARY(16)")
     private UUID notificationId;
 
     @ManyToOne
-    @JoinColumn(name = "ID_NguoiNhan", nullable = false)
+    @JoinColumn(name = "id_nguoinhan", nullable = false)
     private User receiver;
 
-    @Column(name = "LoaiThongBao", nullable = false)
+    @Column(name = "loaithongbao", nullable = false)
     private String type;
 
-    @Column(name = "NoiDung", nullable = false)
+    @Column(name = "noidung", nullable = false)
     private String content;
 
-    @Column(name = "DaDoc")
+    @Column(name = "dadoc")
     private Boolean isRead = false;
 
-    @Column(name = "ThoiGian")
+    @Column(name = "thoigian")
     private LocalDateTime timestamp;
 }

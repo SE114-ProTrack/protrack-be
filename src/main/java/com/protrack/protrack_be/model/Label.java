@@ -11,20 +11,20 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "NHANCONGVIEC")
+@Table(name = "nhancongviec")
 public class Label {
     @Id
     @GeneratedValue
-    @Column(name = "ID_Nhan", columnDefinition = "BINARY(16)")
+    @Column(name = "id_nhan", columnDefinition = "BINARY(16)")
     private UUID labelId;
 
     @ManyToOne
-    @JoinColumn(name = "ID_DuAn", nullable = false)
+    @JoinColumn(name = "id_duan", nullable = false)
     private Project project;
 
-    @Column(name = "TenNhan", nullable = false)
+    @Column(name = "tennhan", nullable = false)
     private String labelName;
 
-    @Column(name = "MoTa")
+    @Column(name = "mota")
     private String description;
 }

@@ -15,12 +15,12 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ProjectPermissionId implements Serializable {
 
-    @Column(name = "ID_DuAn", columnDefinition = "BINARY(16)")
+    @Column(name = "id_duan", columnDefinition = "BINARY(16)")
     private UUID projectId;
 
-    @Column(name = "ID_NguoiDung", columnDefinition = "BINARY(16)")
+    @Column(name = "id_nguoidung", columnDefinition = "BINARY(16)")
     private UUID userId;
 
-    @Column(name = "ID_ChucNang", columnDefinition = "BINARY(16)")
+    @Column(name = "id_chucnang", columnDefinition = "BINARY(16)")
     private UUID functionId;
 }
