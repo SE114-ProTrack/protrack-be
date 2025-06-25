@@ -4,12 +4,10 @@
     import com.protrack.protrack_be.dto.request.LoginRequest;
     import com.protrack.protrack_be.dto.request.RegisterRequest;
     import com.protrack.protrack_be.dto.response.AuthResponse;
-    import com.protrack.protrack_be.model.Account;
-    import com.protrack.protrack_be.model.CustomUserDetails;
-    import com.protrack.protrack_be.model.EmailVerificationToken;
-    import com.protrack.protrack_be.model.User;
+    import com.protrack.protrack_be.model.*;
     import com.protrack.protrack_be.repository.AccountRepository;
     import com.protrack.protrack_be.repository.EmailVerificationTokenRepository;
+    import com.protrack.protrack_be.repository.PasswordResetTokenRepository;
     import com.protrack.protrack_be.repository.UserRepository;
     import com.protrack.protrack_be.service.AuthService;
     import com.protrack.protrack_be.util.JwtUtil;
@@ -19,7 +17,10 @@
     import org.springframework.stereotype.Service;
     import org.springframework.web.server.ResponseStatusException;
 
+    import java.time.Instant;
     import java.time.LocalDateTime;
+    import java.time.ZoneOffset;
+    import java.time.temporal.ChronoUnit;
     import java.util.Optional;
     import java.util.UUID;
 
@@ -42,6 +43,8 @@
         private EmailVerificationTokenRepository tokenRepo;
         @Autowired
         private EmailService emailService;
+        @Autowired
+        private PasswordResetTokenRepository resetTokenRepo;
 
 
 //        @Override
@@ -94,7 +97,7 @@
             Account acc = new Account();
             acc.setEmail(rq.getEmail());
             acc.setPassword(passwordEncoder.encode(rq.getPassword()));
-            acc.setActive(false); // chưa xác minh
+            acc.setActive(false);
             accountRepo.save(acc);
 
             // Tạo token
@@ -102,11 +105,27 @@
             EmailVerificationToken tokenEntity = new EmailVerificationToken();
             tokenEntity.setToken(token);
             tokenEntity.setAccount(acc);
-            tokenEntity.setExpiredAt(LocalDateTime.now().plusMinutes(15));
+            tokenEntity.setExpiredAt(Instant.now().plus(15, ChronoUnit.MINUTES));
             tokenRepo.save(tokenEntity);
 
             String verifyLink = "http://frontend.com/verify?token=" + token;
-            String body = "Nhấn vào link để xác minh tài khoản: " + verifyLink;
+            String body = """
+            <html>
+            <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
+                <div style="max-width: 500px; margin: auto; background-color: white; border-radius: 10px; padding: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                    <h2 style="color: #2d89ff;">Chào mừng bạn đến với ProTrack! 👋</h2>
+                    <p>Nhấn vào nút bên dưới để xác minh tài khoản của bạn:</p>
+                    <a href="%s" style="display: inline-block; padding: 12px 24px; margin-top: 20px; background-color: #2d89ff; color: white; text-decoration: none; border-radius: 5px;">
+                        Xác minh tài khoản
+                    </a>
+                    <p style="margin-top: 30px; font-size: 12px; color: #888;">
+                        Nếu bạn không đăng ký tài khoản, hãy bỏ qua email này.
+                    </p>
+                </div>
+            </body>
+            </html>
+            """.formatted(verifyLink);
+
 
             emailService.send(acc.getEmail(), "Xác minh email ProTrack", body);
         }
@@ -120,7 +139,7 @@
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token đã sử dụng");
             }
 
-            if (tokenEntity.getExpiredAt().isBefore(LocalDateTime.now())) {
+            if (tokenEntity.getExpiredAt().isBefore(Instant.now())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token đã hết hạn");
             }
 
@@ -175,16 +194,82 @@
 
             String token = UUID.randomUUID().toString();
             Optional<EmailVerificationToken> existing = tokenRepo.findByAccountAndVerifiedFalse(acc);
-            if (existing.isPresent() && existing.get().getExpiredAt().isAfter(LocalDateTime.now())) {
+            if (existing.isPresent() && existing.get().getExpiredAt().isAfter(Instant.now())) {
                 token = existing.get().getToken(); // dùng lại token cũ
             } else {
                 token = UUID.randomUUID().toString();
-                EmailVerificationToken tokenEntity = new EmailVerificationToken(token, acc, LocalDateTime.now().plusMinutes(15));
+                EmailVerificationToken tokenEntity = new EmailVerificationToken(token, acc, Instant.now().plus(15, ChronoUnit.MINUTES));
                 tokenRepo.save(tokenEntity);
             }
 
-            String link = "http://frontend.com/verify?token=" + token;
-            emailService.send(acc.getEmail(), "Xác minh lại email", "Nhấn vào đây để xác minh: " + link);
+            String verifyLink = "http://frontend.com/verify?token=" + token;
+            String body = """
+            <html>
+            <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
+                <div style="max-width: 500px; margin: auto; background-color: white; border-radius: 10px; padding: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                    <h2 style="color: #2d89ff;">Chào mừng bạn đến với ProTrack! 👋</h2>
+                    <p>Nhấn vào nút bên dưới để xác minh tài khoản của bạn:</p>
+                    <a href="%s" style="display: inline-block; padding: 12px 24px; margin-top: 20px; background-color: #2d89ff; color: white; text-decoration: none; border-radius: 5px;">
+                        Xác minh tài khoản
+                    </a>
+                    <p style="margin-top: 30px; font-size: 12px; color: #888;">
+                        Nếu bạn không đăng ký tài khoản, hãy bỏ qua email này.
+                    </p>
+                </div>
+            </body>
+            </html>
+            """.formatted(verifyLink);
+
+
+            emailService.send(acc.getEmail(), "Xác minh lại email ProTrack", body);
+        }
+
+        @Override
+        public void forgotPassword(String email) {
+            Account acc = accountRepo.findByEmail(email)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Email không tồn tại"));
+
+            String token = UUID.randomUUID().toString();
+
+            PasswordResetToken tokenEntity = new PasswordResetToken();
+            tokenEntity.setToken(token);
+            tokenEntity.setAccount(acc);
+            tokenEntity.setExpiredAt(Instant.now().plus(15, ChronoUnit.MINUTES));
+            tokenEntity.setVerified(false);
+            resetTokenRepo.save(tokenEntity);
+
+            String link = "" + "/reset-password?token=" + token;
+            String body = "<p>Nhấn vào nút để đặt lại mật khẩu:</p><a href=\"" + link + "\">Đặt lại mật khẩu</a>";
+
+            emailService.send(email, "Khôi phục mật khẩu", body);
+        }
+
+        @Override
+        public void verifyResetToken(String token) {
+            PasswordResetToken tokenEntity = resetTokenRepo.findByToken(token)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token không hợp lệ"));
+
+            if (tokenEntity.isVerified())
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token đã sử dụng");
+
+            if (tokenEntity.getExpiredAt().isBefore(Instant.now()))
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token đã hết hạn");
+
+            tokenEntity.setVerified(true);
+            resetTokenRepo.save(tokenEntity);
+        }
+
+        @Override
+        public void resetPassword(String token, String newPassword) {
+            PasswordResetToken tokenEntity = resetTokenRepo.findByToken(token)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token không hợp lệ"));
+
+            if (!tokenEntity.isVerified())
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token chưa xác minh");
+
+            Account acc = tokenEntity.getAccount();
+            acc.setPassword(passwordEncoder.encode(newPassword));
+            accountRepo.save(acc);
         }
 
     }

@@ -15,4 +15,9 @@ public interface AuthService {
     AuthResponse verifyEmail(String token);
     void completeRegistration(UUID accountId, CompleteProfileRequest rq);
     void resendVerification(String email);
+
+    void forgotPassword(String email);
+    void verifyResetToken(String token);
+    void resetPassword(String token, String newPassword);
+
 }

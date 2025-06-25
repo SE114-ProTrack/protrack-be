@@ -1,8 +1,6 @@
 package com.protrack.protrack_be.controller;
 
-import com.protrack.protrack_be.dto.request.CompleteProfileRequest;
-import com.protrack.protrack_be.dto.request.LoginRequest;
-import com.protrack.protrack_be.dto.request.RegisterRequest;
+import com.protrack.protrack_be.dto.request.*;
 import com.protrack.protrack_be.dto.response.AuthResponse;
 import com.protrack.protrack_be.service.AuthService;
 import io.swagger.v3.oas.annotations.*;
@@ -53,4 +51,24 @@ public class AuthController {
         return ResponseEntity.ok("Đã gửi lại email xác minh");
     }
 
+    @Operation(summary = "Gửi mail khôi phục mật khẩu")
+    @PostMapping("/forgot-password/request")
+    public ResponseEntity<?> requestReset(@RequestBody @Valid ForgotPasswordRequest rq) {
+        authService.forgotPassword(rq.getEmail());
+        return ResponseEntity.ok("Đã gửi link khôi phục mật khẩu");
+    }
+
+    @Operation(summary = "Xác minh token khôi phục mật khẩu")
+    @PostMapping("/forgot-password/verify")
+    public ResponseEntity<?> verifyResetToken(@RequestBody @Valid VerifyResetTokenRequest rq) {
+        authService.verifyResetToken(rq.getToken());
+        return ResponseEntity.ok("Token hợp lệ");
+    }
+
+    @Operation(summary = "Đặt lại mật khẩu mới")
+    @PostMapping("/forgot-password/reset")
+    public ResponseEntity<?> resetPassword(@RequestBody @Valid ResetPasswordRequest rq) {
+        authService.resetPassword(rq.getToken(), rq.getNewPassword());
+        return ResponseEntity.ok("Đặt lại mật khẩu thành công");
+    }
 }
