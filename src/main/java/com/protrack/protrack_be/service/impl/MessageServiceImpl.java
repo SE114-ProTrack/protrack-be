@@ -9,6 +9,7 @@ import com.protrack.protrack_be.repository.MessageRepository;
 import com.protrack.protrack_be.service.MessageService;
 import com.protrack.protrack_be.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,6 +25,8 @@ public class MessageServiceImpl implements MessageService {
 
     @Autowired
     UserService userService;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     @Override
     public List<MessageResponse> getAll(){
@@ -56,11 +59,12 @@ public class MessageServiceImpl implements MessageService {
         message.setContent(request.getContent());
         message.setSentAt(LocalDateTime.now());
 
-        Message saved = repo.save(message);
+        MessageResponse response = toResponse(repo.save(message));
 
-        // actually send the message
+        // send the message
+        messagingTemplate.convertAndSend("/topic/user." + request.getReceiverId(), response);
 
-        return toResponse(saved);
+        return response;
     }
 
     @Override
