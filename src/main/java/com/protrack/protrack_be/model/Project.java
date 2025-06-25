@@ -11,24 +11,24 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "DUAN")
+@Table(name = "duan")
 public class Project {
     @Id
     @GeneratedValue
-    @Column(name = "ID_DuAn", columnDefinition = "BINARY(16)")
+    @Column(name = "id_duan", columnDefinition = "BINARY(16)")
     private UUID projectId;
 
     @ManyToOne
-    @JoinColumn(name = "ID_NguoiDung", referencedColumnName = "ID_NguoiDung", nullable = false)
+    @JoinColumn(name = "id_nguoidung", referencedColumnName = "id_nguoidung", nullable = false)
     private User creatorId;
 
-    @Column(name = "TenDuAn", nullable = false, length = 100)
+    @Column(name = "tenduan", nullable = false, length = 100)
     private String projectName;
 
-    @Column(name = "ThoiGianTao")
+    @Column(name = "thoigiantao")
     @CreationTimestamp
     private LocalDateTime createTime;
 
-    @Column(name = "MoTa", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "mota", columnDefinition = "NVARCHAR(MAX)")
     private String description;
 }

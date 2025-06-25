@@ -8,7 +8,7 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "THANHVIENDUAN")
+@Table(name = "thanhvienduan")
 public class ProjectMember {
 
     @EmbeddedId
@@ -16,14 +16,14 @@ public class ProjectMember {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("projectId")
-    @JoinColumn(name = "ID_DuAn", referencedColumnName = "ID_DuAn", nullable = false)
+    @JoinColumn(name = "id_duan", referencedColumnName = "id_duan", nullable = false)
     private Project project;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
-    @JoinColumn(name = "ID_NguoiDung", referencedColumnName = "ID_NguoiDung", nullable = false)
+    @JoinColumn(name = "id_nguoidung", referencedColumnName = "id_nguoidung", nullable = false)
     private User user;
 
-    @Column(name = "LaChuDuAn")
+    @Column(name = "lachuduan")
     private Boolean isProjectOwner = false;
 }

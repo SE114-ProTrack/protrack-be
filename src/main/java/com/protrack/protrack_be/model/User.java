@@ -12,34 +12,34 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "NGUOIDUNG")
+@Table(name = "nguoidung")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID_NguoiDung")
+    @Column(name = "id_nguoidung")
     private UUID userId;
 
-    @Column(name = "HoTen")
+    @Column(name = "hoten")
     @NonNull
     private String name;
 
-    @Column(name = "NgaySinh")
+    @Column(name = "ngaysinh")
     private LocalDate dob;
 
-    @Column(name = "GioiTinh")
+    @Column(name = "gioitinh")
     private String gender;
 
-    @Column(name = "DienThoai")
+    @Column(name = "dienthoai")
     private String phone;
 
-    @Column(name = "DiaChi")
+    @Column(name = "diachi")
     private String address;
 
-    @Column(name = "HinhAnh")
+    @Column(name = "hinhanh")
     @NonNull
     private String avatarUrl;
 
     @ManyToOne
-    @JoinColumn(name = "ID_TaiKhoan")
+    @JoinColumn(name = "id_taikhoan")
     private Account account;
 }

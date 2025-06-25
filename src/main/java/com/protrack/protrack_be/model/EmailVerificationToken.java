@@ -12,7 +12,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "TOKENXACTHUCMAIL")
+@Table(name = "tokenxacthucemail")
 public class EmailVerificationToken {
 
     @Id
@@ -23,13 +23,13 @@ public class EmailVerificationToken {
     private String token;
 
     @OneToOne
-    @JoinColumn(name = "ID_TaiKhoan", referencedColumnName = "ID_TaiKhoan", nullable = false)
+    @JoinColumn(name = "id_taikhoan", referencedColumnName = "id_taikhoan", nullable = false)
     private Account account;
 
-    @Column(name = "expired_at", nullable = false)
+    @Column(name = "hethan", nullable = false)
     private LocalDateTime expiredAt;
 
-    @Column(name = "verified", nullable = false)
+    @Column(name = "daxacthuc", nullable = false)
     private boolean verified = false;
 
     public EmailVerificationToken(String token, Account acc, LocalDateTime localDateTime) {

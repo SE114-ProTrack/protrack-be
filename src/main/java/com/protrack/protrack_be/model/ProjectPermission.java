@@ -16,19 +16,19 @@ public class ProjectPermission {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("projectId")
-    @JoinColumn(name = "ID_DuAn", referencedColumnName = "ID_DuAn", nullable = false)
+    @JoinColumn(name = "id_duan", referencedColumnName = "id_duan", nullable = false)
     private Project project;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
-    @JoinColumn(name = "ID_NguoiDung", referencedColumnName = "ID_NguoiDung", nullable = false)
+    @JoinColumn(name = "id_nguoidung", referencedColumnName = "id_nguoidung", nullable = false)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("functionId")
-    @JoinColumn(name = "ID_ChucNang", referencedColumnName = "ID_ChucNang", nullable = false)
+    @JoinColumn(name = "id_chucnang", referencedColumnName = "id_chucnang", nullable = false)
     private Function function;
 
-    @Column(name = "TrangThai")
+    @Column(name = "trangthai")
     private Boolean isActive = false;
 }

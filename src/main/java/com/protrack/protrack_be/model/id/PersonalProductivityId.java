@@ -15,9 +15,9 @@ import java.util.UUID;
 @AllArgsConstructor
 public class PersonalProductivityId implements Serializable {
 
-    @Column(name = "ID_NguoiDung", columnDefinition = "BINARY(16)")
+    @Column(name = "id_nguoidung", columnDefinition = "BINARY(16)")
     private UUID userId;
 
-    @Column(name = "ID_DuAn", columnDefinition = "BINARY(16)")
+    @Column(name = "id_duan", columnDefinition = "BINARY(16)")
     private UUID projectId;
 }

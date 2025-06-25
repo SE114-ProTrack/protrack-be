@@ -12,24 +12,24 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "BINHLUAN")
+@Table(name = "binhluan")
 public class Comment {
     @Id
     @GeneratedValue
-    @Column(name = "ID_BinhLuan", columnDefinition = "BINARY(16)")
+    @Column(name = "id_binhluan", columnDefinition = "BINARY(16)")
     private UUID commentId;
 
     @ManyToOne
-    @JoinColumn(name = "ID_CongViec", nullable = false)
+    @JoinColumn(name = "id_congviec", nullable = false)
     private Task task;
 
     @ManyToOne
-    @JoinColumn(name = "ID_NguoiDung", nullable = false)
+    @JoinColumn(name = "id_nguoidung", nullable = false)
     private User user;
 
-    @Column(name = "NoiDung", nullable = false)
+    @Column(name = "noidung", nullable = false)
     private String content;
 
-    @Column(name = "ThoiGianBL")
+    @Column(name = "thoigianbl")
     private LocalDateTime timestamp;
 }
