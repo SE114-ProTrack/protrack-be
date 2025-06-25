@@ -20,11 +20,11 @@ public class TaskDetail {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("parentTaskId")
-    @JoinColumn(name = "id_cvcha", referencedColumnName = "id_cvcha", nullable = false)
+    @JoinColumn(name = "id_cvcha", referencedColumnName = "id_congviec", nullable = false)
     private Task parentTask;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("childTaskId")
-    @JoinColumn(name = "id_cvcon", referencedColumnName = "id_cvcon", nullable = false)
+    @JoinColumn(name = "id_cvcon", referencedColumnName = "id_congviec", nullable = false)
     private Task childTask;
 }
