@@ -11,6 +11,7 @@ import com.protrack.protrack_be.service.ActivityHistoryService;
 import com.protrack.protrack_be.service.TaskService;
 import com.protrack.protrack_be.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 
 import static com.protrack.protrack_be.mapper.ActivityHistoryMapper.toResponse;
 
+@Service
 public class ActivityHistoryServiceImpl implements ActivityHistoryService {
 
     @Autowired

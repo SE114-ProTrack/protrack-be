@@ -11,7 +11,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "HIEUSUATCANHAN")
+@Table(name = "hieusuatcanhan")
 public class PersonalProductivity {
 
     @EmbeddedId
@@ -19,17 +19,17 @@ public class PersonalProductivity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
-    @JoinColumn(name = "ID_NguoiDung", referencedColumnName = "ID_NguoiDung", nullable = false)
+    @JoinColumn(name = "id_nguoidung", referencedColumnName = "id_nguoidung", nullable = false)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("projectId")
-    @JoinColumn(name = "ID_DuAn", referencedColumnName = "ID_DuAn", nullable = false)
+    @JoinColumn(name = "id_duan", referencedColumnName = "id_duan", nullable = false)
     private Project project;
 
-    @Column(name = "SoTaskHoanThanh", nullable = false)
+    @Column(name = "sotaskhoanthanh", nullable = false)
     private Integer completedTasks;
 
-    @Column(name = "NgayCapNhat", nullable = false)
+    @Column(name = "ngaycapnhat", nullable = false)
     private LocalDateTime lastUpdated;
 }

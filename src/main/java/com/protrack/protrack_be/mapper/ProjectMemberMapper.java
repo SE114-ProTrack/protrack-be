@@ -6,9 +6,9 @@ import com.protrack.protrack_be.model.ProjectMember;
 public class ProjectMemberMapper {
     public static ProjectMemberResponse toResponse(ProjectMember entity) {
         return new ProjectMemberResponse(
-                entity.getProjectId().getProjectId(),
-                entity.getUserId().getUserId(),
-                entity.getUserId().getName(),
+                entity.getProject().getProjectId(),
+                entity.getUser().getUserId(),
+                entity.getUser().getName(),
                 entity.getIsProjectOwner()
         );
     }

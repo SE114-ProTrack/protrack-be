@@ -14,7 +14,7 @@ public class CommentResponse {
 
     private UUID taskId;
     private UUID userId;
-    private String userFullName;
+    private String userName;
 
     private String content;
     private LocalDateTime timestamp;

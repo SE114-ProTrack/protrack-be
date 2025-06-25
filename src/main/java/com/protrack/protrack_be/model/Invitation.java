@@ -11,27 +11,27 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "LOIMOITHANHVIEN")
+@Table(name = "loimoithanhvien")
 public class Invitation {
     @Id
     @GeneratedValue
-    @Column(name = "ID_LoiMoi", columnDefinition = "BINARY(16)")
+    @Column(name = "id_loimoi", columnDefinition = "BINARY(16)")
     private UUID invitationId;
 
     @ManyToOne
-    @JoinColumn(name = "ID_DuAn", referencedColumnName = "ID_DuAn", nullable = false)
+    @JoinColumn(name = "id_duan", referencedColumnName = "id_duan", nullable = false)
     private Project project;
 
-    @Column(name = "Email", nullable = false, length = 500)
+    @Column(name = "email", nullable = false, length = 500)
     private String invitationEmail;
 
-    @Column(name = "Token", nullable = false, length = 500)
+    @Column(name = "token", nullable = false, length = 500)
     private String invitationToken;
 
-    @Column(name = "NgayMoi")
+    @Column(name = "ngaymoi")
     @CreationTimestamp
     private LocalDateTime invitationDate;
 
-    @Column(name = "DaChapNhan")
+    @Column(name = "dachapnhan")
     private boolean accepted;
 }

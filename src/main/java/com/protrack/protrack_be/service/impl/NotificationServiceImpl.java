@@ -9,6 +9,7 @@ import com.protrack.protrack_be.repository.NotificationRepository;
 import com.protrack.protrack_be.service.NotificationService;
 import com.protrack.protrack_be.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 
 import static com.protrack.protrack_be.mapper.NotificationMapper.toResponse;
 
+@Service
 public class NotificationServiceImpl implements NotificationService {
 
     @Autowired
@@ -28,7 +30,9 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public List<NotificationResponse> getAll(UUID userId){
-        return repo.findByReceiver(userId)
+        User user = userService.getUserById(userId)
+                .orElseThrow(() -> new RuntimeException("Cannot find user"));
+        return repo.findByReceiver(user)
                 .stream()
                 .map(NotificationMapper::toResponse)
                 .collect(Collectors.toList());

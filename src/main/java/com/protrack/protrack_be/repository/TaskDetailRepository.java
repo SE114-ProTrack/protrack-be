@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.UUID;
 
 public interface TaskDetailRepository extends JpaRepository<TaskDetail, TaskDetailId> {
-    void deleteByParent_TaskId(UUID taskId);
-    void deleteByChild_TaskId(UUID taskId);
+    void deleteByParentTask_TaskId(UUID taskId);
+    void deleteByChildTask_TaskId(UUID taskId);
 }
 

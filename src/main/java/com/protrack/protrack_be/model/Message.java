@@ -10,35 +10,35 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "TINNHAN")
+@Table(name = "tinnhan")
 public class Message {
 
     @Id
     @GeneratedValue
-    @Column(name = "ID_TinNhan", columnDefinition = "BINARY(16)")
+    @Column(name = "id_tinnhan", columnDefinition = "BINARY(16)")
     private UUID messageId;
 
     @ManyToOne
-    @JoinColumn(name = "ID_DuAn", nullable = false)
+    @JoinColumn(name = "id_duan", nullable = false)
     private Project project;
 
     @ManyToOne
-    @JoinColumn(name = "ID_NguoiGui", nullable = false)
+    @JoinColumn(name = "id_nguoigui", nullable = false)
     private User sender;
 
     @ManyToOne
-    @JoinColumn(name = "ID_NguoiNhan", nullable = false)
+    @JoinColumn(name = "id_nguoinhan", nullable = false)
     private User receiver;
 
-    @Column(name = "NoiDung", nullable = false)
+    @Column(name = "noidung", nullable = false)
     private String content;
 
-    @Column(name = "ThoiGianGui")
+    @Column(name = "thoigiangui")
     private LocalDateTime timestamp;
 
-    @Column(name = "DaDoc")
+    @Column(name = "dadoc")
     private boolean read = false;
 
-    @Column(name = "ThoiGianDoc")
+    @Column(name = "thoigiandoc")
     private LocalDateTime readAt;
 }

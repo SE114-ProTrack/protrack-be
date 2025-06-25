@@ -15,9 +15,9 @@ import java.util.UUID;
 @AllArgsConstructor
 public class TaskMemberId implements Serializable {
 
-    @Column(name = "ID_CongViec", columnDefinition = "BINARY(16)")
+    @Column(name = "id_congviec", columnDefinition = "BINARY(16)")
     private UUID taskId;
 
-    @Column(name = "ID_NguoiDung", columnDefinition = "BINARY(16)")
+    @Column(name = "id_nguoidung", columnDefinition = "BINARY(16)")
     private UUID userId;
 }

@@ -10,9 +10,8 @@ import com.protrack.protrack_be.repository.ProjectRepository;
 import com.protrack.protrack_be.service.InvitationService;
 import com.protrack.protrack_be.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +20,7 @@ import java.util.stream.Collectors;
 
 import static com.protrack.protrack_be.mapper.InvitationMapper.toResponse;
 
+@Service
 public class InvitationServiceImpl implements InvitationService {
 
     @Autowired
@@ -67,7 +67,7 @@ public class InvitationServiceImpl implements InvitationService {
 
     @Override
     public InvitationResponse accept(String token){
-        Invitation invitation = repo.findByToken(token)
+        Invitation invitation = repo.findByInvitationToken(token)
                 .orElseThrow(() -> new RuntimeException("Can not find invitation"));
 
         invitation.setAccepted(true);

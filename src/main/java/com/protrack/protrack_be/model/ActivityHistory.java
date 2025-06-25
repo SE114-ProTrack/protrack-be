@@ -12,27 +12,27 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONGVIEC")
+@Table(name = "congviec")
 public class ActivityHistory {
     @Id
     @GeneratedValue
-    @Column(name = "ID_LSHD", columnDefinition = "BINARY(16)")
+    @Column(name = "id_lshd", columnDefinition = "BINARY(16)")
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "ID_NguoiDung", nullable = false)
+    @JoinColumn(name = "id_nguoidung", nullable = false)
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "ID_CongViec", nullable = false)
+    @JoinColumn(name = "id_congviec", nullable = false)
     private Task task;
 
-    @Column(name = "LoaiHanhDong", nullable = false)
+    @Column(name = "loaihanhdong", nullable = false)
     private String actionType;
 
-    @Column(name = "MoTa")
+    @Column(name = "mota")
     private String description;
 
-    @Column(name = "ThoiGian")
+    @Column(name = "thoigian")
     private LocalDateTime timestamp;
 }
