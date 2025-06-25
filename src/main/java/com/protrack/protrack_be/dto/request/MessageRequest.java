@@ -11,11 +11,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class MessageRequest {
 
-    @NotNull(message = "ID dự án không được để trống")
-    private UUID projectId;
-
-    @NotNull(message = "ID người gửi không được để trống")
-    private UUID senderId;
+    @NotNull(message = "ID người nhận không được để trống")
+    private UUID receiverId;
 
     @NotBlank(message = "Nội dung tin nhắn không được để trống")
     private String content;
