@@ -12,22 +12,21 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "TAIKHOAN")
+@Table(name = "taikhoan")
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID_TaiKhoan")
+    @Column(name = "id_taikhoan")
     private UUID accId;
 
-    @Column(name = "Email")
+    @Column(name = "email")
     @NonNull
     private String email;
 
-    @Column(name = "MatKhau")
+    @Column(name = "matkhau")
     @NonNull
     private String password;
 
-    @Column(name = "TrangThai")
-    @NonNull
-    private boolean status;
+    @Column(name = "dahoatdong")
+    private boolean active;
 }

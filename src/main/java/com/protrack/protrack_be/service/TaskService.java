@@ -17,4 +17,6 @@ public interface TaskService {
     void deleteTask(UUID taskId, UUID userId);
     TaskResponse updateTaskStatus(UUID taskId, TaskStatusRequest request, UUID userId);
     Task getTask(UUID taskId);
+    boolean isVisibleToUser(Task task, UUID userId);
+    List<UUID> getAssigneeIds(Task task);
 }

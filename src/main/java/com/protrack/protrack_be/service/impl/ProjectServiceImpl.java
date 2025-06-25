@@ -10,6 +10,7 @@ import com.protrack.protrack_be.repository.ProjectRepository;
 import com.protrack.protrack_be.service.ProjectService;
 import com.protrack.protrack_be.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 import static com.protrack.protrack_be.mapper.ProjectMapper.toResponse;
 
+@Service
 public class ProjectServiceImpl implements ProjectService {
 
     @Autowired

@@ -14,4 +14,5 @@ public class AuthResponse {
     UUID userId;
     String name;
     String email;
+    private boolean needCompleteProfile;
 }

@@ -21,10 +21,10 @@ public class TaskMember {
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("taskId")
     @JoinColumn(name = "ID_CongViec", referencedColumnName = "ID_CongViec", nullable = false)
-    private Task taskId;
+    private Task task;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
     @JoinColumn(name = "ID_NguoiDung", referencedColumnName = "ID_NguoiDung", nullable = false)
-    private User userId;
+    private User user;
 }

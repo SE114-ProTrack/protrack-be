@@ -17,12 +17,12 @@ public class ProjectMember {
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("projectId")
     @JoinColumn(name = "ID_DuAn", referencedColumnName = "ID_DuAn", nullable = false)
-    private Project projectId;
+    private Project project;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
     @JoinColumn(name = "ID_NguoiDung", referencedColumnName = "ID_NguoiDung", nullable = false)
-    private User userId;
+    private User user;
 
     @Column(name = "LaChuDuAn")
     private Boolean isProjectOwner = false;

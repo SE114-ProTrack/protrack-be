@@ -7,10 +7,10 @@ public class TaskMemberMapper {
 
     public static TaskMemberResponse toResponse(TaskMember entity) {
         return new TaskMemberResponse(
-                entity.getTaskId().getTaskId(),
-                entity.getTaskId().getTaskName(),
-                entity.getUserId().getUserId(),
-                entity.getUserId().getName()
+                entity.getTask().getTaskId(),
+                entity.getTask().getTaskName(),
+                entity.getUser().getUserId(),
+                entity.getUser().getName()
         );
     }
 }

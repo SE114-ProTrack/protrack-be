@@ -17,17 +17,17 @@ public class ProjectPermission {
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("projectId")
     @JoinColumn(name = "ID_DuAn", referencedColumnName = "ID_DuAn", nullable = false)
-    private Project projectId;
+    private Project project;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
     @JoinColumn(name = "ID_NguoiDung", referencedColumnName = "ID_NguoiDung", nullable = false)
-    private User userId;
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("functionId")
     @JoinColumn(name = "ID_ChucNang", referencedColumnName = "ID_ChucNang", nullable = false)
-    private Function functionId;
+    private Function function;
 
     @Column(name = "TrangThai")
     private Boolean isActive = false;

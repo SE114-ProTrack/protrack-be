@@ -7,5 +7,5 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface InvitationRepository extends JpaRepository<Invitation, UUID> {
-    Optional<Invitation> findByToken(String token);
+    Optional<Invitation> findByInvitationToken(String token);
 }
