@@ -70,15 +70,15 @@ public class TaskServiceImpl implements TaskService {
 
     @Transactional
     @Override
-    public TaskResponse createTask(TaskRequest request, UUID projectId, UUID userId) {
+    public TaskResponse createTask(TaskRequest request, UUID userId) {
 
         if (hasProjectRight(request.getProjectId(), userId, ProjectFunctionCode.CREATE_TASK)) {
             throw new AccessDeniedException("You are not permitted to create task in this project");
         }
 
-        checkMembership(projectId, userId);
+        checkMembership(request.getProjectId(), userId);
 
-        Task task = buildBaseTask(request, projectId);
+        Task task = buildBaseTask(request, request.getProjectId());
         Task saved = taskRepository.save(task);
 
         assignUsersToTask(task, request.getAssigneeIds());
@@ -95,10 +95,10 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskResponse getTaskById(UUID taskId, UUID userId) {
+    public Optional<TaskResponse> getTaskById(UUID taskId, UUID userId) {
         Task task = getTask(taskId);
         if (!isVisibleToUser(task, userId)) throw new AccessDeniedException("You are not permitted to view this task");
-        return TaskMapper.toResponse(task);
+        return Optional.of(TaskMapper.toResponse(task));
     }
 
     @Transactional
