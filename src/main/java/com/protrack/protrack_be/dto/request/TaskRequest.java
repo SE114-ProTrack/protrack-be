@@ -29,7 +29,7 @@ public class TaskRequest {
 
     private String attachment;
 
-    private UUID relatedTaskId;
+    private UUID parentTaskId;
 
     @NotNull(message = "Người duyệt không được để trống")
     private UUID approverId;

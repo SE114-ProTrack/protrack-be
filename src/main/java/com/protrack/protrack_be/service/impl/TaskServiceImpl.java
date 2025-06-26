@@ -52,9 +52,6 @@ public class TaskServiceImpl implements TaskService {
     private final LabelRepository labelRepository;
 
     @Autowired
-    private final TaskDetailRepository taskDetailRepository;
-
-    @Autowired
     private final UserService userService;
 
     @Autowired
@@ -75,14 +72,14 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public TaskResponse createTask(TaskRequest request, UUID projectId, UUID userId) {
 
-        if (!hasProjectRight(request.getProjectId(), userId, ProjectFunctionCode.CREATE_TASK)) {
+        if (hasProjectRight(request.getProjectId(), userId, ProjectFunctionCode.CREATE_TASK)) {
             throw new AccessDeniedException("You are not permitted to create task in this project");
         }
 
         checkMembership(projectId, userId);
 
         Task task = buildBaseTask(request, projectId);
-        task = taskRepository.save(task);
+        Task saved = taskRepository.save(task);
 
         assignUsersToTask(task, request.getAssigneeIds());
         if (Boolean.TRUE.equals(request.getIsMain())) {
@@ -94,7 +91,7 @@ public class TaskServiceImpl implements TaskService {
         logActivity(task, userId, "CREATE_TASK", "Task \"" + task.getTaskName() + "\" has been created by " + user.getName());
         notifyUsers(request.getAssigneeIds(), "ASSIGN_TASK", "You have been assigned a task: " + task.getTaskName());
 
-        return TaskMapper.toResponse(task);
+        return TaskMapper.toResponse(saved);
     }
 
     @Override
@@ -108,12 +105,12 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public TaskResponse updateTask(UUID taskId, TaskRequest request, UUID userId) {
         Task task = getTask(taskId);
-        if (!hasProjectRight(task.getProject().getProjectId(), userId, ProjectFunctionCode.EDIT_TASK)) {
+        if (hasProjectRight(task.getProject().getProjectId(), userId, ProjectFunctionCode.EDIT_TASK)) {
             throw new AccessDeniedException("You are not permitted to edit this task");
         }
 
         updateTaskFields(task, request);
-        task = taskRepository.save(task);
+        Task saved = taskRepository.save(task);
 
         List<UUID> oldAssignees = getAssigneeIds(task);
         taskMemberRepository.deleteByTask_TaskId(taskId);
@@ -124,13 +121,13 @@ public class TaskServiceImpl implements TaskService {
         User user = userService.getUserById(userId)
                 .orElseThrow(() -> new RuntimeException("Can not find user"));
         logActivity(task, userId, "UPDATE_TASK", "Task \"" + task.getTaskName() + "\" is updated by " + user.getName());
-        return TaskMapper.toResponse(task);
+        return TaskMapper.toResponse(saved);
     }
 
     @Override
     public void deleteTask(UUID taskId, UUID userId) {
         Task task = getTask(taskId);
-        if (!hasProjectRight(task.getProject().getProjectId(), userId, ProjectFunctionCode.DELETE_TASK)) {
+        if (hasProjectRight(task.getProject().getProjectId(), userId, ProjectFunctionCode.DELETE_TASK)) {
             throw new AccessDeniedException("You are not permitted to delete this task");
         }
 
@@ -138,8 +135,9 @@ public class TaskServiceImpl implements TaskService {
             updateProductivity(task.getProject().getProjectId(), assignee, -1);
         }
 
-        taskDetailRepository.deleteByParentTask_TaskId(taskId);
-        taskDetailRepository.deleteByChildTask_TaskId(taskId);
+        if(taskRepository.existsByParentTask_TaskId(taskId))
+            throw new RuntimeException("This task contains subtask(s). Can not delete");
+
         taskMemberRepository.deleteByTask_TaskId(taskId);
         historyRepository.deleteByTask_TaskId(taskId);
 
@@ -171,8 +169,8 @@ public class TaskServiceImpl implements TaskService {
     }
 
     private boolean hasProjectRight(UUID projectId, UUID userId, ProjectFunctionCode function) {
-        return projectMemberService.isProjectOwner(projectId, userId)
-                || projectPermissionService.hasPermission(userId, projectId, function);
+        return !projectMemberService.isProjectOwner(projectId, userId)
+                && !projectPermissionService.hasPermission(userId, projectId, function);
     }
 
     private void checkMembership(UUID projectId, UUID userId) {
@@ -195,8 +193,8 @@ public class TaskServiceImpl implements TaskService {
         task.setApprover(approver);
         if (request.getLabelId() != null)
             task.setLabel(labelRepository.findById(request.getLabelId()).orElse(null));
-        if (request.getRelatedTaskId() != null)
-            task.setRelatedTask(getTask(request.getRelatedTaskId()));
+        if (request.getParentTaskId() != null)
+            task.setParentTask(getTask(request.getParentTaskId()));
         return task;
     }
 
@@ -236,10 +234,8 @@ public class TaskServiceImpl implements TaskService {
             sub.setDeadline(parentTask.getDeadline());
             sub.setApprover(parentTask.getApprover());
             sub.setStatus(parentTask.getStatus());
-            sub = taskRepository.save(sub);
-            taskDetailRepository.save(new TaskDetail(
-                    new TaskDetailId(parentTask.getTaskId(), sub.getTaskId()),
-                    parentTask, sub));
+            sub.setParentTask(parentTask);
+            taskRepository.save(sub);
         }
     }
 
@@ -290,8 +286,8 @@ public class TaskServiceImpl implements TaskService {
         if (request.getLabelId() != null)
             task.setLabel(labelRepository.findById(request.getLabelId()).orElse(null));
 
-        if (request.getRelatedTaskId() != null)
-            task.setRelatedTask(getTask(request.getRelatedTaskId()));
+        if (request.getParentTaskId() != null)
+            task.setParentTask(getTask(request.getParentTaskId()));
     }
 
     public TaskResponse updateTaskStatus(UUID taskId, TaskStatusRequest rq, UUID userId) {
