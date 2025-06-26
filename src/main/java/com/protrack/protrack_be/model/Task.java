@@ -43,8 +43,8 @@ public class Task {
     private String attachment;
 
     @ManyToOne
-    @JoinColumn(name = "congvieclienquan")
-    private Task relatedTask;
+    @JoinColumn(name = "congvieccha")
+    private Task parentTask;
 
     @ManyToOne
     @JoinColumn(name = "id_nguoiduyet", nullable = false)

@@ -24,7 +24,7 @@ public class TaskResponse {
     private UUID labelId;
     private String labelName;
 
-    private UUID relatedTaskId;
+    private UUID parentTaskId;
 
     private UUID approverId;
     private String approverName;

@@ -12,11 +12,12 @@ public class MessageResponse {
 
     private UUID messageId;
     private String content;
-    private LocalDateTime timestamp;
-
-    private UUID projectId;
-    private String projectName;
+    private LocalDateTime sentAt;
+    private LocalDateTime updatedAt;
 
     private UUID senderId;
     private String senderFullName;
+
+    private boolean read;
+    private LocalDateTime readAt;
 }

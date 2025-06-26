@@ -18,7 +18,7 @@ public class TaskMapper {
                 task.getProject().getProjectName(),
                 task.getLabel() != null ? task.getLabel().getLabelId() : null,
                 task.getLabel() != null ? task.getLabel().getLabelName() : null,
-                task.getRelatedTask() != null ? task.getRelatedTask().getTaskId() : null,
+                task.getParentTask() != null ? task.getParentTask().getTaskId() : null,
                 task.getApprover().getUserId(),
                 task.getApprover().getName(),
                 task.getStatus()

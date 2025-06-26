@@ -9,11 +9,12 @@ public class MessageMapper {
         return new MessageResponse(
                 entity.getMessageId(),
                 entity.getContent(),
-                entity.getTimestamp(),
-                entity.getProject().getProjectId(),
-                entity.getProject().getProjectName(),
+                entity.getSentAt(),
+                entity.getUpdatedAt(),
                 entity.getSender().getUserId(),
-                entity.getSender().getName()
+                entity.getSender().getName(),
+                entity.isRead(),
+                entity.getReadAt()
         );
     }
 }
