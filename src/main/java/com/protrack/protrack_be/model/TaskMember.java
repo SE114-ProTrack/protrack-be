@@ -12,7 +12,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "NGUOITHUCHIENCV")
+@Table(name = "nguoithuchiencv")
 public class TaskMember {
 
     @EmbeddedId

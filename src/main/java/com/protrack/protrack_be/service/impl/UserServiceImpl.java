@@ -42,10 +42,9 @@ public class UserServiceImpl implements UserService {
         }
 
         String email = auth.getName(); // hoặc ((CustomUserDetails) auth.getPrincipal()).getEmail()
-        User currentUser = repo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy user với email: " + email));
 
-        return currentUser;
+        return repo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy user với email: " + email));
     }
 
     @Override

@@ -12,7 +12,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "congviec")
+@Table(name = "lichsuhoatdong")
 public class ActivityHistory {
     @Id
     @GeneratedValue

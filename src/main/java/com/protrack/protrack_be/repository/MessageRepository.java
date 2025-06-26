@@ -2,8 +2,19 @@ package com.protrack.protrack_be.repository;
 
 import com.protrack.protrack_be.model.Message;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.UUID;
 
-public interface MessageRepository extends JpaRepository<Message, UUID> {}
+public interface MessageRepository extends JpaRepository<Message, UUID> {
+    @Query("SELECT m FROM Message m WHERE " +
+            "(m.sender.userId = :user1 AND m.receiver.userId = :user2) OR " +
+            "(m.sender.userId = :user2 AND m.receiver.userId = :user1)" +
+            "ORDER BY m.sentAt DESC")
+    List<Message> findMessagesBetweenUsers(@Param("user1") UUID user1,
+                                           @Param("user2") UUID user2);
+
+}
 

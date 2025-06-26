@@ -8,7 +8,7 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "PHANQUYENDUAN")
+@Table(name = "phanquyenduan")
 public class ProjectPermission {
 
     @EmbeddedId
