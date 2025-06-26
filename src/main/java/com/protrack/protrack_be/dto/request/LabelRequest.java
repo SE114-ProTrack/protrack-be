@@ -17,5 +17,8 @@ public class LabelRequest {
     @NotBlank(message = "Tên nhãn không được để trống")
     private String labelName;
 
+    @NotBlank(message = "Màu nhãn không được để trống")
+    private String color;
+
     private String description;
 }

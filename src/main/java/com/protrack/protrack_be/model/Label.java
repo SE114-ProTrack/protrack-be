@@ -25,6 +25,9 @@ public class Label {
     @Column(name = "tennhan", nullable = false)
     private String labelName;
 
+    @Column(name = "mau", nullable = false)
+    private String color;
+
     @Column(name = "mota")
     private String description;
 }

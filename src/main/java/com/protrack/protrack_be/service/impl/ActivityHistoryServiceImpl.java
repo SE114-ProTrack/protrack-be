@@ -1,9 +1,13 @@
 package com.protrack.protrack_be.service.impl;
 
 import com.protrack.protrack_be.dto.request.ActivityHistoryRequest;
+import com.protrack.protrack_be.dto.request.CommentRequest;
 import com.protrack.protrack_be.dto.response.ActivityHistoryResponse;
+import com.protrack.protrack_be.dto.response.CommentResponse;
 import com.protrack.protrack_be.mapper.ActivityHistoryMapper;
+import com.protrack.protrack_be.mapper.CommentMapper;
 import com.protrack.protrack_be.model.ActivityHistory;
+import com.protrack.protrack_be.model.Comment;
 import com.protrack.protrack_be.model.Task;
 import com.protrack.protrack_be.model.User;
 import com.protrack.protrack_be.repository.ActivityHistoryRepository;
@@ -11,6 +15,7 @@ import com.protrack.protrack_be.service.ActivityHistoryService;
 import com.protrack.protrack_be.service.TaskService;
 import com.protrack.protrack_be.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -47,6 +52,17 @@ public class ActivityHistoryServiceImpl implements ActivityHistoryService {
     }
 
     @Override
+    public List<ActivityHistoryResponse> getActivityHistoryByTask(UUID taskId) {
+        Task task = taskService.getTask(taskId);
+        if (!taskService.isVisibleToUser(task, userService.getCurrentUser().getUserId())) throw new AccessDeniedException("Bạn không được xem task này");
+
+        return repo.findByTask_TaskIdOrderByTimestampAsc(taskId)
+                .stream()
+                .map(ActivityHistoryMapper::toResponse)
+                .toList();
+    }
+
+    @Override
     public ActivityHistoryResponse create(ActivityHistoryRequest request){
         ActivityHistory activityHistory = new ActivityHistory();
         User user = userService.getUserById(request.getUserId())
@@ -63,5 +79,6 @@ public class ActivityHistoryServiceImpl implements ActivityHistoryService {
 
         return toResponse(saved);
     }
+
 
 }
