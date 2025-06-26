@@ -10,6 +10,7 @@ public class LabelMapper {
                 entity.getLabelId(),
                 entity.getLabelName(),
                 entity.getDescription(),
+                entity.getColor(),
                 entity.getProject().getProjectId(),
                 entity.getProject().getProjectName()
         );

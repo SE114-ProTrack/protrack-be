@@ -11,5 +11,6 @@ import java.util.UUID;
 public interface ActivityHistoryService {
     List<ActivityHistoryResponse> getAll();
     Optional<ActivityHistoryResponse> getById(UUID id);
+    List<ActivityHistoryResponse> getActivityHistoryByTask(UUID taskId);
     ActivityHistoryResponse create(ActivityHistoryRequest request);
 }
