@@ -4,11 +4,9 @@
     import com.protrack.protrack_be.dto.request.LoginRequest;
     import com.protrack.protrack_be.dto.request.RegisterRequest;
     import com.protrack.protrack_be.dto.response.AuthResponse;
+    import com.protrack.protrack_be.dto.response.CompleteRegistrationResponse;
     import com.protrack.protrack_be.model.*;
-    import com.protrack.protrack_be.repository.AccountRepository;
-    import com.protrack.protrack_be.repository.EmailVerificationTokenRepository;
-    import com.protrack.protrack_be.repository.PasswordResetTokenRepository;
-    import com.protrack.protrack_be.repository.UserRepository;
+    import com.protrack.protrack_be.repository.*;
     import com.protrack.protrack_be.service.AuthService;
     import com.protrack.protrack_be.util.JwtUtil;
     import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +43,9 @@
         private EmailService emailService;
         @Autowired
         private PasswordResetTokenRepository resetTokenRepo;
+
+        @Autowired
+        InvitationRepository invitationRepo;
 
 
 //        @Override
@@ -162,7 +163,7 @@
         }
 
         @Override
-        public void completeRegistration(UUID accountId, CompleteProfileRequest rq) {
+        public CompleteRegistrationResponse completeRegistration(UUID accountId, CompleteProfileRequest rq) {
             Optional<Account> accountOpt = accountRepo.findById(accountId);
             if (accountOpt.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tài khoản không tồn tại");
@@ -181,6 +182,13 @@
             user.setGender(rq.getGender());
             user.setPhone(rq.getPhone());
             userRepo.save(user);
+
+            boolean hasPendingInvitation = invitationRepo.existsByInvitationEmailAndAccepted(user.getAccount().getEmail(), false);
+
+            return new CompleteRegistrationResponse(
+                    "Registered successfully",
+                    hasPendingInvitation
+            );
         }
 
         @Override

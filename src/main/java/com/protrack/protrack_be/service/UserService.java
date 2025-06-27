@@ -11,6 +11,7 @@ import java.util.UUID;
 public interface UserService {
     User getCurrentUser();
     Optional<User> getUserById(UUID id);
+    Optional<User> getUserByEmail(String email);
     UserResponse updateProfile(UUID userId, UpdateProfileRequest rq);
     UserResponse changePassword(UUID userId, ChangePasswordRequest rq);
 }

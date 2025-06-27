@@ -18,6 +18,7 @@ import com.protrack.protrack_be.service.ProjectService;
 import com.protrack.protrack_be.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Map;
 import java.util.UUID;
 import static com.protrack.protrack_be.mapper.ProjectPermissionMapper.toResponse;
 
@@ -48,6 +49,13 @@ public class ProjectPermissionServiceImpl implements ProjectPermissionService {
             .collect(Collectors.toList()); }
 
     @Override
+    public List<ProjectPermissionResponse> getByProjectId(UUID projectId) {
+        return repo.findByProject_ProjectId(projectId).stream()
+                .map(ProjectPermissionMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public Optional<ProjectPermissionResponse> getById(ProjectPermissionId id){
         return repo.findById(id)
                 .map(ProjectPermissionMapper::toResponse);
@@ -73,16 +81,23 @@ public class ProjectPermissionServiceImpl implements ProjectPermissionService {
 
         return toResponse(saved);
     }
-    public ProjectPermissionResponse update(ProjectPermissionId id, ProjectPermissionRequest request){
-        ProjectPermission projectPermission = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Can not find project permission"));
 
-        if(request.getIsActive() != null) projectPermission.setIsActive(request.getIsActive());
+    @Override
+    public void update(UUID projectId, UUID userId, Map<String, Boolean> permissionMap) {
+        for (Map.Entry<String, Boolean> entry : permissionMap.entrySet()) {
+            String functionCode = entry.getKey();
+            Boolean isActive = entry.getValue();
 
-        ProjectPermission saved = repo.save(projectPermission);
+            Function func = functionService.getEntityByFunctionCode(functionCode)
+                    .orElseThrow(() -> new RuntimeException("Function not found"));
 
-        return toResponse(saved);
+            ProjectPermissionId id = new ProjectPermissionId(projectId, userId, func.getFunctionId());
+            ProjectPermission permission = repo.findById(id).orElse(new ProjectPermission(id, projectService.getEntityById(projectId).get(), userService.getUserById(userId).get(), func, false));
+            permission.setIsActive(isActive);
+            repo.save(permission);
+        }
     }
+
 
     @Override
     public void delete(ProjectPermissionId id){ repo.deleteById(id); }
