@@ -53,6 +53,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Optional<User> getUserByEmail(String email){
+        return repo.findByEmail(email);
+    }
+
+    @Override
     public UserResponse updateProfile(UUID userId, UpdateProfileRequest rq){
         User user = repo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng."));
