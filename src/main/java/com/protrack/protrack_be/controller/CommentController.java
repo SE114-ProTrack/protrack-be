@@ -62,6 +62,7 @@ public class CommentController {
     @Operation(summary = "Xóa bình luận")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteComment(@PathVariable UUID id) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        service.delete(id);
+        return ResponseEntity.ok("Delete comment successfully");
     }
 }

@@ -46,19 +46,19 @@ public class SecurityConfig {
     }
 
 
-    // ✅ Cấu hình chuẩn cho Spring Security 6+
+    // Cấu hình chuẩn cho Spring Security 6+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
-    // ✅ Bắt buộc phải khai báo PasswordEncoder cho Security dùng trong Auth
+    // Bắt buộc phải khai báo PasswordEncoder cho Security dùng trong Auth
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // ✅ Cho phép truy cập Swagger mà không bị filter chặn
+    // Cho phép truy cập Swagger mà không bị filter chặn
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return web -> web.ignoring().requestMatchers(
@@ -66,7 +66,7 @@ public class SecurityConfig {
         );
     }
 
-    // ✅ Đăng ký UserDetailsService thủ công nếu cần
+    // Đăng ký UserDetailsService thủ công nếu cần
     @Bean
     public UserDetailsService userDetailsService() {
         return userDetailsService;

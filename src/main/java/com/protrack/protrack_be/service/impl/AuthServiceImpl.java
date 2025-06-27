@@ -85,7 +85,7 @@
             //tạo jwt
             String jwt = jwtUtil.generateToken(new CustomUserDetails(account.get()));
 
-            return new AuthResponse("", account.get().getAccId(), user.get().getName(), account.get().getEmail(), false);
+            return new AuthResponse(jwt, account.get().getAccId(), user.get().getName(), account.get().getEmail(), false);
         }
 
         @Override
