@@ -13,6 +13,7 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -30,6 +31,14 @@ public class ProjectPermissionController {
         List<ProjectPermissionResponse> responses = service.getAll();
         return ResponseEntity.ok(responses);
     }
+
+    @GetMapping("/projects/{projectId}/permissions")
+    @Operation(summary = "Lấy toàn bộ quyền trong 1 dự án")
+    public ResponseEntity<List<ProjectPermissionResponse>> getPermissionsByProject(@PathVariable UUID projectId) {
+        List<ProjectPermissionResponse> permissions = service.getByProjectId(projectId);
+        return ResponseEntity.ok(permissions);
+    }
+
 
     @Operation(summary = "Lấy quyền dự án theo ID dự án, ID người dùng và ID chức năng")
     @GetMapping("/{projectId}/{userId}/{functionId}")
@@ -51,17 +60,15 @@ public class ProjectPermissionController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Cập nhật quyền dự án")
-    @PutMapping("/{projectId}/{userId}/{functionId}")
-    public ResponseEntity<?> updatePermission(
+    @PatchMapping("/projects/{projectId}/permissions/{userId}")
+    @Operation(summary = "Cập nhật quyền của người dùng trong dự án")
+    public ResponseEntity<Void> updatePermission(
             @PathVariable UUID projectId,
             @PathVariable UUID userId,
-            @PathVariable UUID functionId,
-            @RequestBody @Valid ProjectPermissionRequest request) {
-
-        ProjectPermissionId id = new ProjectPermissionId(projectId, userId, functionId);
-        ProjectPermissionResponse response = service.update(id, request);
-        return ResponseEntity.ok(response);
+            @RequestBody Map<String, Boolean> permissionUpdates
+    ) {
+        service.update(projectId, userId, permissionUpdates);
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Xóa quyền dự án")

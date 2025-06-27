@@ -24,6 +24,11 @@ public class FunctionServiceImpl implements FunctionService {
     FunctionRepository repo;
 
     @Override
+    public List<Function> getDefaults() {
+        return repo.findByFunctionCodeIn(List.of("VIEW_TASK"));
+    }
+
+    @Override
     public List<FunctionResponse> getAll(){
         return repo.findAll().stream()
                 .map(FunctionMapper::toResponse)
@@ -39,6 +44,11 @@ public class FunctionServiceImpl implements FunctionService {
     @Override
     public Optional<Function> getEntityById(UUID id){
         return repo.findById(id);
+    }
+
+    @Override
+    public Optional<Function> getEntityByFunctionCode(String functionCode){
+        return repo.findByFunctionCode(functionCode);
     }
 
     @Override

@@ -4,17 +4,13 @@ import com.protrack.protrack_be.dto.request.InvitationRequest;
 import com.protrack.protrack_be.dto.request.NotificationRequest;
 import com.protrack.protrack_be.dto.response.InvitationResponse;
 import com.protrack.protrack_be.mapper.InvitationMapper;
-import com.protrack.protrack_be.model.Invitation;
-import com.protrack.protrack_be.model.Project;
-import com.protrack.protrack_be.model.ProjectMember;
-import com.protrack.protrack_be.model.User;
+import com.protrack.protrack_be.model.*;
+import com.protrack.protrack_be.model.id.ProjectPermissionId;
 import com.protrack.protrack_be.repository.InvitationRepository;
 import com.protrack.protrack_be.repository.ProjectMemberRepository;
+import com.protrack.protrack_be.repository.ProjectPermissionRepository;
 import com.protrack.protrack_be.repository.ProjectRepository;
-import com.protrack.protrack_be.service.AuthService;
-import com.protrack.protrack_be.service.InvitationService;
-import com.protrack.protrack_be.service.NotificationService;
-import com.protrack.protrack_be.service.UserService;
+import com.protrack.protrack_be.service.*;
 import com.protrack.protrack_be.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.validation.constraints.Email;
@@ -42,10 +38,16 @@ public class InvitationServiceImpl implements InvitationService {
     ProjectMemberRepository projectMemberRepository;
 
     @Autowired
+    ProjectPermissionRepository projectPermissionRepository;
+
+    @Autowired
     UserService userService;
 
     @Autowired
     NotificationService notificationService;
+
+    @Autowired
+    FunctionService functionService;
 
     @Autowired
     EmailService emailService;
@@ -84,8 +86,11 @@ public class InvitationServiceImpl implements InvitationService {
                     invitedUserOpt.get().getName() + " has invited you to \"" + project.getProjectName() + "\""
             ));
         } else {
-            // Gửi email mời với token
-            emailService.send(request.getInvitationEmail(), "INVITATION", token);
+            String acceptUrl = "https://frontend-url.com/invitations/accept?token=" + token;
+            String content = "<p>Bạn được mời vào dự án <b>" + project.getProjectName() + "</b>.</p>"
+                    + "<p>Nhấn vào link sau để chấp nhận: <a href='" + acceptUrl + "'>Chấp nhận lời mời</a></p>";
+
+            emailService.send(request.getInvitationEmail(), "INVITATION", content);
         }
 
         invitation.setProject(project);
@@ -120,12 +125,24 @@ public class InvitationServiceImpl implements InvitationService {
         Invitation saved = repo.save(invitation);
 
         User user = userService.getCurrentUser();
+        Project project = invitation.getProject();
 
         ProjectMember member = new ProjectMember();
-        member.setProject(invitation.getProject());
+        member.setProject(project);
         member.setUser(user);
         member.setIsProjectOwner(false);
         projectMemberRepository.save(member);
+
+        List<Function> defaultFunctions = functionService.getDefaults(); // ví dụ là VIEW_TASK, CREATE_TASK
+        for (Function func : defaultFunctions) {
+            ProjectPermission permission = new ProjectPermission();
+            permission.setId(new ProjectPermissionId(project.getProjectId(), user.getUserId(), func.getFunctionId()));
+            permission.setProject(project);
+            permission.setUser(user);
+            permission.setFunction(func);
+            permission.setIsActive(true);
+            projectPermissionRepository.save(permission);
+        }
 
         return toResponse(saved);
     }
