@@ -60,6 +60,8 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
         ProjectMemberId id = new ProjectMemberId(project.getProjectId(), user.getUserId());
 
         projectMember.setId(id);
+        projectMember.setProject(project);
+        projectMember.setUser(user);
         projectMember.setIsProjectOwner(request.getIsProjectOwner());
 
         ProjectMember saved = repo.save(projectMember);
