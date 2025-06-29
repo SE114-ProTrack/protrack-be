@@ -15,6 +15,7 @@ import com.protrack.protrack_be.service.ProjectPermissionService;
 import com.protrack.protrack_be.service.ProjectService;
 import com.protrack.protrack_be.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -35,8 +36,10 @@ public class ProjectServiceImpl implements ProjectService {
     UserService userService;
 
     @Autowired
+    @Lazy
     ProjectMemberService projectMemberService;
     @Autowired
+    @Lazy
     ProjectPermissionService projectPermissionService;
 
     @Override
@@ -113,6 +116,14 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public List<ProjectResponse> get3ByUser(UUID userId){
         return repo.findTop3ProjectsByUserId(userId)
+                .stream()
+                .map(ProjectMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProjectResponse> findByKeyword(String keyword) {
+        return repo.findByProjectNameContainingIgnoreCase(keyword)
                 .stream()
                 .map(ProjectMapper::toResponse)
                 .collect(Collectors.toList());

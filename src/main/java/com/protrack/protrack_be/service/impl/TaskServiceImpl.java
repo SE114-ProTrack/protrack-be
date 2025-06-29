@@ -2,12 +2,10 @@ package com.protrack.protrack_be.service.impl;
 
 import com.protrack.protrack_be.dto.request.TaskRequest;
 import com.protrack.protrack_be.dto.request.TaskStatusRequest;
-import com.protrack.protrack_be.dto.response.ProjectResponse;
 import com.protrack.protrack_be.dto.response.TaskResponse;
 import com.protrack.protrack_be.enums.ProjectFunctionCode;
 import com.protrack.protrack_be.exception.BadRequestException;
 import com.protrack.protrack_be.exception.NotFoundException;
-import com.protrack.protrack_be.mapper.ProjectMapper;
 import com.protrack.protrack_be.mapper.TaskMapper;
 import com.protrack.protrack_be.model.*;
 import com.protrack.protrack_be.model.id.*;
@@ -167,6 +165,15 @@ public class TaskServiceImpl implements TaskService {
                 .map(TaskMapper::toResponse)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<TaskResponse> findByKeyword(String keyword) {
+        return taskRepository.findByTaskNameContainingIgnoreCase(keyword)
+                .stream()
+                .map(TaskMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
 
     // HELPERS
 

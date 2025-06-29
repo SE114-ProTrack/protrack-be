@@ -30,4 +30,6 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
             LIMIT 3
             """, nativeQuery = true)
     List<Project> findTop3ProjectsByUserId(@Param("userId") UUID userId);
+
+    List<Project> findByProjectNameContainingIgnoreCase(String keyword);
 }

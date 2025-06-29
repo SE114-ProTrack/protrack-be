@@ -23,4 +23,6 @@ public interface TaskService {
     List<UUID> getAssigneeIds(Task task);
     List<TaskResponse> getTasksByUser(UUID userId);
     List<TaskResponse> get3ByUser(UUID userId);
+
+    List<TaskResponse> findByKeyword(String keyword);
 }

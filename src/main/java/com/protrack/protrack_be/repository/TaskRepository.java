@@ -24,5 +24,7 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
             LIMIT 3
             """, nativeQuery = true)
     List<Task> findTop3TasksByUserId(@Param("userId") UUID userId);
+
+    List<Task> findByTaskNameContainingIgnoreCase(String keyword);
 }
 

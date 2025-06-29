@@ -1,5 +1,6 @@
 package com.protrack.protrack_be.repository;
 
+import com.protrack.protrack_be.dto.response.MessagePreviewResponse;
 import com.protrack.protrack_be.model.Message;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,5 +17,50 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
     List<Message> findMessagesBetweenUsers(@Param("user1") UUID user1,
                                            @Param("user2") UUID user2);
 
+
+    @Query(value = """
+            SELECT
+                sub.user_id,
+                u.hoten,
+                u.hinhanh,
+                sub.noidung,
+                sub.thoigiangui,
+                COALESCE(unread.count, 0) AS unread_count
+            FROM (
+                SELECT
+                    CASE
+                        WHEN t.id_nguoigui = :currentUserId THEN t.id_nguoinhan
+                        ELSE t.id_nguoigui
+                    END AS user_id,
+                    t.noidung,
+                    t.thoigiangui
+                FROM tinnhan t
+                JOIN (
+                    SELECT
+                        CASE
+                            WHEN t1.id_nguoigui = :currentUserId THEN t1.id_nguoinhan
+                            ELSE t1.id_nguoigui
+                        END AS user_id,
+                        MAX(t1.thoigiangui) AS max_time
+                    FROM tinnhan t1
+                    WHERE :currentUserId IN (t1.id_nguoigui, t1.id_nguoinhan)
+                    GROUP BY user_id
+                ) latest ON (
+                    ((t.id_nguoigui = :currentUserId AND t.id_nguoinhan = latest.user_id)
+                    OR (t.id_nguoinhan = :currentUserId AND t.id_nguoigui = latest.user_id))
+                    AND t.thoigiangui = latest.max_time
+                )
+            ) sub
+            JOIN nguoidung u ON u.id_nguoidung = sub.user_id
+            LEFT JOIN (
+                SELECT id_nguoigui, COUNT(*) AS count
+                FROM tinnhan
+                WHERE id_nguoinhan = :currentUserId AND dadoc = false
+                GROUP BY id_nguoigui
+            ) unread
+            ON unread.id_nguoigui = sub.user_id
+            ORDER BY sub.thoigiangui DESC
+            """, nativeQuery = true)
+    List<MessagePreviewResponse> findPreviewsByUserId(@Param("currentUserId") UUID currentUserId);
 }
 

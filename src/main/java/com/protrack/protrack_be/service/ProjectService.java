@@ -17,4 +17,5 @@ public interface ProjectService {
     void delete(UUID id);
     List<ProjectResponse> getProjectsByUser(UUID userId);
     List<ProjectResponse> get3ByUser(UUID userId);
+    List<ProjectResponse> findByKeyword(String keyword);
 }
