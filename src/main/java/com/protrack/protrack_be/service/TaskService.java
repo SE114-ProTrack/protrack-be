@@ -2,6 +2,7 @@ package com.protrack.protrack_be.service;
 
 import com.protrack.protrack_be.dto.request.TaskRequest;
 import com.protrack.protrack_be.dto.request.TaskStatusRequest;
+import com.protrack.protrack_be.dto.response.ProjectResponse;
 import com.protrack.protrack_be.dto.response.TaskResponse;
 import com.protrack.protrack_be.model.Task;
 import jakarta.validation.constraints.NotNull;
@@ -20,4 +21,6 @@ public interface TaskService {
     Task getTask(UUID taskId);
     boolean isVisibleToUser(Task task, UUID userId);
     List<UUID> getAssigneeIds(Task task);
+    List<TaskResponse> getTasksByUser(UUID userId);
+    List<TaskResponse> get3ByUser(UUID userId);
 }

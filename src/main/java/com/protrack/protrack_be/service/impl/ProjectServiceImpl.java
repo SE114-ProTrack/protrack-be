@@ -1,12 +1,17 @@
 package com.protrack.protrack_be.service.impl;
 
+import com.protrack.protrack_be.dto.request.ProjectMemberRequest;
 import com.protrack.protrack_be.dto.request.ProjectRequest;
 import com.protrack.protrack_be.dto.response.ProjectResponse;
+import com.protrack.protrack_be.dto.response.TaskResponse;
 import com.protrack.protrack_be.dto.response.UserResponse;
 import com.protrack.protrack_be.mapper.ProjectMapper;
+import com.protrack.protrack_be.mapper.TaskMapper;
 import com.protrack.protrack_be.model.Project;
 import com.protrack.protrack_be.model.User;
 import com.protrack.protrack_be.repository.ProjectRepository;
+import com.protrack.protrack_be.service.ProjectMemberService;
+import com.protrack.protrack_be.service.ProjectPermissionService;
 import com.protrack.protrack_be.service.ProjectService;
 import com.protrack.protrack_be.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +33,11 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    ProjectMemberService projectMemberService;
+    @Autowired
+    ProjectPermissionService projectPermissionService;
 
     @Override
     public List<ProjectResponse> getAll(){
@@ -59,6 +69,13 @@ public class ProjectServiceImpl implements ProjectService {
 
         Project saved = repo.save(project);
 
+        // Add creator to project member
+        ProjectMemberRequest memberRequest = new ProjectMemberRequest(saved.getProjectId(), user.getUserId(), true);
+        projectMemberService.create(memberRequest);
+
+        // Add permission to creator
+
+
         return toResponse(saved);
     }
 
@@ -77,4 +94,27 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public void delete(UUID id){ repo.deleteById(id); }
+
+    @Override
+    public List<ProjectResponse> getProjectsByUser(UUID userId){
+        return repo.findProjectsByUserId(userId)
+                .stream()
+                .map(project -> {
+                    ProjectResponse res = ProjectMapper.toResponse(project);
+
+                    res.setAllTasks(repo.getNumberOfTasks(project.getProjectId()));
+                    res.setCompletedTasks(repo.getNumberOfCompletedTasks(project.getProjectId()));
+
+                    return res;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProjectResponse> get3ByUser(UUID userId){
+        return repo.findTop3ProjectsByUserId(userId)
+                .stream()
+                .map(ProjectMapper::toResponse)
+                .collect(Collectors.toList());
+    }
 }

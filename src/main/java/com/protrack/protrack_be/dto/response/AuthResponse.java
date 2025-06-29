@@ -11,7 +11,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class AuthResponse {
     String token;
-    UUID userId;
+    UUID accountId;
     String name;
     String email;
     private boolean needCompleteProfile;

@@ -2,10 +2,12 @@ package com.protrack.protrack_be.service.impl;
 
 import com.protrack.protrack_be.dto.request.TaskRequest;
 import com.protrack.protrack_be.dto.request.TaskStatusRequest;
+import com.protrack.protrack_be.dto.response.ProjectResponse;
 import com.protrack.protrack_be.dto.response.TaskResponse;
 import com.protrack.protrack_be.enums.ProjectFunctionCode;
 import com.protrack.protrack_be.exception.BadRequestException;
 import com.protrack.protrack_be.exception.NotFoundException;
+import com.protrack.protrack_be.mapper.ProjectMapper;
 import com.protrack.protrack_be.mapper.TaskMapper;
 import com.protrack.protrack_be.model.*;
 import com.protrack.protrack_be.model.id.*;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -149,6 +152,22 @@ public class TaskServiceImpl implements TaskService {
         taskRepository.delete(task);
     }
 
+    @Override
+    public List<TaskResponse> getTasksByUser(UUID userId){
+        return taskRepository.findTasksByUserId(userId)
+                .stream()
+                .map(TaskMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TaskResponse> get3ByUser(UUID userId){
+        return taskRepository.findTop3TasksByUserId(userId)
+                .stream()
+                .map(TaskMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
     // HELPERS
 
     public Task getTask(UUID taskId) {
@@ -190,6 +209,7 @@ public class TaskServiceImpl implements TaskService {
         task.setPriority(request.getPriority());
         task.setAttachment(request.getAttachment());
         task.setIsMain(request.getIsMain());
+        task.setCreatedTime(LocalDateTime.now());
         task.setApprover(approver);
         if (request.getLabelId() != null)
             task.setLabel(labelRepository.findById(request.getLabelId()).orElse(null));

@@ -3,6 +3,7 @@ package com.protrack.protrack_be.controller;
 import com.protrack.protrack_be.dto.request.ProjectRequest;
 import com.protrack.protrack_be.dto.response.ProjectResponse;
 
+import com.protrack.protrack_be.dto.response.TaskResponse;
 import com.protrack.protrack_be.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -59,5 +60,19 @@ public class ProjectController {
     public ResponseEntity<?> deleteProject(@PathVariable UUID id) {
         service.delete(id);
         return ResponseEntity.ok("Xóa thành công");
+    }
+
+    @Operation(summary = "Lấy tất cả dự án theo user")
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getByUser(@PathVariable UUID userId){
+        List<ProjectResponse> responses = service.getProjectsByUser(userId);
+        return ResponseEntity.ok(responses);
+    }
+
+    @Operation(summary = "Lấy 3 dự án tạo gần nhất theo user")
+    @GetMapping("/user/{userId}/get3")
+    public ResponseEntity<?> getTop3ByUser(@PathVariable UUID userId){
+        List<ProjectResponse> responses = service.get3ByUser(userId);
+        return ResponseEntity.ok(responses);
     }
 }
