@@ -18,4 +18,5 @@ public interface ProjectService {
     List<ProjectResponse> getProjectsByUser(UUID userId);
     List<ProjectResponse> get3ByUser(UUID userId);
     List<ProjectResponse> findByKeyword(String keyword);
+    ProjectResponse updateProjectBanner(UUID projectId, String bannerUrl);
 }

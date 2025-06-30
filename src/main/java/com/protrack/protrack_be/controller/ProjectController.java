@@ -4,7 +4,9 @@ import com.protrack.protrack_be.dto.request.ProjectRequest;
 import com.protrack.protrack_be.dto.response.ProjectResponse;
 
 import com.protrack.protrack_be.dto.response.TaskResponse;
+import com.protrack.protrack_be.model.Project;
 import com.protrack.protrack_be.service.ProjectService;
+import com.protrack.protrack_be.service.impl.FileStorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -12,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,6 +28,9 @@ public class ProjectController {
 
     @Autowired
     private ProjectService service;
+
+    @Autowired
+    private FileStorageService fileStorageService;
 
     @Operation(summary = "Lấy tất cả dự án")
     @GetMapping
@@ -75,4 +81,13 @@ public class ProjectController {
         List<ProjectResponse> responses = service.get3ByUser(userId);
         return ResponseEntity.ok(responses);
     }
+
+    @Operation(summary = "Thay đổi ảnh bìa dự án")
+    @PostMapping("/{id}/uploadBanner")
+    public ResponseEntity<String> uploadProjectBanner(@PathVariable UUID id, @RequestParam("file") MultipartFile file) {
+        String fileUrl = fileStorageService.store(file);
+        ProjectResponse projectResponse = service.updateProjectBanner(id, fileUrl);
+        return ResponseEntity.ok(fileUrl);
+    }
+
 }

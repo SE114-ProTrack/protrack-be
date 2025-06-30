@@ -1,6 +1,7 @@
 package com.protrack.protrack_be.repository;
 
 import com.protrack.protrack_be.model.Function;
+import lombok.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

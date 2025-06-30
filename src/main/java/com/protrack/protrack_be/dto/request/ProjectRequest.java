@@ -12,4 +12,5 @@ public class ProjectRequest {
     private String projectName;
 
     private String description;
+    private String bannerUrl;
 }

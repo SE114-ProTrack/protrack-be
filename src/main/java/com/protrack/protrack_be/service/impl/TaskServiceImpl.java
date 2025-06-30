@@ -87,13 +87,13 @@ public class TaskServiceImpl implements TaskService {
 
         if (request.getAttachments() != null) {
             for (TaskAttachmentRequest att : request.getAttachments()) {
-                TaskAttachment a = new TaskAttachment();
-                a.setTask(task);
-                a.setFileName(att.getFileName());
-                a.setFileUrl(att.getFileUrl());
-                a.setFileType(att.getFileType());
-                a.setUploadedAt(LocalDateTime.now());
-                taskAttachmentRepository.save(a);
+                TaskAttachment attachment = new TaskAttachment();
+                attachment.setTask(task);
+                attachment.setFileName(att.getFileName());
+                attachment.setFileUrl(att.getFileUrl());
+                attachment.setFileType(att.getFileType());
+                attachment.setUploadedAt(LocalDateTime.now());
+                taskAttachmentRepository.save(attachment);
             }
         }
 
@@ -128,6 +128,21 @@ public class TaskServiceImpl implements TaskService {
         }
 
         updateTaskFields(task, request);
+
+        if (request.getAttachments() != null) {
+            taskAttachmentRepository.deleteByTask_TaskId(taskId);
+
+            for (TaskAttachmentRequest att : request.getAttachments()) {
+                TaskAttachment attachment = new TaskAttachment();
+                attachment.setTask(task);
+                attachment.setFileName(att.getFileName());
+                attachment.setFileUrl(att.getFileUrl());
+                attachment.setFileType(att.getFileType());
+                attachment.setUploadedAt(LocalDateTime.now());
+                taskAttachmentRepository.save(attachment);
+            }
+        }
+
         Task saved = taskRepository.save(task);
 
         List<UUID> oldAssignees = getAssigneeIds(task);
@@ -249,6 +264,8 @@ public class TaskServiceImpl implements TaskService {
             task.setLabel(labelRepository.findById(request.getLabelId()).orElse(null));
         if (request.getParentTaskId() != null)
             task.setParentTask(getTask(request.getParentTaskId()));
+        task.setColor(request.getColor());
+        task.setIcon(request.getIcon());
         return task;
     }
 

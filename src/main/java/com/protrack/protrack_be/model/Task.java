@@ -1,9 +1,11 @@
 package com.protrack.protrack_be.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,7 +42,9 @@ public class Task {
     @Column(name = "isprojectmaintask")
     private Boolean isMain = true;
 
-    @Column(name = "tepdinhkem")
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    @ToString.Exclude
     private List<TaskAttachment> attachment;
 
     @ManyToOne
