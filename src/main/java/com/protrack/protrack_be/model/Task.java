@@ -54,8 +54,11 @@ public class Task {
     @Column(name = "mucdouutien")
     private String priority;
 
+    @Column(name = "thoigiantao")
+    private LocalDateTime createdTime;
+
     @Column(name = "trangthai")
-    private String status;
+    private String status; // TO_DO, IN_PROGRESS, DONE
 
     @Column(name = "icon")
     private String icon;

@@ -15,4 +15,7 @@ public interface ProjectService {
     ProjectResponse create(ProjectRequest request);
     ProjectResponse update(UUID id, ProjectRequest request);
     void delete(UUID id);
+    List<ProjectResponse> getProjectsByUser(UUID userId);
+    List<ProjectResponse> get3ByUser(UUID userId);
+    List<ProjectResponse> findByKeyword(String keyword);
 }

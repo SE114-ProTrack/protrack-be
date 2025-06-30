@@ -14,4 +14,6 @@ public class ProjectResponse {
     private String description;
     private LocalDateTime createTime;
     private String creatorFullName;
+    private int allTasks;
+    private int completedTasks;
 }

@@ -1,6 +1,7 @@
 package com.protrack.protrack_be.service.impl;
 
 import com.protrack.protrack_be.dto.request.MessageRequest;
+import com.protrack.protrack_be.dto.response.MessagePreviewResponse;
 import com.protrack.protrack_be.dto.response.MessageResponse;
 import com.protrack.protrack_be.mapper.MessageMapper;
 import com.protrack.protrack_be.model.Message;
@@ -95,6 +96,12 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public void delete(UUID id){
         repo.deleteById(id);
+    }
+
+    @Override
+    public List<MessagePreviewResponse> getPreviews() {
+        User current = userService.getCurrentUser();
+        return repo.findPreviewsByUserId(current.getUserId());
     }
 
     // HELPERS

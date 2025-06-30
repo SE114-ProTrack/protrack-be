@@ -1,6 +1,7 @@
 package com.protrack.protrack_be.controller;
 
 import com.protrack.protrack_be.dto.request.TaskRequest;
+import com.protrack.protrack_be.dto.response.ProjectResponse;
 import com.protrack.protrack_be.dto.response.TaskResponse;
 import com.protrack.protrack_be.model.Task;
 import com.protrack.protrack_be.model.User;
@@ -66,5 +67,19 @@ public class TaskController {
         User user = userService.getCurrentUser();
         service.deleteTask(id, user.getUserId());
         return ResponseEntity.ok("Delete task successfully");
+    }
+
+    @Operation(summary = "Lấy tất cả công việc theo user")
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getByUser(@PathVariable UUID userId){
+        List<TaskResponse> responses = service.getTasksByUser(userId);
+        return ResponseEntity.ok(responses);
+    }
+
+    @Operation(summary = "Lấy 3 công việc tạo gần nhất theo user")
+    @GetMapping("/user/{userId}/get3")
+    public ResponseEntity<?> getTop3ByUser(@PathVariable UUID userId){
+        List<TaskResponse> responses = service.get3ByUser(userId);
+        return ResponseEntity.ok(responses);
     }
 }

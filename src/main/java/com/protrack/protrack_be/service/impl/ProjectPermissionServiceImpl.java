@@ -10,12 +10,9 @@ import com.protrack.protrack_be.model.ProjectPermission;
 import com.protrack.protrack_be.model.User;
 import com.protrack.protrack_be.model.id.ProjectPermissionId;
 import com.protrack.protrack_be.repository.ProjectPermissionRepository;
-import com.protrack.protrack_be.service.FunctionService;
-import com.protrack.protrack_be.service.ProjectPermissionService;
+import com.protrack.protrack_be.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import com.protrack.protrack_be.service.ProjectService;
-import com.protrack.protrack_be.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
@@ -41,6 +38,9 @@ public class ProjectPermissionServiceImpl implements ProjectPermissionService {
 
     @Autowired
     FunctionService functionService;
+
+    @Autowired
+    ProjectMemberService projectMemberService;
 
     @Override
     public List<ProjectPermissionResponse> getAll(){
@@ -84,6 +84,7 @@ public class ProjectPermissionServiceImpl implements ProjectPermissionService {
 
     @Override
     public void update(UUID projectId, UUID userId, Map<String, Boolean> permissionMap) {
+
         for (Map.Entry<String, Boolean> entry : permissionMap.entrySet()) {
             String functionCode = entry.getKey();
             Boolean isActive = entry.getValue();

@@ -21,6 +21,7 @@ public class TaskMapper {
                 task.getParentTask() != null ? task.getParentTask().getTaskId() : null,
                 task.getApprover().getUserId(),
                 task.getApprover().getName(),
+                task.getCreatedTime(),
                 task.getStatus(),
                 task.getIcon(),
                 task.getColor()

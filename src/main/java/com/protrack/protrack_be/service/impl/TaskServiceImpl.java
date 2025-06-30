@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -166,6 +167,31 @@ public class TaskServiceImpl implements TaskService {
         taskRepository.delete(task);
     }
 
+    @Override
+    public List<TaskResponse> getTasksByUser(UUID userId){
+        return taskRepository.findTasksByUserId(userId)
+                .stream()
+                .map(TaskMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TaskResponse> get3ByUser(UUID userId){
+        return taskRepository.findTop3TasksByUserId(userId)
+                .stream()
+                .map(TaskMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TaskResponse> findByKeyword(String keyword) {
+        return taskRepository.findByTaskNameContainingIgnoreCase(keyword)
+                .stream()
+                .map(TaskMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+
     // HELPERS
 
     public Task getTask(UUID taskId) {
@@ -217,6 +243,7 @@ public class TaskServiceImpl implements TaskService {
             }
         }
         task.setIsMain(request.getIsMain());
+        task.setCreatedTime(LocalDateTime.now());
         task.setApprover(approver);
         if (request.getLabelId() != null)
             task.setLabel(labelRepository.findById(request.getLabelId()).orElse(null));

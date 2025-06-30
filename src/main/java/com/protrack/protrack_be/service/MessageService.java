@@ -1,6 +1,7 @@
 package com.protrack.protrack_be.service;
 
 import com.protrack.protrack_be.dto.request.MessageRequest;
+import com.protrack.protrack_be.dto.response.MessagePreviewResponse;
 import com.protrack.protrack_be.dto.response.MessageResponse;
 
 import java.util.List;
@@ -15,4 +16,5 @@ public interface MessageService {
     MessageResponse update(UUID id, MessageRequest request);
     void markAsRead(UUID id);
     void delete(UUID id);
+    List<MessagePreviewResponse> getPreviews();
 }
