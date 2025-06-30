@@ -13,4 +13,5 @@ public class ProjectMemberResponse {
     private UUID userId;
     private String userFullName;
     private Boolean isProjectOwner;
+    private String role;
 }

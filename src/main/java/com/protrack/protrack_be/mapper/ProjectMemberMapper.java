@@ -9,7 +9,8 @@ public class ProjectMemberMapper {
                 entity.getProject().getProjectId(),
                 entity.getUser().getUserId(),
                 entity.getUser().getName(),
-                entity.getIsProjectOwner()
+                entity.getIsProjectOwner(),
+                entity.getRole()
         );
     }
 }

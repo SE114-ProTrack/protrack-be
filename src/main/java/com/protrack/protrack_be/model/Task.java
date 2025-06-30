@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -40,7 +41,7 @@ public class Task {
     private Boolean isMain = true;
 
     @Column(name = "tepdinhkem")
-    private String attachment;
+    private List<TaskAttachment> attachment;
 
     @ManyToOne
     @JoinColumn(name = "congvieccha")
@@ -55,4 +56,10 @@ public class Task {
 
     @Column(name = "trangthai")
     private String status;
+
+    @Column(name = "icon")
+    private String icon;
+
+    @Column(name = "ma_mau")
+    private String color;
 }

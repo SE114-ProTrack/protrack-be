@@ -26,4 +26,7 @@ public class ProjectMember {
 
     @Column(name = "lachuduan")
     private Boolean isProjectOwner = false;
+
+    @Column(name = "vaitro")
+    private String role = "Member";
 }
