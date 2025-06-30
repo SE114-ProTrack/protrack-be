@@ -11,7 +11,9 @@ public class ProjectMapper {
                 entity.getProjectName(),
                 entity.getDescription(),
                 entity.getCreateTime(),
-                null // Nếu cần thêm creatorName sau này
+                entity.getCreatorId().getName(),
+                0,
+                0
         );
     }
 }

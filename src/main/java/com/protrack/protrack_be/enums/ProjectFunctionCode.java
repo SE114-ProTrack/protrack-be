@@ -4,6 +4,7 @@ public enum ProjectFunctionCode {
     CREATE_TASK,
     EDIT_TASK,
     DELETE_TASK,
-    VIEW_TASK
+    VIEW_TASK,
+    EDIT_PROJECT
 }
 

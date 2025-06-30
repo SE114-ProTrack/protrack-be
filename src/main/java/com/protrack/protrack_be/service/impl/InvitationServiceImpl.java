@@ -133,7 +133,7 @@ public class InvitationServiceImpl implements InvitationService {
         member.setIsProjectOwner(false);
         projectMemberRepository.save(member);
 
-        List<Function> defaultFunctions = functionService.getDefaults(); // ví dụ là VIEW_TASK, CREATE_TASK
+        List<Function> defaultFunctions = functionService.getDefaults(); // VIEW_TASK
         for (Function func : defaultFunctions) {
             ProjectPermission permission = new ProjectPermission();
             permission.setId(new ProjectPermissionId(project.getProjectId(), user.getUserId(), func.getFunctionId()));

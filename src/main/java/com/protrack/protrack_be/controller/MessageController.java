@@ -1,6 +1,7 @@
 package com.protrack.protrack_be.controller;
 
 import com.protrack.protrack_be.dto.request.MessageRequest;
+import com.protrack.protrack_be.dto.response.MessagePreviewResponse;
 import com.protrack.protrack_be.dto.response.MessageResponse;
 import com.protrack.protrack_be.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,7 +39,7 @@ public class MessageController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @Operation(summary = "Lấy tin nhắn theo ID người nhận")
+    @Operation(summary = "Lấy chi tiết cuộc trò chuyện")
     @GetMapping("/with/{userId}")
     public ResponseEntity<List<MessageResponse>> getConversationWithUser(@PathVariable UUID userId) {
         List<MessageResponse> responses = service.getConversation(userId);
@@ -64,5 +65,12 @@ public class MessageController {
     public ResponseEntity<?> deleteMessage(@PathVariable UUID id) {
         service.delete(id);
         return ResponseEntity.ok("Xóa thành công");
+    }
+
+    @Operation(summary = "Lấy danh sách cuộc trò chuyện")
+    @GetMapping("/previews")
+    public ResponseEntity<?> getMessagePreviews(){
+        List<MessagePreviewResponse> responses = service.getPreviews();
+        return ResponseEntity.ok(responses);
     }
 }
