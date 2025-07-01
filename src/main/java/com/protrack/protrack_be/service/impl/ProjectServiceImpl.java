@@ -9,6 +9,7 @@ import com.protrack.protrack_be.exception.NotFoundException;
 import com.protrack.protrack_be.mapper.ProjectMapper;
 import com.protrack.protrack_be.mapper.TaskMapper;
 import com.protrack.protrack_be.model.*;
+import com.protrack.protrack_be.model.id.ProjectMemberId;
 import com.protrack.protrack_be.repository.FunctionRepository;
 import com.protrack.protrack_be.repository.ProjectMemberRepository;
 import com.protrack.protrack_be.repository.ProjectPermissionRepository;
@@ -17,6 +18,7 @@ import com.protrack.protrack_be.service.ProjectMemberService;
 import com.protrack.protrack_be.service.ProjectPermissionService;
 import com.protrack.protrack_be.service.ProjectService;
 import com.protrack.protrack_be.service.UserService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -73,6 +75,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    @Transactional
     public ProjectResponse create(ProjectRequest request){
         Project project = new Project();
         User user = userService.getCurrentUser();
@@ -87,6 +90,9 @@ public class ProjectServiceImpl implements ProjectService {
 
         // Add creator to project member
         ProjectMember projectMember = new ProjectMember();
+        ProjectMemberId projectMemberId = new ProjectMemberId(saved.getProjectId(), user.getUserId());
+        projectMember.setId(projectMemberId);
+
         projectMember.setProject(saved);
         projectMember.setUser(user);
         projectMember.setIsProjectOwner(true);
@@ -94,7 +100,6 @@ public class ProjectServiceImpl implements ProjectService {
         projectMemberRepository.save(projectMember);
 
         List<Function> allFunctions = functionRepository.findAll();
-
         allFunctions.forEach(function -> {
             ProjectPermission projectPermission = new ProjectPermission();
             projectPermission.setProject(saved);
