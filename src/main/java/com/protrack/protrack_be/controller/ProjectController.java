@@ -1,5 +1,6 @@
 package com.protrack.protrack_be.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.protrack.protrack_be.dto.request.ProjectRequest;
 import com.protrack.protrack_be.dto.response.ProjectResponse;
 
@@ -8,6 +9,7 @@ import com.protrack.protrack_be.model.Project;
 import com.protrack.protrack_be.service.ProjectService;
 import com.protrack.protrack_be.service.impl.FileStorageService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -48,10 +50,28 @@ public class ProjectController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Tạo dự án (kèm ảnh banner)")
     public ResponseEntity<ProjectResponse> createProject(
-            @RequestPart("project") @Valid ProjectRequest request,
+            @Parameter(
+                    description = "Thông tin dự án ở dạng JSON",
+                    required = true,
+                    example = """
+                    {
+                      "projectName": "Tên dự án mẫu",
+                      "description": "Nội dung mô tả"
+                    }
+                    """
+            )
+            @RequestPart("project") String rawProjectJson,
             @RequestPart(value = "file", required = false) MultipartFile file) {
+
+        ObjectMapper mapper = new ObjectMapper();
+        ProjectRequest request;
+
+        try {
+            request = mapper.readValue(rawProjectJson, ProjectRequest.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Dữ liệu project không hợp lệ", e);
+        }
 
         if (file != null && !file.isEmpty()) {
             String bannerUrl = fileStorageService.store(file);
@@ -62,20 +82,32 @@ public class ProjectController {
         return ResponseEntity.ok(response);
     }
 
+
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Cập nhật dự án (kèm ảnh banner)")
-    public ResponseEntity<?> updateProject(
+    public ResponseEntity<ProjectResponse> updateProject(
             @PathVariable UUID id,
-            @RequestPart("project") @Valid ProjectRequest request,
+            @RequestPart("project") String rawProjectJson,
             @RequestPart(value = "file", required = false) MultipartFile file) {
 
-        String bannerUrl = (file != null) ? fileStorageService.store(file) : null;
-        if (bannerUrl != null) {
+        ObjectMapper mapper = new ObjectMapper();
+        ProjectRequest request;
+
+        try {
+            request = mapper.readValue(rawProjectJson, ProjectRequest.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Dữ liệu JSON không hợp lệ", e);
+        }
+
+        if (file != null && !file.isEmpty()) {
+            String bannerUrl = fileStorageService.store(file);
             request.setBannerUrl(bannerUrl);
         }
+
         ProjectResponse response = service.update(id, request);
         return ResponseEntity.ok(response);
     }
+
 
     @Operation(summary = "Xóa dự án")
     @DeleteMapping("/{id}")

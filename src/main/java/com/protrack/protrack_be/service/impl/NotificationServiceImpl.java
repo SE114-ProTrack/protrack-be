@@ -54,6 +54,8 @@ public class NotificationServiceImpl implements NotificationService {
         noti.setType(request.getType());
         noti.setContent(request.getContent());
         noti.setTimestamp(LocalDateTime.now());
+        noti.setIsRead(false);
+        noti.setActionUrl(request.getActionUrl());
 
         Notification saved = repo.save(noti);
 

@@ -173,7 +173,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public boolean hasProjectRight(UUID projectId, UUID userId, ProjectFunctionCode function) {
         return projectMemberService.isProjectOwner(projectId, userId)
-                && projectPermissionService.hasPermission(userId, projectId, function);
+                || projectPermissionService.hasPermission(userId, projectId, function);
     }
 
 }
