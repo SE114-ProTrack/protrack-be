@@ -1,11 +1,13 @@
 package com.protrack.protrack_be.controller;
 
+import com.protrack.protrack_be.dto.request.TaskAttachmentRequest;
 import com.protrack.protrack_be.dto.response.TaskAttachmentResponse;
 import com.protrack.protrack_be.service.TaskAttachmentService;
 import com.protrack.protrack_be.service.impl.FileStorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,12 +24,24 @@ public class FileUploadController {
     private final FileStorageService fileStorageService;
     private final TaskAttachmentService attachmentService;
 
-    @Operation(summary = "Upload file từ máy người dùng hoặc đường dẫn file")
-    @PostMapping("/upload")
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+    @PostMapping(value = "/tasks/{taskId}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Upload file và gán vào task")
+    public ResponseEntity<?> uploadAttachmentToTask(
+            @PathVariable UUID taskId,
+            @RequestPart("file") MultipartFile file) {
+
         String fileUrl = fileStorageService.store(file);
-        return ResponseEntity.ok(fileUrl);
+
+        TaskAttachmentRequest request = new TaskAttachmentRequest();
+        request.setTaskId(taskId);
+        request.setFileUrl(fileUrl);
+        request.setFileName(file.getOriginalFilename());
+        request.setFileType(file.getContentType());
+
+        TaskAttachmentResponse savedAttachment = attachmentService.createTaskAttachment(request);
+        return ResponseEntity.ok(savedAttachment);
     }
+
 
     @Operation(summary = "Lấy danh sách tệp đính kèm theo task")
     @GetMapping("/tasks/{taskId}/attachments")

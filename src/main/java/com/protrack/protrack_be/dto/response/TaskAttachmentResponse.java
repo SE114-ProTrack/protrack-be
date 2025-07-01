@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 @NoArgsConstructor
 public class TaskAttachmentResponse {
     private UUID id;
+    private UUID taskId;
     private String fileName;
     private String fileUrl;
     private String fileType;
