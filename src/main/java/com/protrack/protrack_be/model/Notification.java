@@ -34,4 +34,7 @@ public class Notification {
 
     @Column(name = "thoigian")
     private LocalDateTime timestamp;
+
+    @Column(name = "duongdan")
+    private String actionUrl;
 }

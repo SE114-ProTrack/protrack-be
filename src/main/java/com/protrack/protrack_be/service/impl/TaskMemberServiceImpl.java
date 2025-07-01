@@ -3,17 +3,20 @@ package com.protrack.protrack_be.service.impl;
 import com.protrack.protrack_be.dto.request.TaskMemberRequest;
 import com.protrack.protrack_be.dto.response.TaskMemberResponse;
 import com.protrack.protrack_be.mapper.TaskMemberMapper;
+import com.protrack.protrack_be.model.ActivityHistory;
 import com.protrack.protrack_be.model.Task;
 import com.protrack.protrack_be.model.TaskMember;
 import com.protrack.protrack_be.model.User;
 import com.protrack.protrack_be.model.id.TaskMemberId;
 import com.protrack.protrack_be.repository.TaskMemberRepository;
+import com.protrack.protrack_be.service.ActivityHistoryService;
 import com.protrack.protrack_be.service.TaskMemberService;
 import com.protrack.protrack_be.service.TaskService;
 import com.protrack.protrack_be.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,6 +35,9 @@ public class TaskMemberServiceImpl implements TaskMemberService {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    ActivityHistoryService activityHistoryService;
 
     @Override
     public List<TaskMemberResponse> getAll(){
@@ -60,6 +66,16 @@ public class TaskMemberServiceImpl implements TaskMemberService {
         taskMember.setUser(user);
 
         TaskMember saved = repo.save(taskMember);
+
+//        activityHistoryService.create(new ActivityHistory(
+//                UUID.randomUUID(),
+//                userService.getUserById(actorId)
+//                        .orElseThrow(() -> new RuntimeException("Can not find user")),
+//                task,
+//                type,
+//                description,
+//                LocalDateTime.now()
+//        ));
 
         return toResponse(saved);
     }

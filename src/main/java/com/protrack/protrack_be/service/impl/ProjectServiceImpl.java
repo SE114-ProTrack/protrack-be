@@ -5,6 +5,7 @@ import com.protrack.protrack_be.dto.request.ProjectRequest;
 import com.protrack.protrack_be.dto.response.ProjectResponse;
 import com.protrack.protrack_be.dto.response.TaskResponse;
 import com.protrack.protrack_be.dto.response.UserResponse;
+import com.protrack.protrack_be.enums.ProjectFunctionCode;
 import com.protrack.protrack_be.exception.NotFoundException;
 import com.protrack.protrack_be.mapper.ProjectMapper;
 import com.protrack.protrack_be.mapper.TaskMapper;
@@ -168,4 +169,11 @@ public class ProjectServiceImpl implements ProjectService {
         Project saved = repo.save(project);
         return toResponse(saved);
     }
+
+    @Override
+    public boolean hasProjectRight(UUID projectId, UUID userId, ProjectFunctionCode function) {
+        return projectMemberService.isProjectOwner(projectId, userId)
+                && projectPermissionService.hasPermission(userId, projectId, function);
+    }
+
 }

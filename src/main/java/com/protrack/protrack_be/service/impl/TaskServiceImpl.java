@@ -332,7 +332,8 @@ public class TaskServiceImpl implements TaskService {
                     type,
                     content,
                     false,
-                    LocalDateTime.now()
+                    LocalDateTime.now(),
+                    ""
             ));
         }
     }

@@ -3,6 +3,7 @@ package com.protrack.protrack_be.service.impl;
 import com.protrack.protrack_be.dto.request.InvitationRequest;
 import com.protrack.protrack_be.dto.request.NotificationRequest;
 import com.protrack.protrack_be.dto.response.InvitationResponse;
+import com.protrack.protrack_be.enums.ProjectFunctionCode;
 import com.protrack.protrack_be.mapper.InvitationMapper;
 import com.protrack.protrack_be.model.*;
 import com.protrack.protrack_be.model.id.ProjectPermissionId;
@@ -13,8 +14,9 @@ import com.protrack.protrack_be.repository.ProjectRepository;
 import com.protrack.protrack_be.service.*;
 import com.protrack.protrack_be.util.JwtUtil;
 import io.jsonwebtoken.Claims;
-import jakarta.validation.constraints.Email;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -55,6 +57,9 @@ public class InvitationServiceImpl implements InvitationService {
     @Autowired
     JwtUtil jwtUtil;
 
+    @Autowired
+    ProjectService projectService;
+
     @Override
     public List<InvitationResponse> getAll(){
         return repo.findAll().stream()
@@ -70,25 +75,34 @@ public class InvitationServiceImpl implements InvitationService {
 
     @Override
     public InvitationResponse create(InvitationRequest request){
+        if (!projectService.hasProjectRight(request.getProjectId(), userService.getCurrentUser().getUserId(), ProjectFunctionCode.INVITE_MEMBER)) {
+            throw new AccessDeniedException("You are not permitted to create task in this project");
+        }
+
         Invitation invitation = new Invitation();
         Project project = projectRepo.findById(request.getProjectId())
                 .orElseThrow(() -> new RuntimeException("Can not find project"));
+
+        Optional<Invitation> existing = repo.findByProjectAndInvitationEmail(project, request.getInvitationEmail());
+        if (existing.isPresent() && !existing.get().isAccepted()) {
+            throw new RuntimeException("This user has been invited.");
+        }
 
         Optional<User> invitedUserOpt = userService.getUserByEmail(request.getInvitationEmail());
 
         String token = jwtUtil.generateInvitationToken(request.getInvitationEmail(), request.getProjectId());
 
         if (invitedUserOpt.isPresent()) {
-            // Gửi notification trong app (nếu có hệ thống notify)
             notificationService.create(new NotificationRequest(
                     invitedUserOpt.get().getUserId(),
                     "INVITATION",
-                    invitedUserOpt.get().getName() + " has invited you to \"" + project.getProjectName() + "\""
+                    invitedUserOpt.get().getName() + " has invited you to \"" + project.getProjectName() + "\"",
+                    "/invitations/accept?token=" + token
             ));
         } else {
             String acceptUrl = "https://frontend-url.com/invitations/accept?token=" + token;
-            String content = "<p>Bạn được mời vào dự án <b>" + project.getProjectName() + "</b>.</p>"
-                    + "<p>Nhấn vào link sau để chấp nhận: <a href='" + acceptUrl + "'>Chấp nhận lời mời</a></p>";
+            String content = "<p>You have been invited to <b>" + project.getProjectName() + "</b>.</p>"
+                    + "<p>Click here to accept: <a href='" + acceptUrl + "'>Accept invite</a></p>";
 
             emailService.send(request.getInvitationEmail(), "INVITATION", content);
         }
@@ -104,6 +118,7 @@ public class InvitationServiceImpl implements InvitationService {
         return toResponse(saved);
     }
 
+    @Transactional
     @Override
     public InvitationResponse accept(String token){
         Invitation invitation = repo.findByInvitationToken(token)
@@ -118,7 +133,7 @@ public class InvitationServiceImpl implements InvitationService {
 
         String currentUserEmail = userService.getCurrentUser().getAccount().getEmail();
         if (!emailInToken.equals(currentUserEmail)) {
-            throw new RuntimeException("Token không thuộc về tài khoản hiện tại");
+            throw new RuntimeException("Token doesn't belong to the current user");
         }
 
         invitation.setAccepted(true);
