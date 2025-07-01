@@ -11,8 +11,9 @@ import java.util.UUID;
 public interface ProjectRepository extends JpaRepository<Project, UUID> {
     @Query(value = """
             SELECT * FROM duan d
-            JOIN thanhvienduan tv ON tv.id_duan = d.id_duan
-            WHERE tv.id_nguoidung = :userId
+            WHERE d.id_duan IN (
+                SELECT id_duan FROM thanhvienduan WHERE id_nguoidung = :userId
+            )
             """, nativeQuery = true)
     List<Project> findProjectsByUserId(@Param("userId") UUID userId);
 
@@ -24,9 +25,10 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
 
     @Query(value = """
             SELECT * FROM duan d
-            JOIN thanhvienduan tv ON tv.id_duan = d.id_duan
-            WHERE tv.id_nguoidung = :userId
-            ORDER BY d.createTime DESC
+            WHERE d.id_duan IN (
+                SELECT id_duan FROM thanhvienduan WHERE id_nguoidung = :userId
+            )
+            ORDER BY d.thoigiantao DESC
             LIMIT 3
             """, nativeQuery = true)
     List<Project> findTop3ProjectsByUserId(@Param("userId") UUID userId);
