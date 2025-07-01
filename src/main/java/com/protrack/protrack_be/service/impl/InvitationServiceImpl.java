@@ -99,7 +99,7 @@ public class InvitationServiceImpl implements InvitationService {
             notificationService.create(new NotificationRequest(
                     invitedUserOpt.get().getUserId(),
                     "INVITATION",
-                    invitedUserOpt.get().getName() + " has invited you to \"" + project.getProjectName() + "\"",
+                    userService.getCurrentUser().getName() + " has invited you to \"" + project.getProjectName() + "\"",
                     "/invitations/accept?token=" + token
             ));
         } else {

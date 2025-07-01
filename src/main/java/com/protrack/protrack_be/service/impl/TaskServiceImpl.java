@@ -322,16 +322,19 @@ public class TaskServiceImpl implements TaskService {
     }
 
     private void logActivity(Task task, UUID actorId, String type, String description) {
-        historyRepository.save(new ActivityHistory(
-                UUID.randomUUID(),
-                userService.getUserById(actorId)
-                        .orElseThrow(() -> new RuntimeException("Can not find user")),
-                task,
-                type,
-                description,
-                LocalDateTime.now()
-        ));
+        User user = userService.getUserById(actorId)
+                .orElseThrow(() -> new RuntimeException("Can not find user"));
+
+        ActivityHistory history = new ActivityHistory();
+        history.setUser(user);
+        history.setTask(task);
+        history.setActionType(type);
+        history.setDescription(description);
+        history.setTimestamp(LocalDateTime.now());
+
+        historyRepository.save(history);
     }
+
 
     private void notifyUsers(List<UUID> userIds, String type, String content) {
         if (userIds == null) return;

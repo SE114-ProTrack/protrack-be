@@ -3,6 +3,7 @@ package com.protrack.protrack_be.service.impl;
 import com.protrack.protrack_be.dto.request.ChangePasswordRequest;
 import com.protrack.protrack_be.dto.request.UpdateProfileRequest;
 import com.protrack.protrack_be.dto.response.UserResponse;
+import com.protrack.protrack_be.mapper.UserMapper;
 import com.protrack.protrack_be.model.Account;
 import com.protrack.protrack_be.model.User;
 import com.protrack.protrack_be.repository.AccountRepository;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import static com.protrack.protrack_be.mapper.UserMapper.toResponse;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -76,12 +78,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse changePassword(UUID userId, ChangePasswordRequest rq){
         User user = repo.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng."));
+                .orElseThrow(() -> new RuntimeException("User not found."));
 
         Account account = user.getAccount();
 
         if (!passwordEncoder.matches(rq.getOldPassword(), account.getPassword())) {
-            throw new RuntimeException("Mật khẩu cũ không chính xác");
+            throw new RuntimeException("Old password is incorrect");
         }
 
         account.setPassword(passwordEncoder.encode(rq.getNewPassword()));
@@ -93,9 +95,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateUserAvatar(UUID userId, String avatarUrl){
         User user = repo.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng."));
+                .orElseThrow(() -> new RuntimeException("User not found."));
 
         user.setAvatarUrl(avatarUrl);
         repo.save(user);
+    }
+
+    @Override
+    public List<UserResponse> getUsersSharingProjects() {
+        UUID currentUserId = getCurrentUser().getUserId();
+        List<User> users = repo.findUsersInSameProjectWithoutConversation(currentUserId);
+        return users.stream().map(UserMapper::toResponse).toList();
     }
 }
