@@ -47,16 +47,32 @@ public class ProjectController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @Operation(summary = "Tạo dự án")
-    @PostMapping
-    public ResponseEntity<?> createProject(@RequestBody @Valid ProjectRequest request) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Tạo dự án (kèm ảnh banner)")
+    public ResponseEntity<ProjectResponse> createProject(
+            @RequestPart("project") @Valid ProjectRequest request,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+
+        if (file != null && !file.isEmpty()) {
+            String bannerUrl = fileStorageService.store(file);
+            request.setBannerUrl(bannerUrl);
+        }
+
         ProjectResponse response = service.create(request);
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Cập nhật dự án")
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateProject(@PathVariable UUID id, @RequestBody @Valid ProjectRequest request) {
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Cập nhật dự án (kèm ảnh banner)")
+    public ResponseEntity<?> updateProject(
+            @PathVariable UUID id,
+            @RequestPart("project") @Valid ProjectRequest request,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+
+        String bannerUrl = (file != null) ? fileStorageService.store(file) : null;
+        if (bannerUrl != null) {
+            request.setBannerUrl(bannerUrl);
+        }
         ProjectResponse response = service.update(id, request);
         return ResponseEntity.ok(response);
     }
@@ -82,9 +98,11 @@ public class ProjectController {
         return ResponseEntity.ok(responses);
     }
 
+    @PostMapping(value = "/{id}/uploadBanner", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Thay đổi ảnh bìa dự án")
-    @PostMapping("/{id}/uploadBanner")
-    public ResponseEntity<String> uploadProjectBanner(@PathVariable UUID id, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<String> uploadProjectBanner(
+            @PathVariable UUID id,
+            @RequestPart("file") MultipartFile file) {
         String fileUrl = fileStorageService.store(file);
         ProjectResponse projectResponse = service.updateProjectBanner(id, fileUrl);
         return ResponseEntity.ok(fileUrl);

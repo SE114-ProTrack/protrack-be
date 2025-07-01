@@ -19,4 +19,6 @@ public class NotificationRequest {
 
     @NotBlank(message = "Nội dung thông báo không được để trống")
     private String content;
+
+    private String actionUrl;
 }

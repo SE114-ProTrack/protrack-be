@@ -2,6 +2,7 @@ package com.protrack.protrack_be.service;
 
 import com.protrack.protrack_be.dto.request.ProjectRequest;
 import com.protrack.protrack_be.dto.response.ProjectResponse;
+import com.protrack.protrack_be.enums.ProjectFunctionCode;
 import com.protrack.protrack_be.model.Project;
 
 import java.util.List;
@@ -19,4 +20,5 @@ public interface ProjectService {
     List<ProjectResponse> get3ByUser(UUID userId);
     List<ProjectResponse> findByKeyword(String keyword);
     ProjectResponse updateProjectBanner(UUID projectId, String bannerUrl);
+    boolean hasProjectRight(UUID projectId, UUID userId, ProjectFunctionCode function);
 }

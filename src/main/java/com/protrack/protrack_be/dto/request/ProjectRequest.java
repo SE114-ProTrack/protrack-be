@@ -1,5 +1,6 @@
 package com.protrack.protrack_be.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -12,5 +13,7 @@ public class ProjectRequest {
     private String projectName;
 
     private String description;
+
+    @Schema(hidden = true)
     private String bannerUrl;
 }

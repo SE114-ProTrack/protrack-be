@@ -19,4 +19,6 @@ public class NotificationResponse {
     private String content;
     private Boolean isRead;
     private LocalDateTime timestamp;
+
+    private String actionUrl;
 }

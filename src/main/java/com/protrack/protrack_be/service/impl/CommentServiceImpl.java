@@ -76,7 +76,8 @@ public class CommentServiceImpl implements CommentService {
             notificationService.create(new NotificationRequest(
                     receiverId,
                     "COMMENT",
-                    user.getName() + " đã bình luận vào công việc \"" + task.getTaskName() + "\""
+                    user.getName() + " has commented on \"" + task.getTaskName() + "\"",
+                    ""
             ));
         }
         return CommentMapper.toResponse(saved);
