@@ -23,6 +23,10 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private int jwtExpiration;
 
+    public String extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("userId", String.class));
+    }
+
     // Trích xuất username từ token
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);

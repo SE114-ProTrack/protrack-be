@@ -89,4 +89,13 @@ public class UserServiceImpl implements UserService {
 
         return toResponse(user);
     }
+
+    @Override
+    public void updateUserAvatar(UUID userId, String avatarUrl){
+        User user = repo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng."));
+
+        user.setAvatarUrl(avatarUrl);
+        repo.save(user);
+    }
 }

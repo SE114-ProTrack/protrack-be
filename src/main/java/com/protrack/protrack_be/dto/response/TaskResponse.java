@@ -1,8 +1,10 @@
 package com.protrack.protrack_be.dto.response;
 
+import com.protrack.protrack_be.model.TaskAttachment;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -16,8 +18,7 @@ public class TaskResponse {
     private LocalDateTime deadline;
     private String priority;
     private Boolean isMain;
-    private String attachment;
-
+    private List<TaskAttachment> attachments;
     private UUID projectId;
     private String projectName;
 
@@ -32,4 +33,8 @@ public class TaskResponse {
     private LocalDateTime createdTime;
 
     private String status;
+
+    private String icon;
+
+    private String color;
 }

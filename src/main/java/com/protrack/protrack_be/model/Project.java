@@ -31,4 +31,7 @@ public class Project {
 
     @Column(name = "mota", columnDefinition = "NVARCHAR(MAX)")
     private String description;
+
+    @Column(name = "banner")
+    private String bannerUrl;
 }

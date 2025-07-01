@@ -1,5 +1,6 @@
 package com.protrack.protrack_be.service.impl;
 
+import com.protrack.protrack_be.dto.request.TaskAttachmentRequest;
 import com.protrack.protrack_be.dto.request.TaskRequest;
 import com.protrack.protrack_be.dto.request.TaskStatusRequest;
 import com.protrack.protrack_be.dto.response.TaskResponse;
@@ -41,6 +42,9 @@ public class TaskServiceImpl implements TaskService {
     private final TaskMemberRepository taskMemberRepository;
 
     @Autowired
+    private final TaskAttachmentRepository taskAttachmentRepository;
+
+    @Autowired
     private final ActivityHistoryRepository historyRepository;
 
     @Autowired
@@ -80,6 +84,19 @@ public class TaskServiceImpl implements TaskService {
         checkMembership(request.getProjectId(), userId);
 
         Task task = buildBaseTask(request, request.getProjectId());
+
+        if (request.getAttachments() != null) {
+            for (TaskAttachmentRequest att : request.getAttachments()) {
+                TaskAttachment attachment = new TaskAttachment();
+                attachment.setTask(task);
+                attachment.setFileName(att.getFileName());
+                attachment.setFileUrl(att.getFileUrl());
+                attachment.setFileType(att.getFileType());
+                attachment.setUploadedAt(LocalDateTime.now());
+                taskAttachmentRepository.save(attachment);
+            }
+        }
+
         Task saved = taskRepository.save(task);
 
         assignUsersToTask(task, request.getAssigneeIds());
@@ -111,6 +128,21 @@ public class TaskServiceImpl implements TaskService {
         }
 
         updateTaskFields(task, request);
+
+        if (request.getAttachments() != null) {
+            taskAttachmentRepository.deleteByTask_TaskId(taskId);
+
+            for (TaskAttachmentRequest att : request.getAttachments()) {
+                TaskAttachment attachment = new TaskAttachment();
+                attachment.setTask(task);
+                attachment.setFileName(att.getFileName());
+                attachment.setFileUrl(att.getFileUrl());
+                attachment.setFileType(att.getFileType());
+                attachment.setUploadedAt(LocalDateTime.now());
+                taskAttachmentRepository.save(attachment);
+            }
+        }
+
         Task saved = taskRepository.save(task);
 
         List<UUID> oldAssignees = getAssigneeIds(task);
@@ -214,7 +246,17 @@ public class TaskServiceImpl implements TaskService {
         task.setDescription(request.getDescription());
         task.setDeadline(request.getDeadline());
         task.setPriority(request.getPriority());
-        task.setAttachment(request.getAttachment());
+        if (request.getAttachments() != null) {
+            for (TaskAttachmentRequest att : request.getAttachments()) {
+                TaskAttachment a = new TaskAttachment();
+                a.setTask(task);
+                a.setFileName(att.getFileName());
+                a.setFileUrl(att.getFileUrl());
+                a.setFileType(att.getFileType());
+                a.setUploadedAt(LocalDateTime.now());
+                taskAttachmentRepository.save(a);
+            }
+        }
         task.setIsMain(request.getIsMain());
         task.setCreatedTime(LocalDateTime.now());
         task.setApprover(approver);
@@ -222,6 +264,8 @@ public class TaskServiceImpl implements TaskService {
             task.setLabel(labelRepository.findById(request.getLabelId()).orElse(null));
         if (request.getParentTaskId() != null)
             task.setParentTask(getTask(request.getParentTaskId()));
+        task.setColor(request.getColor());
+        task.setIcon(request.getIcon());
         return task;
     }
 
@@ -303,8 +347,17 @@ public class TaskServiceImpl implements TaskService {
         if (request.getPriority() != null)
             task.setPriority(request.getPriority());
 
-        if (request.getAttachment() != null)
-            task.setAttachment(request.getAttachment());
+        if (request.getAttachments() != null) {
+            for (TaskAttachmentRequest att : request.getAttachments()) {
+                TaskAttachment a = new TaskAttachment();
+                a.setTask(task);
+                a.setFileName(att.getFileName());
+                a.setFileUrl(att.getFileUrl());
+                a.setFileType(att.getFileType());
+                a.setUploadedAt(LocalDateTime.now());
+                taskAttachmentRepository.save(a);
+            }
+        }
 
         if (request.getApproverId() != null)
             task.setApprover(userService.getUserById(request.getApproverId())

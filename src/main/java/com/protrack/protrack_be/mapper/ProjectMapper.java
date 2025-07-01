@@ -10,6 +10,7 @@ public class ProjectMapper {
                 entity.getProjectId(),
                 entity.getProjectName(),
                 entity.getDescription(),
+                entity.getBannerUrl(),
                 entity.getCreateTime(),
                 entity.getCreatorId().getName(),
                 0,

@@ -5,10 +5,13 @@ import com.protrack.protrack_be.dto.request.ProjectRequest;
 import com.protrack.protrack_be.dto.response.ProjectResponse;
 import com.protrack.protrack_be.dto.response.TaskResponse;
 import com.protrack.protrack_be.dto.response.UserResponse;
+import com.protrack.protrack_be.exception.NotFoundException;
 import com.protrack.protrack_be.mapper.ProjectMapper;
 import com.protrack.protrack_be.mapper.TaskMapper;
-import com.protrack.protrack_be.model.Project;
-import com.protrack.protrack_be.model.User;
+import com.protrack.protrack_be.model.*;
+import com.protrack.protrack_be.repository.FunctionRepository;
+import com.protrack.protrack_be.repository.ProjectMemberRepository;
+import com.protrack.protrack_be.repository.ProjectPermissionRepository;
 import com.protrack.protrack_be.repository.ProjectRepository;
 import com.protrack.protrack_be.service.ProjectMemberService;
 import com.protrack.protrack_be.service.ProjectPermissionService;
@@ -42,6 +45,15 @@ public class ProjectServiceImpl implements ProjectService {
     @Lazy
     ProjectPermissionService projectPermissionService;
 
+    @Autowired
+    ProjectMemberRepository projectMemberRepository;
+
+    @Autowired
+    ProjectPermissionRepository projectPermissionRepository;
+
+    @Autowired
+    FunctionRepository functionRepository;
+
     @Override
     public List<ProjectResponse> getAll(){
         return repo.findAll()
@@ -69,17 +81,30 @@ public class ProjectServiceImpl implements ProjectService {
         project.setProjectName(request.getProjectName());
         project.setCreateTime(LocalDateTime.now());
         project.setDescription(request.getDescription());
+        project.setBannerUrl(request.getBannerUrl());
 
         Project saved = repo.save(project);
 
         // Add creator to project member
-        ProjectMemberRequest memberRequest = new ProjectMemberRequest(saved.getProjectId(), user.getUserId(), true);
-        projectMemberService.create(memberRequest);
+        ProjectMember projectMember = new ProjectMember();
+        projectMember.setProject(saved);
+        projectMember.setUser(user);
+        projectMember.setIsProjectOwner(true);
+        projectMember.setRole("Owner");
+        projectMemberRepository.save(projectMember);
 
-        // Add permission to creator
+        List<Function> allFunctions = functionRepository.findAll();
 
+        allFunctions.forEach(function -> {
+            ProjectPermission projectPermission = new ProjectPermission();
+            projectPermission.setProject(saved);
+            projectPermission.setUser(user);
+            projectPermission.setFunction(function);
+            projectPermission.setIsActive(true);
+            projectPermissionRepository.save(projectPermission);
+        });
 
-        return toResponse(saved);
+        return ProjectMapper.toResponse(saved);
     }
 
     @Override
@@ -127,5 +152,15 @@ public class ProjectServiceImpl implements ProjectService {
                 .stream()
                 .map(ProjectMapper::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public ProjectResponse updateProjectBanner(UUID projectId, String bannerUrl){
+        Project project = repo.findById(projectId)
+                .orElseThrow(() -> new NotFoundException("Project not found with id: " + projectId));
+
+        project.setBannerUrl(bannerUrl);
+        Project saved = repo.save(project);
+        return toResponse(saved);
     }
 }

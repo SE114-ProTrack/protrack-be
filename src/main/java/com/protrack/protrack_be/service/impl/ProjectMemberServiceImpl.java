@@ -63,6 +63,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
         projectMember.setProject(project);
         projectMember.setUser(user);
         projectMember.setIsProjectOwner(request.getIsProjectOwner());
+        projectMember.setRole(request.getRole());
 
         ProjectMember saved = repo.save(projectMember);
 

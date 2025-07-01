@@ -17,4 +17,5 @@ public class ProjectMemberRequest {
     private UUID userId;
 
     private Boolean isProjectOwner = false;
+    private String role = "Member";
 }

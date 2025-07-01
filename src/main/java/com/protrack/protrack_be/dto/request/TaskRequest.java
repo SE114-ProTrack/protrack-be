@@ -1,5 +1,6 @@
 package com.protrack.protrack_be.dto.request;
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -27,7 +28,7 @@ public class TaskRequest {
 
     private Boolean isMain = true;
 
-    private String attachment;
+    private List<TaskAttachmentRequest> attachments;
 
     private UUID parentTaskId;
 
@@ -37,6 +38,10 @@ public class TaskRequest {
     private String priority;
 
     private String status;
+
+    private String icon;
+
+    private String color;
 
     private List<UUID> assigneeIds;
     private List<String> subTasks;

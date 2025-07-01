@@ -14,4 +14,5 @@ public interface UserService {
     Optional<User> getUserByEmail(String email);
     UserResponse updateProfile(UUID userId, UpdateProfileRequest rq);
     UserResponse changePassword(UUID userId, ChangePasswordRequest rq);
+    void updateUserAvatar(UUID userId, String avatarUrl);
 }
