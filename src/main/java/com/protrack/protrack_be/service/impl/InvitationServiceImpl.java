@@ -5,6 +5,7 @@ import com.protrack.protrack_be.dto.request.NotificationRequest;
 import com.protrack.protrack_be.dto.response.InvitationResponse;
 import com.protrack.protrack_be.mapper.InvitationMapper;
 import com.protrack.protrack_be.model.*;
+import com.protrack.protrack_be.model.id.ProjectMemberId;
 import com.protrack.protrack_be.model.id.ProjectPermissionId;
 import com.protrack.protrack_be.repository.InvitationRepository;
 import com.protrack.protrack_be.repository.ProjectMemberRepository;
@@ -13,6 +14,7 @@ import com.protrack.protrack_be.repository.ProjectRepository;
 import com.protrack.protrack_be.service.*;
 import com.protrack.protrack_be.util.JwtUtil;
 import io.jsonwebtoken.Claims;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.Email;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -105,6 +107,7 @@ public class InvitationServiceImpl implements InvitationService {
     }
 
     @Override
+    @Transactional
     public InvitationResponse accept(String token){
         Invitation invitation = repo.findByInvitationToken(token)
                 .orElseThrow(() -> new RuntimeException("Can not find invitation"));
@@ -128,6 +131,8 @@ public class InvitationServiceImpl implements InvitationService {
         Project project = invitation.getProject();
 
         ProjectMember member = new ProjectMember();
+        ProjectMemberId projectMemberId = new ProjectMemberId(project.getProjectId(), user.getUserId());
+        member.setId(projectMemberId);
         member.setProject(project);
         member.setUser(user);
         member.setIsProjectOwner(false);

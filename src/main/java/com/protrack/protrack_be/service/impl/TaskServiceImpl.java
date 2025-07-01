@@ -15,6 +15,8 @@ import com.protrack.protrack_be.service.ProjectMemberService;
 import com.protrack.protrack_be.service.ProjectPermissionService;
 import com.protrack.protrack_be.service.TaskService;
 import com.protrack.protrack_be.service.UserService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +67,10 @@ public class TaskServiceImpl implements TaskService {
     @Autowired
     private final ProjectPermissionService projectPermissionService;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
+
     @Override
     public List<TaskResponse> getTasks(UUID projectId, UUID userId) {
         return taskRepository.findByProject_ProjectId(projectId).stream()
@@ -76,40 +82,45 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     @Override
     public TaskResponse createTask(TaskRequest request, UUID userId) {
+        try {
 
-        if (hasProjectRight(request.getProjectId(), userId, ProjectFunctionCode.CREATE_TASK)) {
-            throw new AccessDeniedException("You are not permitted to create task in this project");
-        }
-
-        checkMembership(request.getProjectId(), userId);
-
-        Task task = buildBaseTask(request, request.getProjectId());
-
-        if (request.getAttachments() != null) {
-            for (TaskAttachmentRequest att : request.getAttachments()) {
-                TaskAttachment attachment = new TaskAttachment();
-                attachment.setTask(task);
-                attachment.setFileName(att.getFileName());
-                attachment.setFileUrl(att.getFileUrl());
-                attachment.setFileType(att.getFileType());
-                attachment.setUploadedAt(LocalDateTime.now());
-                taskAttachmentRepository.save(attachment);
+            if (!hasProjectRight(request.getProjectId(), userId, ProjectFunctionCode.CREATE_TASK)) {
+                throw new AccessDeniedException("You are not permitted to create task in this project");
             }
+
+            checkMembership(request.getProjectId(), userId);
+
+            Task task = buildBaseTask(request, request.getProjectId());
+
+            if (request.getAttachments() != null) {
+                for (TaskAttachmentRequest att : request.getAttachments()) {
+                    TaskAttachment attachment = new TaskAttachment();
+                    attachment.setTask(task);
+                    attachment.setFileName(att.getFileName());
+                    attachment.setFileUrl(att.getFileUrl());
+                    attachment.setFileType(att.getFileType());
+                    attachment.setUploadedAt(LocalDateTime.now());
+                    taskAttachmentRepository.save(attachment);
+                }
+            }
+
+            Task saved = taskRepository.save(task);
+
+            assignUsersToTask(task, request.getAssigneeIds());
+            if (Boolean.TRUE.equals(request.getIsMain())) {
+                createSubTasks(task, request.getSubTasks());
+            }
+
+            User user = userService.getUserById(userId)
+                    .orElseThrow(() -> new RuntimeException("Can not find user"));
+            logActivity(task, userId, "CREATE_TASK", "Task \"" + task.getTaskName() + "\" has been created by " + user.getName());
+            notifyUsers(request.getAssigneeIds(), "ASSIGN_TASK", "You have been assigned a task: " + task.getTaskName());
+
+            return TaskMapper.toResponse(saved);
+        } catch (Exception e) {
+            entityManager.clear();
+            throw e;
         }
-
-        Task saved = taskRepository.save(task);
-
-        assignUsersToTask(task, request.getAssigneeIds());
-        if (Boolean.TRUE.equals(request.getIsMain())) {
-            createSubTasks(task, request.getSubTasks());
-        }
-
-        User user = userService.getUserById(userId)
-                .orElseThrow(() -> new RuntimeException("Can not find user"));
-        logActivity(task, userId, "CREATE_TASK", "Task \"" + task.getTaskName() + "\" has been created by " + user.getName());
-        notifyUsers(request.getAssigneeIds(), "ASSIGN_TASK", "You have been assigned a task: " + task.getTaskName());
-
-        return TaskMapper.toResponse(saved);
     }
 
     @Override
@@ -123,7 +134,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public TaskResponse updateTask(UUID taskId, TaskRequest request, UUID userId) {
         Task task = getTask(taskId);
-        if (hasProjectRight(task.getProject().getProjectId(), userId, ProjectFunctionCode.EDIT_TASK)) {
+        if (!hasProjectRight(task.getProject().getProjectId(), userId, ProjectFunctionCode.EDIT_TASK)) {
             throw new AccessDeniedException("You are not permitted to edit this task");
         }
 
@@ -227,8 +238,8 @@ public class TaskServiceImpl implements TaskService {
     }
 
     private boolean hasProjectRight(UUID projectId, UUID userId, ProjectFunctionCode function) {
-        return !projectMemberService.isProjectOwner(projectId, userId)
-                && !projectPermissionService.hasPermission(userId, projectId, function);
+        return projectMemberService.isProjectOwner(projectId, userId)
+                || projectPermissionService.hasPermission(userId, projectId, function);
     }
 
     private void checkMembership(UUID projectId, UUID userId) {
