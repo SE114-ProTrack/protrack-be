@@ -14,7 +14,7 @@ import java.util.UUID;
 
 public interface NotificationRepository extends JpaRepository<Notification, UUID> {
     List<Notification> findByReceiver(User receiver);
-    Page<Notification> findByReceiverOrderByTimestampDesc(User receiver, Pageable pageable);
+    Page<Notification> findByReceiverOrderByCreatedAtDesc(User receiver, Pageable pageable);
     long countByReceiverAndIsReadFalse(User receiver);
 
     @Modifying

@@ -20,15 +20,12 @@ import com.protrack.protrack_be.service.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 //import jakarta.transaction.Transactional;
-import org.springframework.transaction.annotation.Propagation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -358,7 +355,6 @@ public class TaskServiceImpl implements TaskService {
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     private void logActivity(Task task, UUID actorId, String type, String description) {
         User user = userService.getUserById(actorId)
                 .orElseThrow(() -> new NotFoundException("Can not find user"));
@@ -480,7 +476,7 @@ public class TaskServiceImpl implements TaskService {
         PersonalProductivityId id = new PersonalProductivityId(userId, projectId);
         PersonalProductivity productivity = productivityRepository.findById(id)
                 .orElse(new PersonalProductivity(id, userService.getUserById(userId)
-                        .orElseThrow(() -> new NotFoundException("Can not find user")), projectRepository.getReferenceById(projectId), 0, LocalDateTime.now()));
+                        .orElseThrow(() -> new NotFoundException("Can not find user")), projectRepository.getReferenceById(projectId), 0));
 
         int updated = productivity.getCompletedTasks() + change;
         productivity.setCompletedTasks(Math.max(updated, 0));

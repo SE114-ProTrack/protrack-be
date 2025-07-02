@@ -14,6 +14,7 @@ import com.protrack.protrack_be.model.id.ProjectPermissionId;
 import com.protrack.protrack_be.repository.ProjectPermissionRepository;
 import com.protrack.protrack_be.service.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -42,6 +43,7 @@ public class ProjectPermissionServiceImpl implements ProjectPermissionService {
     FunctionService functionService;
 
     @Autowired
+            @Lazy
     ProjectMemberService projectMemberService;
 
     @Override

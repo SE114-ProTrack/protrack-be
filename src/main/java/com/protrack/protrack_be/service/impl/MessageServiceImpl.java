@@ -89,7 +89,6 @@ public class MessageServiceImpl implements MessageService {
                 .orElseThrow(() -> new NotFoundException("Can not find receiver")));
         validateContent(request.getContent());
         message.setContent(request.getContent());
-        message.setSentAt(LocalDateTime.now());
         message.setUpdatedAt(null);
 
         MessageResponse response = toResponse(repo.save(message));
