@@ -65,10 +65,4 @@ public class SecurityConfig {
                 "/swagger-ui/**", "/v3/api-docs/**"
         );
     }
-
-    // Đăng ký UserDetailsService thủ công nếu cần
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return userDetailsService;
-    }
 }

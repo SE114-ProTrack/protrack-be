@@ -29,8 +29,8 @@ public class LabelController {
     @Autowired
     LabelService service;
 
-    @Operation(summary = "Lấy tất cả các nhãn")
-    @GetMapping
+
+    //@GetMapping
     public ResponseEntity<List<LabelResponse>> getAllLabels() {
         List<LabelResponse> responses = service.getAll();
         //return ResponseEntity.ok(responses);
@@ -45,6 +45,7 @@ public class LabelController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Lấy tất cả các nhãn theo project")
     @GetMapping
     public ResponseEntity<List<LabelResponse>> getLabelsByProject(@RequestParam UUID projectId) {
         List<LabelResponse> responses = service.getByProject(projectId);

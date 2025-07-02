@@ -17,4 +17,7 @@ public class InvitationRequest {
     @NotBlank(groups = CreateGroup.class, message = "Email người được mời không được để trống")
     @Email(message = "Email không hợp lệ")
     private String invitationEmail;
+
+    @NotBlank(groups = CreateGroup.class, message = "Vai trò không được để trống")
+    private String role = "Member";
 }

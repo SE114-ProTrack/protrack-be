@@ -66,7 +66,7 @@ public class TaskController {
     }
 
     @Operation(summary = "Cập nhật trạng thái công việc")
-    @PutMapping("/{id}")
+    @PutMapping("/{id}/status")
     public ResponseEntity<?> updateTaskStatus(@PathVariable UUID id, @RequestBody TaskStatusRequest request) {
         User user = userService.getCurrentUser();
         TaskResponse response = service.updateTaskStatus(id, request, user.getUserId());

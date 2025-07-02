@@ -23,6 +23,5 @@ public class SoftDeleteFilterAspect {
     @Before("methodsWithSoftDeleteFilter()")
     public void applyFilter() {
         HibernateUtil.enableDeletedFilter(entityManager);
-        log.debug("✅ Hibernate filter 'deletedFilter' applied via @EnableSoftDeleteFilter");
     }
 }

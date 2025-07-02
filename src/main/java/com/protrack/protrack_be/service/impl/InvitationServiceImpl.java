@@ -121,7 +121,7 @@ public class InvitationServiceImpl implements InvitationService {
 
 
         Optional<User> invitedUserOpt = userService.getUserByEmail(request.getInvitationEmail());
-        String token = jwtUtil.generateInvitationToken(request.getInvitationEmail(), request.getProjectId());
+        String token = jwtUtil.generateInvitationToken(request.getInvitationEmail(), request.getProjectId(), request.getRole());
 
         if (invitedUserOpt.isPresent()) {
             if (projectMemberRepository.existsByProject_ProjectIdAndUser_UserId(project.getProjectId(), invitedUserOpt.get().getUserId())) {
@@ -165,6 +165,7 @@ public class InvitationServiceImpl implements InvitationService {
 
         Claims claims = jwtUtil.parseInvitationToken(token);
         String emailInToken = claims.getSubject();
+        String role = claims.get("role").toString();
 
         String currentUserEmail = userService.getCurrentUser().getAccount().getEmail();
         if (!emailInToken.equals(currentUserEmail)) {
@@ -183,6 +184,7 @@ public class InvitationServiceImpl implements InvitationService {
         member.setProject(project);
         member.setUser(user);
         member.setIsProjectOwner(false);
+        member.setRole(role);
         projectMemberRepository.save(member);
 
         projectPermissionService.grantDefaultPermissions(user.getUserId(), project.getProjectId());
