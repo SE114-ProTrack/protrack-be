@@ -1,5 +1,6 @@
 package com.protrack.protrack_be.service.impl;
 
+import com.protrack.protrack_be.annotation.EnableSoftDeleteFilter;
 import com.protrack.protrack_be.dto.request.PersonalProductivityRequest;
 import com.protrack.protrack_be.dto.response.PersonalProductivityResponse;
 import com.protrack.protrack_be.mapper.PersonalProductivityMapper;
@@ -34,6 +35,7 @@ public class PersonalProductivityServiceImpl implements PersonalProductivityServ
     ProjectService projectService;
 
     @Override
+    @EnableSoftDeleteFilter
     public List<PersonalProductivityResponse> getAll(){
         return repo.findAll().stream()
                 .map(PersonalProductivityMapper::toResponse)
@@ -41,12 +43,14 @@ public class PersonalProductivityServiceImpl implements PersonalProductivityServ
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public Optional<PersonalProductivityResponse> getById(PersonalProductivityId id){
         return repo.findById(id)
                 .map(PersonalProductivityMapper::toResponse);
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public PersonalProductivityResponse save(PersonalProductivityRequest request){
         User user = userService.getUserById(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("Can not find user"));
@@ -63,7 +67,6 @@ public class PersonalProductivityServiceImpl implements PersonalProductivityServ
         productivity.setUser(user);
         productivity.setProject(project);
         productivity.setCompletedTasks(request.getCompletedTasks());
-        productivity.setLastUpdated(LocalDateTime.now());
 
         PersonalProductivity saved = repo.save(productivity);
 

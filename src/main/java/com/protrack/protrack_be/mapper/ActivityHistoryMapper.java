@@ -14,7 +14,7 @@ public class ActivityHistoryMapper {
                 entity.getTask().getTaskName(),
                 entity.getActionType(),
                 entity.getDescription(),
-                entity.getTimestamp()
+                entity.getCreatedAt()
         );
     }
 }

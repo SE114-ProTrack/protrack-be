@@ -2,21 +2,23 @@ package com.protrack.protrack_be.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.SQLDelete;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@EqualsAndHashCode(callSuper = false)
 @Entity
+@SQLDelete(sql = "UPDATE task SET da_xoa = true WHERE id_congviec = ?")
+@Filter(name = "deletedFilter", condition = "da_xoa = :isDeleted")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "congviec")
-public class Task {
+public class Task extends BaseEntity {
     @Id
     @GeneratedValue
     @Column(name = "id_congviec", columnDefinition = "BINARY(16)")
@@ -57,9 +59,6 @@ public class Task {
 
     @Column(name = "mucdouutien")
     private String priority;
-
-    @Column(name = "thoigiantao")
-    private LocalDateTime createdTime;
 
     @Column(name = "trangthai")
     private String status; // TO_DO, IN_PROGRESS, DONE

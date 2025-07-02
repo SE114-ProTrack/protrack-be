@@ -14,6 +14,7 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
             WHERE d.id_duan IN (
                 SELECT id_duan FROM thanhvienduan WHERE id_nguoidung = :userId
             )
+            AND d.da_xoa = false
             """, nativeQuery = true)
     List<Project> findProjectsByUserId(@Param("userId") UUID userId);
 
@@ -28,6 +29,7 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
             WHERE d.id_duan IN (
                 SELECT id_duan FROM thanhvienduan WHERE id_nguoidung = :userId
             )
+            AND d.da_xoa = false
             ORDER BY d.thoigiantao DESC
             LIMIT 3
             """, nativeQuery = true)

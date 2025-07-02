@@ -3,16 +3,21 @@ package com.protrack.protrack_be.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.SQLDelete;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@EqualsAndHashCode(callSuper = false)
 @Entity
+@SQLDelete(sql = "UPDATE duan SET da_xoa = true WHERE id_duan = ?")
+@Filter(name = "deletedFilter", condition = "da_xoa = :isDeleted")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "duan")
-public class Project {
+public class Project extends BaseEntity {
     @Id
     @GeneratedValue
     @Column(name = "id_duan", columnDefinition = "BINARY(16)")
@@ -24,10 +29,6 @@ public class Project {
 
     @Column(name = "tenduan", nullable = false, length = 100)
     private String projectName;
-
-    @Column(name = "thoigiantao")
-    @CreationTimestamp
-    private LocalDateTime createTime;
 
     @Column(name = "mota", columnDefinition = "NVARCHAR(MAX)")
     private String description;

@@ -7,6 +7,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface CommentRepository extends JpaRepository<Comment, UUID> {
-    List<Comment> findByTask_TaskIdOrderByTimestampAsc(UUID taskId);
+    List<Comment> findByTask_TaskIdOrderByCreatedAtAsc(UUID taskId);
 }
 

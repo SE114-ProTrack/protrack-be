@@ -1,5 +1,6 @@
 package com.protrack.protrack_be.service.impl;
 
+import com.protrack.protrack_be.annotation.EnableSoftDeleteFilter;
 import com.protrack.protrack_be.dto.request.NotificationRequest;
 import com.protrack.protrack_be.dto.response.NotificationResponse;
 import com.protrack.protrack_be.mapper.NotificationMapper;
@@ -29,6 +30,7 @@ public class NotificationServiceImpl implements NotificationService {
     UserService userService;
 
     @Override
+    @EnableSoftDeleteFilter
     public List<NotificationResponse> getAll(UUID userId){
         User user = userService.getUserById(userId)
                 .orElseThrow(() -> new RuntimeException("Cannot find user"));
@@ -39,6 +41,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public Optional<NotificationResponse> getById(UUID id){
         return repo.findById(id)
                 .map(NotificationMapper::toResponse);
@@ -53,7 +56,6 @@ public class NotificationServiceImpl implements NotificationService {
         noti.setReceiver(receiver);
         noti.setType(request.getType());
         noti.setContent(request.getContent());
-        noti.setTimestamp(LocalDateTime.now());
         noti.setIsRead(false);
         noti.setActionUrl(request.getActionUrl());
 
@@ -63,6 +65,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public void markAsRead(UUID id){
         Notification noti = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Can not find notification"));

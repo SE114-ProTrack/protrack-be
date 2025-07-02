@@ -13,7 +13,7 @@ public class NotificationMapper {
                 entity.getType(),
                 entity.getContent(),
                 entity.getIsRead(),
-                entity.getTimestamp(),
+                entity.getCreatedAt(),
                 entity.getActionUrl()
         );
     }

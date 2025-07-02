@@ -1,5 +1,6 @@
 package com.protrack.protrack_be.service.impl;
 
+import com.protrack.protrack_be.annotation.EnableSoftDeleteFilter;
 import com.protrack.protrack_be.dto.request.LabelRequest;
 import com.protrack.protrack_be.dto.response.LabelResponse;
 import com.protrack.protrack_be.mapper.LabelMapper;
@@ -28,6 +29,7 @@ public class LabelServiceImpl implements LabelService {
     ProjectService projectService;
 
     @Override
+    @EnableSoftDeleteFilter
     public List<LabelResponse> getAll(){
         return repo.findAll()
                 .stream()
@@ -36,12 +38,14 @@ public class LabelServiceImpl implements LabelService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public Optional<LabelResponse> getById(UUID id){
         return repo.findById(id)
                 .map(LabelMapper::toResponse);
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public LabelResponse create(LabelRequest request){
         Label label = new Label();
         Project project = projectService.getEntityById(request.getProjectId())
@@ -57,6 +61,7 @@ public class LabelServiceImpl implements LabelService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public LabelResponse update(UUID id, LabelRequest request){
         Label label = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Can not find label"));

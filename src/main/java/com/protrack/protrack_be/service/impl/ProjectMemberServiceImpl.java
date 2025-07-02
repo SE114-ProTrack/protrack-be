@@ -1,5 +1,6 @@
 package com.protrack.protrack_be.service.impl;
 
+import com.protrack.protrack_be.annotation.EnableSoftDeleteFilter;
 import com.protrack.protrack_be.dto.request.ProjectMemberRequest;
 import com.protrack.protrack_be.dto.response.ProjectMemberResponse;
 import com.protrack.protrack_be.mapper.InvitationMapper;
@@ -37,6 +38,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     UserService userService;
 
     @Override
+    @EnableSoftDeleteFilter
     public List<ProjectMemberResponse> getAll(){
         return repo.findAll().stream()
                 .map(ProjectMemberMapper::toResponse)
@@ -45,6 +47,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     private final ProjectMemberRepository memberRepository;
 
     @Override
+    @EnableSoftDeleteFilter
     public Optional<ProjectMemberResponse> getById(ProjectMemberId id) {
         return repo.findById(id)
                 .map(ProjectMemberMapper::toResponse);
@@ -71,6 +74,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public ProjectMemberResponse update(ProjectMemberId id, ProjectMemberRequest request){
         ProjectMember projectMember = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Can not find project member"));
@@ -86,11 +90,13 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     public void delete(ProjectMemberId id){ repo.deleteById(id); }
 
     @Override
+    @EnableSoftDeleteFilter
     public boolean isProjectOwner(UUID projectId, UUID userId) {
         return memberRepository.existsByProject_ProjectIdAndUser_UserIdAndIsProjectOwnerTrue(projectId, userId);
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public boolean isMember(UUID projectId, UUID userId) {
         return memberRepository.existsByProject_ProjectIdAndUser_UserId(projectId, userId);
     }

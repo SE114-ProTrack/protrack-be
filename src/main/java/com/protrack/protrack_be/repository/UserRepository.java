@@ -20,18 +20,20 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Query(value = """
     SELECT DISTINCT u.*
     FROM thanhvienduan pm1
-    JOIN thanhvienduan pm2 ON pm1.id_duan = pm2.id_duan
-    JOIN nguoidung u ON u.id_nguoidung = pm2.id_nguoidung
+    JOIN thanhvienduan pm2 ON pm1.id_duan = pm2.id_duan AND pm2.da_xoa = false
+    JOIN nguoidung u ON u.id_nguoidung = pm2.id_nguoidung AND u.da_xoa = false
     WHERE pm1.id_nguoidung = :currentUserId
+      AND pm1.da_xoa = false
       AND pm2.id_nguoidung <> :currentUserId
       AND NOT EXISTS (
           SELECT 1 FROM tinnhan t
-          WHERE 
+          WHERE (
               (t.id_nguoigui = :currentUserId AND t.id_nguoinhan = pm2.id_nguoidung)
               OR
               (t.id_nguoinhan = :currentUserId AND t.id_nguoigui = pm2.id_nguoidung)
+          )
+          AND t.da_xoa = false
       )
     """, nativeQuery = true)
     List<User> findUsersInSameProjectWithoutConversation(@Param("currentUserId") UUID currentUserId);
-
 }

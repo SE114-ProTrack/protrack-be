@@ -24,8 +24,8 @@ public class NotificationController {
     private NotificationService service;
 
     @Operation(summary = "Lấy tất cả thông báo")
-    @GetMapping
-    public ResponseEntity<List<NotificationResponse>> getAllNotifications(@RequestBody UUID userId) {
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<NotificationResponse>> getAllNotificationsById(@PathVariable UUID userId) {
         List<NotificationResponse> responses = service.getAll(userId);
         return ResponseEntity.ok(responses);
     }

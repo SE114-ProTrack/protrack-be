@@ -1,5 +1,6 @@
 package com.protrack.protrack_be.service.impl;
 
+import com.protrack.protrack_be.annotation.EnableSoftDeleteFilter;
 import com.protrack.protrack_be.dto.request.InvitationRequest;
 import com.protrack.protrack_be.dto.request.NotificationRequest;
 import com.protrack.protrack_be.dto.response.InvitationResponse;
@@ -63,6 +64,7 @@ public class InvitationServiceImpl implements InvitationService {
     ProjectService projectService;
 
     @Override
+    @EnableSoftDeleteFilter
     public List<InvitationResponse> getAll(){
         return repo.findAll().stream()
                 .map(InvitationMapper::toResponse)
@@ -70,12 +72,14 @@ public class InvitationServiceImpl implements InvitationService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public Optional<InvitationResponse> getById(UUID id){
         return repo.findById(id)
                 .map(InvitationMapper::toResponse);
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public InvitationResponse create(InvitationRequest request){
         if (!projectService.hasProjectRight(request.getProjectId(), userService.getCurrentUser().getUserId(), ProjectFunctionCode.INVITE_MEMBER)) {
             throw new AccessDeniedException("You are not permitted to create task in this project");
@@ -123,7 +127,7 @@ public class InvitationServiceImpl implements InvitationService {
 
     @Transactional
     @Override
-    @Transactional
+    @EnableSoftDeleteFilter
     public InvitationResponse accept(String token){
         Invitation invitation = repo.findByInvitationToken(token)
                 .orElseThrow(() -> new RuntimeException("Can not find invitation"));

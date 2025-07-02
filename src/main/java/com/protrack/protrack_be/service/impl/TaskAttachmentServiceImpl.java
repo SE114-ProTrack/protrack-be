@@ -1,5 +1,6 @@
 package com.protrack.protrack_be.service.impl;
 
+import com.protrack.protrack_be.annotation.EnableSoftDeleteFilter;
 import com.protrack.protrack_be.dto.request.TaskAttachmentRequest;
 import com.protrack.protrack_be.dto.response.TaskAttachmentResponse;
 import com.protrack.protrack_be.mapper.TaskAttachmentMapper;
@@ -42,6 +43,7 @@ public class TaskAttachmentServiceImpl implements TaskAttachmentService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public List<TaskAttachmentResponse> getByTaskId(UUID taskId) {
         return repo.findByTask_TaskId(taskId).stream()
                 .map(attachment -> new TaskAttachmentResponse(

@@ -1,5 +1,6 @@
 package com.protrack.protrack_be.service.impl;
 
+import com.protrack.protrack_be.annotation.EnableSoftDeleteFilter;
 import com.protrack.protrack_be.dto.request.MessageRequest;
 import com.protrack.protrack_be.dto.response.MessagePreviewResponse;
 import com.protrack.protrack_be.dto.response.MessageResponse;
@@ -32,6 +33,7 @@ public class MessageServiceImpl implements MessageService {
     private SimpMessagingTemplate messagingTemplate;
 
     @Override
+    @EnableSoftDeleteFilter
     public List<MessageResponse> getAll(){
         return repo.findAll().stream()
                 .map(MessageMapper::toResponse)
@@ -39,12 +41,14 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public Optional<MessageResponse> getById(UUID id){
         return repo.findById(id)
                 .map(MessageMapper::toResponse);
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public List<MessageResponse> getConversation(UUID user) {
         return repo.findMessagesBetweenUsers(user, userService.getCurrentUser().getUserId()).stream()
                 .map(MessageMapper::toResponse)
@@ -60,7 +64,6 @@ public class MessageServiceImpl implements MessageService {
         message.setReceiver(userService.getUserById(request.getReceiverId())
                 .orElseThrow(() -> new RuntimeException("Can not find receiver")));
         message.setContent(request.getContent());
-        message.setSentAt(LocalDateTime.now());
 
         MessageResponse response = toResponse(repo.save(message));
 
@@ -71,6 +74,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public MessageResponse update(UUID id, MessageRequest request){
         Message message = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Can not find message"));
@@ -83,6 +87,7 @@ public class MessageServiceImpl implements MessageService {
         return toResponse(saved);
     }
     @Override
+    @EnableSoftDeleteFilter
     public void markAsRead(UUID id){
         Message message = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Can not find message"));

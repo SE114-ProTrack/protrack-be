@@ -3,16 +3,22 @@ package com.protrack.protrack_be.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.SQLDelete;
 
 import java.util.UUID;
 
+@EqualsAndHashCode(callSuper = false)
 @Entity
+@SQLDelete(sql = "UPDATE nhancongviec SET da_xoa = true WHERE id_nhan = ?")
+@Filter(name = "deletedFilter", condition = "da_xoa = :isDeleted")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "nhancongviec")
-public class Label {
+public class Label extends BaseEntity {
     @Id
     @GeneratedValue
     @Column(name = "id_nhan", columnDefinition = "BINARY(16)")

@@ -3,16 +3,21 @@ package com.protrack.protrack_be.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.SQLDelete;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@EqualsAndHashCode(callSuper = false)
 @Entity
+@SQLDelete(sql = "UPDATE loimoithanhvien SET da_xoa = true WHERE id_loimoi = ?")
+@Filter(name = "deletedFilter", condition = "da_xoa = :isDeleted")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "loimoithanhvien")
-public class Invitation {
+public class Invitation extends BaseEntity {
     @Id
     @GeneratedValue
     @Column(name = "id_loimoi", columnDefinition = "BINARY(16)")

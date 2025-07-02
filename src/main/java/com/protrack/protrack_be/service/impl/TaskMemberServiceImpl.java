@@ -1,5 +1,6 @@
 package com.protrack.protrack_be.service.impl;
 
+import com.protrack.protrack_be.annotation.EnableSoftDeleteFilter;
 import com.protrack.protrack_be.dto.request.TaskMemberRequest;
 import com.protrack.protrack_be.dto.response.TaskMemberResponse;
 import com.protrack.protrack_be.mapper.TaskMemberMapper;
@@ -40,6 +41,7 @@ public class TaskMemberServiceImpl implements TaskMemberService {
     ActivityHistoryService activityHistoryService;
 
     @Override
+    @EnableSoftDeleteFilter
     public List<TaskMemberResponse> getAll(){
         return repo.findAll()
                 .stream()
@@ -48,6 +50,7 @@ public class TaskMemberServiceImpl implements TaskMemberService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public Optional<TaskMemberResponse> getById(TaskMemberId id){
         return repo.findById(id)
                 .map(TaskMemberMapper::toResponse);
@@ -84,11 +87,13 @@ public class TaskMemberServiceImpl implements TaskMemberService {
     public void delete(TaskMemberId id){ repo.deleteById(id); }
 
     @Override
+    @EnableSoftDeleteFilter
     public List<TaskMember> getMembersByTask(UUID taskId) {
         return repo.findByTask_TaskId(taskId);
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public List<UUID> getAssigneeIds(UUID taskId) {
         return getMembersByTask(taskId).stream()
                 .map(tm -> tm.getUser().getUserId())

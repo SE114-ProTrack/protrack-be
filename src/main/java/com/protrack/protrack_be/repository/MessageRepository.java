@@ -13,7 +13,7 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
     @Query("SELECT m FROM Message m WHERE " +
             "(m.sender.userId = :user1 AND m.receiver.userId = :user2) OR " +
             "(m.sender.userId = :user2 AND m.receiver.userId = :user1)" +
-            "ORDER BY m.sentAt DESC")
+            "ORDER BY m.createdAt DESC")
     List<Message> findMessagesBetweenUsers(@Param("user1") UUID user1,
                                            @Param("user2") UUID user2);
 
@@ -24,7 +24,7 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
                 u.hoten,
                 u.hinhanh,
                 sub.noidung,
-                sub.thoigiangui,
+                sub.thoi_gian_tao,
                 COALESCE(unread.count, 0) AS unread_count
             FROM (
                 SELECT
@@ -33,7 +33,7 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
                         ELSE t.id_nguoigui
                     END AS user_id,
                     t.noidung,
-                    t.thoigiangui
+                    t.thoi_gian_tao
                 FROM tinnhan t
                 JOIN (
                     SELECT
@@ -41,25 +41,26 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
                             WHEN t1.id_nguoigui = :currentUserId THEN t1.id_nguoinhan
                             ELSE t1.id_nguoigui
                         END AS user_id,
-                        MAX(t1.thoigiangui) AS max_time
+                        MAX(t1.thoi_gian_tao) AS max_time
                     FROM tinnhan t1
-                    WHERE :currentUserId IN (t1.id_nguoigui, t1.id_nguoinhan)
+                    WHERE :currentUserId IN (t1.id_nguoigui, t1.id_nguoinhan) AND t1.da_xoa = false
                     GROUP BY user_id
                 ) latest ON (
                     ((t.id_nguoigui = :currentUserId AND t.id_nguoinhan = latest.user_id)
                     OR (t.id_nguoinhan = :currentUserId AND t.id_nguoigui = latest.user_id))
-                    AND t.thoigiangui = latest.max_time
+                    AND t.thoi_gian_tao = latest.max_time
                 )
+                WHERE t.da_xoa = false
             ) sub
             JOIN nguoidung u ON u.id_nguoidung = sub.user_id
             LEFT JOIN (
                 SELECT id_nguoigui, COUNT(*) AS count
                 FROM tinnhan
-                WHERE id_nguoinhan = :currentUserId AND dadoc = false
+                WHERE id_nguoinhan = :currentUserId AND dadoc = false AND da_xoa = false
                 GROUP BY id_nguoigui
             ) unread
             ON unread.id_nguoigui = sub.user_id
-            ORDER BY sub.thoigiangui DESC
+            ORDER BY sub.thoi_gian_tao DESC
             """, nativeQuery = true)
     List<MessagePreviewResponse> findPreviewsByUserId(@Param("currentUserId") UUID currentUserId);
 }

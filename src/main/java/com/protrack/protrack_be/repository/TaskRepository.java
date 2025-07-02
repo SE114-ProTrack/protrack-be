@@ -19,7 +19,7 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
     @Query(value = """
             SELECT * FROM congviec c
             JOIN nguoithuchiencv nth ON nth.id_congviec = c.id_congviec
-            WHERE nth.id_nguoidung = :userId
+            WHERE nth.id_nguoidung = :userId AND c.da_xoa = false
             ORDER BY c.thoigiantao DESC
             LIMIT 3
             """, nativeQuery = true)

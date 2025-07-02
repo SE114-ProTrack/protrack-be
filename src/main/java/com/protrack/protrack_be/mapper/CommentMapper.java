@@ -12,7 +12,7 @@ public class CommentMapper {
                 entity.getUser().getUserId(),
                 entity.getUser().getName(),
                 entity.getContent(),
-                entity.getTimestamp()
+                entity.getCreatedAt()
         );
     }
 }

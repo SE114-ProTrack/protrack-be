@@ -1,5 +1,6 @@
 package com.protrack.protrack_be.service.impl;
 
+import com.protrack.protrack_be.annotation.EnableSoftDeleteFilter;
 import com.protrack.protrack_be.dto.request.TaskAttachmentRequest;
 import com.protrack.protrack_be.dto.request.TaskRequest;
 import com.protrack.protrack_be.dto.request.TaskStatusRequest;
@@ -17,11 +18,14 @@ import com.protrack.protrack_be.service.TaskService;
 import com.protrack.protrack_be.service.UserService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
+//import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -72,6 +76,7 @@ public class TaskServiceImpl implements TaskService {
 
 
     @Override
+    @EnableSoftDeleteFilter
     public List<TaskResponse> getTasks(UUID projectId, UUID userId) {
         return taskRepository.findByProject_ProjectId(projectId).stream()
                 .filter(task -> isVisibleToUser(task, userId))
@@ -107,6 +112,7 @@ public class TaskServiceImpl implements TaskService {
             Task saved = taskRepository.save(task);
 
             assignUsersToTask(task, request.getAssigneeIds());
+
             if (Boolean.TRUE.equals(request.getIsMain())) {
                 createSubTasks(task, request.getSubTasks());
             }
@@ -124,6 +130,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public Optional<TaskResponse> getTaskById(UUID taskId, UUID userId) {
         Task task = getTask(taskId);
         if (!isVisibleToUser(task, userId)) throw new AccessDeniedException("You are not permitted to view this task");
@@ -132,6 +139,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Transactional
     @Override
+    @EnableSoftDeleteFilter
     public TaskResponse updateTask(UUID taskId, TaskRequest request, UUID userId) {
         Task task = getTask(taskId);
         if (!hasProjectRight(task.getProject().getProjectId(), userId, ProjectFunctionCode.EDIT_TASK)) {
@@ -194,6 +202,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public List<TaskResponse> getTasksByUser(UUID userId){
         return taskRepository.findTasksByUserId(userId)
                 .stream()
@@ -202,6 +211,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public List<TaskResponse> get3ByUser(UUID userId){
         return taskRepository.findTop3TasksByUserId(userId)
                 .stream()
@@ -210,6 +220,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public List<TaskResponse> findByKeyword(String keyword) {
         return taskRepository.findByTaskNameContainingIgnoreCase(keyword)
                 .stream()
@@ -219,16 +230,18 @@ public class TaskServiceImpl implements TaskService {
 
 
     // HELPERS
-
+    @EnableSoftDeleteFilter
     public Task getTask(UUID taskId) {
         return taskRepository.findById(taskId).orElseThrow(() -> new NotFoundException("Task doesn't exist"));
     }
 
+    @EnableSoftDeleteFilter
     private void validateUserIsProjectMember(UUID projectId, UUID userId) {
         if (!memberRepository.existsByProject_ProjectIdAndUser_UserId(projectId, userId)) {
             throw new BadRequestException("User " + userId + " is not a member of project " + projectId);
         }
     }
+    @EnableSoftDeleteFilter
     public boolean isVisibleToUser(Task task, UUID userId) {
         UUID projectId = task.getProject().getProjectId();
 
@@ -248,6 +261,7 @@ public class TaskServiceImpl implements TaskService {
         }
     }
 
+    @EnableSoftDeleteFilter
     private Task buildBaseTask(TaskRequest request, UUID projectId) {
         Task task = new Task();
         User approver = userService.getUserById(request.getApproverId())
@@ -269,7 +283,6 @@ public class TaskServiceImpl implements TaskService {
             }
         }
         task.setIsMain(request.getIsMain());
-        task.setCreatedTime(LocalDateTime.now());
         task.setApprover(approver);
         if (request.getLabelId() != null)
             task.setLabel(labelRepository.findById(request.getLabelId()).orElse(null));
@@ -299,6 +312,7 @@ public class TaskServiceImpl implements TaskService {
         }
     }
 
+    @EnableSoftDeleteFilter
     public List<UUID> getAssigneeIds(Task task) {
         return taskMemberRepository.findAll().stream()
                 .filter(tm -> tm.getTask().getTaskId().equals(task.getTaskId()))
@@ -321,6 +335,7 @@ public class TaskServiceImpl implements TaskService {
         }
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     private void logActivity(Task task, UUID actorId, String type, String description) {
         User user = userService.getUserById(actorId)
                 .orElseThrow(() -> new RuntimeException("Can not find user"));
@@ -330,8 +345,6 @@ public class TaskServiceImpl implements TaskService {
         history.setTask(task);
         history.setActionType(type);
         history.setDescription(description);
-        history.setTimestamp(LocalDateTime.now());
-
         historyRepository.save(history);
     }
 
@@ -346,12 +359,12 @@ public class TaskServiceImpl implements TaskService {
                     type,
                     content,
                     false,
-                    LocalDateTime.now(),
                     ""
             ));
         }
     }
 
+    @EnableSoftDeleteFilter
     private void updateTaskFields(Task task, TaskRequest request) {
         if (request.getDescription() != null)
             task.setDescription(request.getDescription());
@@ -415,15 +428,15 @@ public class TaskServiceImpl implements TaskService {
         return TaskMapper.toResponse(task);
     }
 
+    @EnableSoftDeleteFilter
     private void updateProductivity(UUID projectId, UUID userId, int change) {
         PersonalProductivityId id = new PersonalProductivityId(userId, projectId);
         PersonalProductivity productivity = productivityRepository.findById(id)
                 .orElse(new PersonalProductivity(id, userService.getUserById(userId)
-                        .orElseThrow(() -> new RuntimeException("Can not find user")), projectRepository.getReferenceById(projectId), 0, LocalDateTime.now()));
+                        .orElseThrow(() -> new RuntimeException("Can not find user")), projectRepository.getReferenceById(projectId), 0));
 
         int updated = productivity.getCompletedTasks() + change;
         productivity.setCompletedTasks(Math.max(updated, 0));
-        productivity.setLastUpdated(LocalDateTime.now());
 
         productivityRepository.save(productivity);
     }

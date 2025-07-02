@@ -1,5 +1,6 @@
 package com.protrack.protrack_be.service.impl;
 
+import com.protrack.protrack_be.annotation.EnableSoftDeleteFilter;
 import com.protrack.protrack_be.dto.request.ProjectMemberRequest;
 import com.protrack.protrack_be.dto.request.ProjectRequest;
 import com.protrack.protrack_be.dto.response.ProjectResponse;
@@ -19,7 +20,10 @@ import com.protrack.protrack_be.service.ProjectMemberService;
 import com.protrack.protrack_be.service.ProjectPermissionService;
 import com.protrack.protrack_be.service.ProjectService;
 import com.protrack.protrack_be.service.UserService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -58,6 +62,7 @@ public class ProjectServiceImpl implements ProjectService {
     FunctionRepository functionRepository;
 
     @Override
+    @EnableSoftDeleteFilter
     public List<ProjectResponse> getAll(){
         return repo.findAll()
             .stream()
@@ -65,12 +70,14 @@ public class ProjectServiceImpl implements ProjectService {
             .collect(Collectors.toList()); }
 
     @Override
+    @EnableSoftDeleteFilter
     public Optional<ProjectResponse> getById(UUID id){
         return repo.findById(id)
             .map(ProjectMapper::toResponse);
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public Optional<Project> getEntityById(UUID id){
         return repo.findById(id);
     }
@@ -83,7 +90,6 @@ public class ProjectServiceImpl implements ProjectService {
 
         project.setCreatorId(user);
         project.setProjectName(request.getProjectName());
-        project.setCreateTime(LocalDateTime.now());
         project.setDescription(request.getDescription());
         project.setBannerUrl(request.getBannerUrl());
 
@@ -114,6 +120,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public ProjectResponse update(UUID id, ProjectRequest request){
         Project project = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Can not find project"));
@@ -130,6 +137,7 @@ public class ProjectServiceImpl implements ProjectService {
     public void delete(UUID id){ repo.deleteById(id); }
 
     @Override
+    @EnableSoftDeleteFilter
     public List<ProjectResponse> getProjectsByUser(UUID userId){
         return repo.findProjectsByUserId(userId)
                 .stream()
@@ -153,6 +161,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public List<ProjectResponse> findByKeyword(String keyword) {
         return repo.findByProjectNameContainingIgnoreCase(keyword)
                 .stream()
@@ -171,6 +180,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public boolean hasProjectRight(UUID projectId, UUID userId, ProjectFunctionCode function) {
         return projectMemberService.isProjectOwner(projectId, userId)
                 || projectPermissionService.hasPermission(userId, projectId, function);

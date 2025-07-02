@@ -1,5 +1,6 @@
 package com.protrack.protrack_be.service.impl;
 
+import com.protrack.protrack_be.annotation.EnableSoftDeleteFilter;
 import com.protrack.protrack_be.dto.request.FunctionRequest;
 import com.protrack.protrack_be.dto.response.FunctionResponse;
 import com.protrack.protrack_be.mapper.FunctionMapper;
@@ -29,6 +30,7 @@ public class FunctionServiceImpl implements FunctionService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public List<FunctionResponse> getAll(){
         return repo.findAll().stream()
                 .map(FunctionMapper::toResponse)
@@ -36,17 +38,20 @@ public class FunctionServiceImpl implements FunctionService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public Optional<FunctionResponse> getById(UUID id){
         return repo.findById(id)
                 .map(FunctionMapper::toResponse);
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public Optional<Function> getEntityById(UUID id){
         return repo.findById(id);
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public Optional<Function> getEntityByFunctionCode(String functionCode){
         return repo.findByFunctionCode(functionCode);
     }
@@ -59,6 +64,7 @@ public class FunctionServiceImpl implements FunctionService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public FunctionResponse update(UUID id, FunctionRequest request){
         Function function = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy chức năng"));

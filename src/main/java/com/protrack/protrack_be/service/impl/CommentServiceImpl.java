@@ -1,5 +1,6 @@
 package com.protrack.protrack_be.service.impl;
 
+import com.protrack.protrack_be.annotation.EnableSoftDeleteFilter;
 import com.protrack.protrack_be.dto.request.CommentRequest;
 import com.protrack.protrack_be.dto.request.NotificationRequest;
 import com.protrack.protrack_be.dto.request.ProjectRequest;
@@ -42,11 +43,12 @@ public class CommentServiceImpl implements CommentService {
     private final NotificationService notificationService;
 
     @Override
+    @EnableSoftDeleteFilter
     public List<CommentResponse> getCommentsByTask(UUID taskId) {
         Task task = taskService.getTask(taskId);
         if (!taskService.isVisibleToUser(task, userService.getCurrentUser().getUserId())) throw new AccessDeniedException("Bạn không được xem task này");
 
-        return repo.findByTask_TaskIdOrderByTimestampAsc(taskId)
+        return repo.findByTask_TaskIdOrderByCreatedAtAsc(taskId)
                 .stream()
                 .map(CommentMapper::toResponse)
                 .toList();
@@ -67,7 +69,6 @@ public class CommentServiceImpl implements CommentService {
         comment.setTask(task);
         comment.setUser(user);
         comment.setContent(request.getContent());
-        comment.setTimestamp(LocalDateTime.now());
 
         Comment saved = repo.save(comment);
         List<UUID> receivers = getCommentNotifiedUsers(task, user);
@@ -101,7 +102,9 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public void delete(UUID id){ repo.deleteById(id); }
+    public void delete(UUID id){
+        repo.deleteById(id);
+    }
 
     private List<UUID> getCommentNotifiedUsers(Task task, User commenter) {
         Set<UUID> notifiedUserIds = new HashSet<>();

@@ -1,5 +1,6 @@
 package com.protrack.protrack_be.service.impl;
 
+import com.protrack.protrack_be.annotation.EnableSoftDeleteFilter;
 import com.protrack.protrack_be.dto.request.ChangePasswordRequest;
 import com.protrack.protrack_be.dto.request.UpdateProfileRequest;
 import com.protrack.protrack_be.dto.response.UserResponse;
@@ -50,16 +51,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public Optional<User> getUserById(UUID id){
         return repo.findById(id);
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public Optional<User> getUserByEmail(String email){
         return repo.findByEmail(email);
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public UserResponse updateProfile(UUID userId, UpdateProfileRequest rq){
         User user = repo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng."));
@@ -76,6 +80,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public UserResponse changePassword(UUID userId, ChangePasswordRequest rq){
         User user = repo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found."));
@@ -93,6 +98,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public void updateUserAvatar(UUID userId, String avatarUrl){
         User user = repo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found."));
@@ -102,6 +108,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public List<UserResponse> getUsersSharingProjects() {
         UUID currentUserId = getCurrentUser().getUserId();
         List<User> users = repo.findUsersInSameProjectWithoutConversation(currentUserId);

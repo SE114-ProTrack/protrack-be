@@ -3,13 +3,18 @@ package com.protrack.protrack_be.model;
 import com.protrack.protrack_be.model.id.ProjectMemberId;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.SQLDelete;
 
+@EqualsAndHashCode(callSuper = false)
 @Entity
+@SQLDelete(sql = "UPDATE thanhvienduan SET da_xoa = true WHERE id_duan = ? AND id_nguoidung = ?")
+@Filter(name = "deletedFilter", condition = "da_xoa = :isDeleted")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "thanhvienduan")
-public class ProjectMember {
+public class ProjectMember extends BaseEntity {
 
     @EmbeddedId
     private ProjectMemberId id;
