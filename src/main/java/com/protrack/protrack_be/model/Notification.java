@@ -26,6 +26,10 @@ public class Notification extends BaseEntity {
     private UUID notificationId;
 
     @ManyToOne
+    @JoinColumn(name = "id_nguoigui", nullable = false)
+    private User sender;
+
+    @ManyToOne
     @JoinColumn(name = "id_nguoinhan", nullable = false)
     private User receiver;
 

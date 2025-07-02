@@ -82,6 +82,7 @@ public class CommentServiceImpl implements CommentService {
 
         for (UUID receiverId : receivers) {
             notificationService.create(new NotificationRequest(
+                    user.getUserId(),
                     receiverId,
                     "COMMENT",
                     user.getName() + " has commented on \"" + task.getTaskName() + "\"",

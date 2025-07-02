@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface NotificationService {
-    List<NotificationResponse> getAll(UUID userId);
+    List<NotificationResponse> getAll();
     Optional<NotificationResponse> getById(UUID id);
     NotificationResponse create(NotificationRequest request);
     void markAsRead(UUID id);

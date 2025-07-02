@@ -1,6 +1,7 @@
 package com.protrack.protrack_be.service.impl;
 
 import com.protrack.protrack_be.annotation.EnableSoftDeleteFilter;
+import com.protrack.protrack_be.dto.request.NotificationRequest;
 import com.protrack.protrack_be.dto.request.TaskAttachmentRequest;
 import com.protrack.protrack_be.dto.request.TaskRequest;
 import com.protrack.protrack_be.dto.request.TaskStatusRequest;
@@ -12,10 +13,7 @@ import com.protrack.protrack_be.mapper.TaskMapper;
 import com.protrack.protrack_be.model.*;
 import com.protrack.protrack_be.model.id.*;
 import com.protrack.protrack_be.repository.*;
-import com.protrack.protrack_be.service.ProjectMemberService;
-import com.protrack.protrack_be.service.ProjectPermissionService;
-import com.protrack.protrack_be.service.TaskService;
-import com.protrack.protrack_be.service.UserService;
+import com.protrack.protrack_be.service.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 //import jakarta.transaction.Transactional;
@@ -54,9 +52,6 @@ public class TaskServiceImpl implements TaskService {
     private final ActivityHistoryRepository historyRepository;
 
     @Autowired
-    private final NotificationRepository notificationRepository;
-
-    @Autowired
     private final PersonalProductivityRepository productivityRepository;
 
     @Autowired
@@ -70,6 +65,9 @@ public class TaskServiceImpl implements TaskService {
 
     @Autowired
     private final ProjectPermissionService projectPermissionService;
+
+    @Autowired
+    private final NotificationService notificationService;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -351,16 +349,14 @@ public class TaskServiceImpl implements TaskService {
 
     private void notifyUsers(List<UUID> userIds, String type, String content) {
         if (userIds == null) return;
+        User current = userService.getCurrentUser();
         for (UUID userId : userIds) {
-            notificationRepository.save(new Notification(
-                    UUID.randomUUID(),
-                    userService.getUserById(userId)
-                            .orElseThrow(() -> new RuntimeException("Can not find user")),
+            notificationService.create(new NotificationRequest(
+                    current.getUserId(),
+                    userId,
                     type,
                     content,
-                    false,
-                    ""
-            ));
+                    ""));
         }
     }
 

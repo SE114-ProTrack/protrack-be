@@ -25,10 +25,10 @@ public class NotificationController {
     @Autowired
     private NotificationService service;
 
-    @Operation(summary = "Lấy tất cả thông báo")
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<NotificationResponse>> getAllNotificationsById(@PathVariable UUID userId) {
-        List<NotificationResponse> responses = service.getAll(userId);
+    @Operation(summary = "Lấy tất cả thông báo của user hiện tại")
+    @GetMapping()
+    public ResponseEntity<List<NotificationResponse>> getAllNotificationsById() {
+        List<NotificationResponse> responses = service.getAll();
         return ResponseEntity.ok(responses);
     }
 

@@ -12,6 +12,9 @@ public class NotificationResponse {
 
     private UUID notificationId;
 
+    private String senderAvt;
+    private String senderName;
+
     private UUID receiverId;
     private String receiverFullName;
 

@@ -31,9 +31,8 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @EnableSoftDeleteFilter
-    public List<NotificationResponse> getAll(UUID userId){
-        User user = userService.getUserById(userId)
-                .orElseThrow(() -> new RuntimeException("Cannot find user"));
+    public List<NotificationResponse> getAll(){
+        User user = userService.getCurrentUser();
         return repo.findByReceiver(user)
                 .stream()
                 .map(NotificationMapper::toResponse)
@@ -52,8 +51,11 @@ public class NotificationServiceImpl implements NotificationService {
         Notification noti = new Notification();
         User receiver = userService.getUserById(request.getReceiverId())
                 .orElseThrow(() -> new RuntimeException("Can not find receiver"));
+        User sender = userService.getUserById(request.getSenderId())
+                .orElseThrow(() -> new RuntimeException("Can not find sender"));
 
         noti.setReceiver(receiver);
+        noti.setSender(sender);
         noti.setType(request.getType());
         noti.setContent(request.getContent());
         noti.setIsRead(false);

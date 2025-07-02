@@ -12,6 +12,9 @@ import java.util.UUID;
 @AllArgsConstructor
 public class NotificationRequest {
 
+    @NotNull(groups = CreateGroup.class, message = "ID người gửi không được để trống")
+    private UUID senderId;
+
     @NotNull(groups = CreateGroup.class, message = "ID người nhận không được để trống")
     private UUID receiverId;
 

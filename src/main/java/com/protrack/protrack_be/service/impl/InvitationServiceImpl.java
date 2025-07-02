@@ -120,6 +120,8 @@ public class InvitationServiceImpl implements InvitationService {
         }
 
 
+
+
         Optional<User> invitedUserOpt = userService.getUserByEmail(request.getInvitationEmail());
         String token = jwtUtil.generateInvitationToken(request.getInvitationEmail(), request.getProjectId(), request.getRole());
 
@@ -128,6 +130,7 @@ public class InvitationServiceImpl implements InvitationService {
                 throw new BadRequestException("This user is already a member of the project.");
             }
             notificationService.create(new NotificationRequest(
+                    userService.getCurrentUser().getUserId(),
                     invitedUserOpt.get().getUserId(),
                     "INVITATION",
                     userService.getCurrentUser().getName() + " has invited you to \"" + project.getProjectName() + "\"",
