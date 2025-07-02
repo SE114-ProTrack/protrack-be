@@ -1,6 +1,7 @@
 package com.protrack.protrack_be.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.protrack.protrack_be.enums.TaskStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Filter;
@@ -61,7 +62,8 @@ public class Task extends BaseEntity {
     private String priority;
 
     @Column(name = "trangthai")
-    private String status; // TO_DO, IN_PROGRESS, DONE
+    @Enumerated(EnumType.STRING)
+    private TaskStatus status; // TO_DO, IN_PROGRESS, DONE
 
     @Column(name = "icon")
     private String icon;

@@ -16,6 +16,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.*;
 import org.springframework.validation.Validator;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -44,8 +46,9 @@ public class ProjectController {
 
     @Operation(summary = "Lấy tất cả dự án")
     @GetMapping
-    public ResponseEntity<List<ProjectResponse>> getAllProjects() {
-        List<ProjectResponse> responses = service.getAll();
+    public ResponseEntity<Page<ProjectResponse>> getAllProjects(@RequestParam int page,
+                                                                @RequestParam int size) {
+        Page<ProjectResponse> responses = service.getAll(PageRequest.of(page, size));
         return ResponseEntity.ok(responses);
     }
 
@@ -138,8 +141,10 @@ public class ProjectController {
 
     @Operation(summary = "Lấy tất cả dự án theo user")
     @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getByUser(@PathVariable UUID userId){
-        List<ProjectResponse> responses = service.getProjectsByUser(userId);
+    public ResponseEntity<?> getByUser(@PathVariable UUID userId,
+                                       @RequestParam int page,
+                                       @RequestParam int size){
+        Page<ProjectResponse> responses = service.getProjectsByUser(userId, PageRequest.of(page, size));
         return ResponseEntity.ok(responses);
     }
 

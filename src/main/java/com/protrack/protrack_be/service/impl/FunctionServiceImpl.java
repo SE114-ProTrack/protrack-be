@@ -6,7 +6,14 @@ import com.protrack.protrack_be.dto.response.FunctionResponse;
 import com.protrack.protrack_be.exception.BadRequestException;
 import com.protrack.protrack_be.mapper.FunctionMapper;
 import com.protrack.protrack_be.model.Function;
+import com.protrack.protrack_be.model.Project;
+import com.protrack.protrack_be.model.ProjectMember;
+import com.protrack.protrack_be.model.ProjectPermission;
+import com.protrack.protrack_be.model.id.ProjectPermissionId;
 import com.protrack.protrack_be.repository.FunctionRepository;
+import com.protrack.protrack_be.repository.ProjectMemberRepository;
+import com.protrack.protrack_be.repository.ProjectPermissionRepository;
+import com.protrack.protrack_be.repository.ProjectRepository;
 import com.protrack.protrack_be.service.FunctionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +31,15 @@ public class FunctionServiceImpl implements FunctionService {
 
     @Autowired
     FunctionRepository repo;
+
+    @Autowired
+    ProjectRepository projectRepository;
+
+    @Autowired
+    ProjectPermissionRepository projectPermissionRepository;
+
+    @Autowired
+    ProjectMemberRepository projectMemberRepository;
 
     @Override
     public List<Function> getDefaults() {
@@ -71,6 +87,18 @@ public class FunctionServiceImpl implements FunctionService {
         }
         Function function = toEntity(request);
         Function saved = repo.save(function);
+        List<Project> allProjects = projectRepository.findAll();
+        for (Project project : allProjects) {
+            List<ProjectMember> members = projectMemberRepository.findAllByProject_ProjectId(project.getProjectId());
+            for (ProjectMember member : members) {
+                ProjectPermissionId id = new ProjectPermissionId(project.getProjectId(), member.getUser().getUserId(), saved.getFunctionId());
+                if (!projectPermissionRepository.existsById(id)) {
+                    ProjectPermission permission = new ProjectPermission(id, project, member.getUser(), saved, false);
+                    projectPermissionRepository.save(permission);
+                }
+            }
+        }
+
         return toResponse(saved);
     }
 
@@ -94,4 +122,10 @@ public class FunctionServiceImpl implements FunctionService {
 
     @Override
     public void delete(UUID id){ repo.deleteById(id); }
+
+    @Override
+    public boolean existsById(UUID functionId) {
+        return repo.existsById(functionId);
+    }
+
 }

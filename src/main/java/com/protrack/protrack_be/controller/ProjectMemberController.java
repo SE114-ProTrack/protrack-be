@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +32,16 @@ public class ProjectMemberController {
     @GetMapping
     public ResponseEntity<List<ProjectMemberResponse>> getAllProjectMembers() {
         List<ProjectMemberResponse> responses = service.getAll();
+        return ResponseEntity.ok(responses);
+    }
+
+    @Operation(summary = "Lấy tất cả thành viên của 1 dự án")
+    @GetMapping("/project/{projectId}")
+    public ResponseEntity<Page<ProjectMemberResponse>> getMembersByProject(
+            @PathVariable UUID projectId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Page<ProjectMemberResponse> responses = service.getMembersOfProject(projectId, PageRequest.of(page, size));
         return ResponseEntity.ok(responses);
     }
 
@@ -63,5 +75,11 @@ public class ProjectMemberController {
         ProjectMemberId id = new ProjectMemberId(projectId, userId);
         service.delete(id);
         return ResponseEntity.ok("Xóa thành công");
+    }
+
+    @DeleteMapping("/leave/{projectId}")
+    public ResponseEntity<?> leaveProject(@PathVariable UUID projectId) {
+        service.leaveProject(projectId);
+        return ResponseEntity.ok("You have left the project.");
     }
 }

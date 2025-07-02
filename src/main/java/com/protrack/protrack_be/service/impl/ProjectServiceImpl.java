@@ -26,6 +26,9 @@ import jakarta.transaction.Transactional;
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -63,11 +66,10 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @EnableSoftDeleteFilter
-    public List<ProjectResponse> getAll(){
-        return repo.findAll()
-            .stream()
-            .map(ProjectMapper::toResponse)
-            .collect(Collectors.toList()); }
+    public Page<ProjectResponse> getAll(Pageable pageable){
+        return repo.findAll(pageable)
+                .map(ProjectMapper::toResponse);
+    }
 
     @Override
     @EnableSoftDeleteFilter
@@ -116,6 +118,11 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectResponse update(UUID id, ProjectRequest request){
         Project project = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Can not find project"));
+        User user = userService.getCurrentUser();
+
+        if (!hasProjectRight(project.getProjectId(), user.getUserId(), ProjectFunctionCode.EDIT_PROJECT)) {
+            throw new AccessDeniedException("You are not permitted to edit this project");
+        }
 
         if(request.getProjectName() != null) project.setProjectName(request.getProjectName());
         if(request.getDescription() != null) project.setDescription(request.getDescription());
@@ -126,13 +133,17 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void delete(UUID id){ repo.deleteById(id); }
+    public void delete(UUID id){
+        if (!projectMemberService.isProjectOwner(id, userService.getCurrentUser().getUserId())) {
+            throw new AccessDeniedException("You are not permitted to delete this project");
+        }
+        repo.deleteById(id);
+    }
 
     @Override
     @EnableSoftDeleteFilter
-    public List<ProjectResponse> getProjectsByUser(UUID userId){
-        return repo.findProjectsByUserId(userId)
-                .stream()
+    public Page<ProjectResponse> getProjectsByUser(UUID userId, Pageable pageable){
+        return repo.findProjectsByUserId(userId, pageable)
                 .map(project -> {
                     ProjectResponse res = ProjectMapper.toResponse(project);
 
@@ -140,8 +151,7 @@ public class ProjectServiceImpl implements ProjectService {
                     res.setCompletedTasks(repo.getNumberOfCompletedTasks(project.getProjectId()));
 
                     return res;
-                })
-                .collect(Collectors.toList());
+                });
     }
 
     @Override

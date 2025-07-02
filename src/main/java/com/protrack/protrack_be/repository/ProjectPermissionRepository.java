@@ -12,4 +12,5 @@ public interface ProjectPermissionRepository extends JpaRepository<ProjectPermis
     boolean existsByUser_UserIdAndProject_ProjectIdAndFunction_FunctionCodeAndIsActiveTrue(
             UUID userId, UUID projectId, String functionCode);
     Optional<ProjectPermission> findByProject_ProjectId(UUID id);
+    void deleteByProject_ProjectIdAndUser_UserId(UUID projectId, UUID userId);
 }

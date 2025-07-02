@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +33,15 @@ public class TaskMemberController {
     public ResponseEntity<List<TaskMemberResponse>> getAllTaskMembers() {
         List<TaskMemberResponse> responses = service.getAll();
         return ResponseEntity.ok(responses);
+    }
+
+    @Operation(summary = "Lấy tất cả thành viên của một công việc")
+    @GetMapping("/{taskId}/members")
+    public ResponseEntity<Page<TaskMemberResponse>> getMembersByTask(
+            @PathVariable UUID taskId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(service.getMembersByTask(taskId, PageRequest.of(page, size)));
     }
 
     @Operation(summary = "Lấy thành viên công việc theo ID")

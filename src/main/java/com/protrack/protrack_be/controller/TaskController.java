@@ -14,6 +14,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -34,9 +36,11 @@ public class TaskController {
     UserService userService;
 
     @GetMapping("/project/{projectId}")
-    public ResponseEntity<List<TaskResponse>> getAllTasksByProject(@PathVariable UUID projectId) {
+    public ResponseEntity<Page<TaskResponse>> getAllTasksByProject(@PathVariable UUID projectId,
+                                                                   @RequestParam(defaultValue = "0") int page,
+                                                                   @RequestParam(defaultValue = "20") int size) {
         User user = userService.getCurrentUser();
-        List<TaskResponse> responses = service.getTasks(projectId, user.getUserId());
+        Page<TaskResponse> responses = service.getTasks(projectId, user.getUserId(), PageRequest.of(page, size));
         return ResponseEntity.ok(responses);
     }
 
@@ -93,5 +97,19 @@ public class TaskController {
     public ResponseEntity<?> getTop3ByUser(@PathVariable UUID userId){
         List<TaskResponse> responses = service.get3ByUser(userId);
         return ResponseEntity.ok(responses);
+    }
+
+    @Operation(summary = "Lấy task cha của 1 task")
+    @GetMapping("/{taskId}/parent")
+    public ResponseEntity<TaskResponse> getParentTask(@PathVariable UUID taskId) {
+        return service.getParentTask(taskId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @Operation(summary = "Lấy subtask của 1 task")
+    @GetMapping("/{taskId}/subtasks")
+    public ResponseEntity<List<TaskResponse>> getSubtasks(@PathVariable UUID taskId) {
+        return ResponseEntity.ok(service.getSubtasks(taskId));
     }
 }

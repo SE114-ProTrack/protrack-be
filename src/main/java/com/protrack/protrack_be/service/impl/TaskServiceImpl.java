@@ -7,6 +7,7 @@ import com.protrack.protrack_be.dto.request.TaskRequest;
 import com.protrack.protrack_be.dto.request.TaskStatusRequest;
 import com.protrack.protrack_be.dto.response.TaskResponse;
 import com.protrack.protrack_be.enums.ProjectFunctionCode;
+import com.protrack.protrack_be.enums.TaskStatus;
 import com.protrack.protrack_be.exception.BadRequestException;
 import com.protrack.protrack_be.exception.NotFoundException;
 import com.protrack.protrack_be.mapper.TaskMapper;
@@ -14,12 +15,16 @@ import com.protrack.protrack_be.model.*;
 import com.protrack.protrack_be.model.id.*;
 import com.protrack.protrack_be.repository.*;
 import com.protrack.protrack_be.service.*;
+import jakarta.transaction.Transactional;
+import com.protrack.protrack_be.service.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 //import jakarta.transaction.Transactional;
 import org.springframework.transaction.annotation.Propagation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -73,13 +78,17 @@ public class TaskServiceImpl implements TaskService {
     private EntityManager entityManager;
 
 
+    @Autowired
+    private final ProjectService projectService;
+
+    @Autowired
+    private final TaskAttachmentService taskAttachmentService;
+
     @Override
     @EnableSoftDeleteFilter
-    public List<TaskResponse> getTasks(UUID projectId, UUID userId) {
-        return taskRepository.findByProject_ProjectId(projectId).stream()
-                .filter(task -> isVisibleToUser(task, userId))
-                .map(TaskMapper::toResponse)
-                .toList();
+    public Page<TaskResponse> getTasks(UUID projectId, UUID userId, Pageable pageable) {
+        return taskRepository.findAllByProjectIdAndUserId(projectId, userId, pageable)
+                .map(TaskMapper::toResponse);
     }
 
     @Transactional
@@ -87,9 +96,9 @@ public class TaskServiceImpl implements TaskService {
     public TaskResponse createTask(TaskRequest request, UUID userId) {
         try {
 
-            if (!hasProjectRight(request.getProjectId(), userId, ProjectFunctionCode.CREATE_TASK)) {
-                throw new AccessDeniedException("You are not permitted to create task in this project");
-            }
+        if (!projectService.hasProjectRight(request.getProjectId(), userId, ProjectFunctionCode.CREATE_TASK)) {
+            throw new AccessDeniedException("You are not permitted to create task in this project");
+        }
 
             checkMembership(request.getProjectId(), userId);
 
@@ -115,10 +124,10 @@ public class TaskServiceImpl implements TaskService {
                 createSubTasks(task, request.getSubTasks());
             }
 
-            User user = userService.getUserById(userId)
-                    .orElseThrow(() -> new RuntimeException("Can not find user"));
-            logActivity(task, userId, "CREATE_TASK", "Task \"" + task.getTaskName() + "\" has been created by " + user.getName());
-            notifyUsers(request.getAssigneeIds(), "ASSIGN_TASK", "You have been assigned a task: " + task.getTaskName());
+        User user = userService.getUserById(userId)
+                .orElseThrow(() -> new NotFoundException("Can not find user"));
+        logActivity(task, userId, "CREATE_TASK", "Task \"" + task.getTaskName() + "\" has been created by " + user.getName());
+        notifyUsers(request.getAssigneeIds(), "ASSIGN_TASK", "You have been assigned a task: " + task.getTaskName());
 
             return TaskMapper.toResponse(saved);
         } catch (Exception e) {
@@ -140,7 +149,7 @@ public class TaskServiceImpl implements TaskService {
     @EnableSoftDeleteFilter
     public TaskResponse updateTask(UUID taskId, TaskRequest request, UUID userId) {
         Task task = getTask(taskId);
-        if (!hasProjectRight(task.getProject().getProjectId(), userId, ProjectFunctionCode.EDIT_TASK)) {
+        if (!projectService.hasProjectRight(task.getProject().getProjectId(), userId, ProjectFunctionCode.EDIT_TASK)) {
             throw new AccessDeniedException("You are not permitted to edit this task");
         }
 
@@ -169,7 +178,7 @@ public class TaskServiceImpl implements TaskService {
             updateProductivity(task.getProject().getProjectId(), _userId, -1);
         }
         User user = userService.getUserById(userId)
-                .orElseThrow(() -> new RuntimeException("Can not find user"));
+                .orElseThrow(() -> new NotFoundException("Can not find user"));
         logActivity(task, userId, "UPDATE_TASK", "Task \"" + task.getTaskName() + "\" is updated by " + user.getName());
         return TaskMapper.toResponse(saved);
     }
@@ -177,7 +186,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public void deleteTask(UUID taskId, UUID userId) {
         Task task = getTask(taskId);
-        if (hasProjectRight(task.getProject().getProjectId(), userId, ProjectFunctionCode.DELETE_TASK)) {
+        if (!projectService.hasProjectRight(task.getProject().getProjectId(), userId, ProjectFunctionCode.DELETE_TASK)) {
             throw new AccessDeniedException("You are not permitted to delete this task");
         }
 
@@ -186,13 +195,13 @@ public class TaskServiceImpl implements TaskService {
         }
 
         if(taskRepository.existsByParentTask_TaskId(taskId))
-            throw new RuntimeException("This task contains subtask(s). Can not delete");
+            throw new BadRequestException("This task contains subtask(s). Can not delete");
 
         taskMemberRepository.deleteByTask_TaskId(taskId);
         historyRepository.deleteByTask_TaskId(taskId);
 
         User user = userService.getUserById(userId)
-                .orElseThrow(() -> new RuntimeException("Can not find user"));
+                .orElseThrow(() -> new NotFoundException("Can not find user"));
         notifyUsers(getAssigneeIds(task), "DELETE_TASK", "Task \"" + task.getTaskName() + "\" has been deleted");
         logActivity(task, userId, "DELETE_TASK", "Task \"" + task.getTaskName() + "\" is deleted by " + user.getName());
 
@@ -226,11 +235,22 @@ public class TaskServiceImpl implements TaskService {
                 .collect(Collectors.toList());
     }
 
+    public List<TaskResponse> getSubtasks(UUID parentTaskId) {
+        List<Task> subtasks = taskRepository.findByParentTask_TaskId(parentTaskId);
+        return subtasks.stream().map(TaskMapper::toResponse).collect(Collectors.toList());
+    }
+
+    public Optional<TaskResponse> getParentTask(UUID taskId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new NotFoundException("Task not found"));
+        if (task.getParentTask() == null) return Optional.empty();
+        return Optional.of(TaskMapper.toResponse(task.getParentTask()));
+    }
 
     // HELPERS
     @EnableSoftDeleteFilter
     public Task getTask(UUID taskId) {
-        return taskRepository.findById(taskId).orElseThrow(() -> new NotFoundException("Task doesn't exist"));
+        return taskRepository.findById(taskId).orElseThrow(() -> new NotFoundException("Task not found"));
     }
 
     @EnableSoftDeleteFilter
@@ -248,11 +268,6 @@ public class TaskServiceImpl implements TaskService {
                 || projectPermissionService.hasPermission(userId, projectId, ProjectFunctionCode.VIEW_TASK);
     }
 
-    private boolean hasProjectRight(UUID projectId, UUID userId, ProjectFunctionCode function) {
-        return projectMemberService.isProjectOwner(projectId, userId)
-                || projectPermissionService.hasPermission(userId, projectId, function);
-    }
-
     private void checkMembership(UUID projectId, UUID userId) {
         if (!projectMemberService.isMember(projectId, userId)) {
             throw new AccessDeniedException("You are not a member of this project");
@@ -263,10 +278,13 @@ public class TaskServiceImpl implements TaskService {
     private Task buildBaseTask(TaskRequest request, UUID projectId) {
         Task task = new Task();
         User approver = userService.getUserById(request.getApproverId())
-                .orElseThrow(() -> new RuntimeException("Can not find user"));
+                .orElseThrow(() -> new NotFoundException("Can not find user"));
         task.setProject(projectRepository.getReferenceById(projectId));
         task.setTaskName(request.getTaskName());
         task.setDescription(request.getDescription());
+        if (request.getDeadline() != null && request.getDeadline().isBefore(LocalDateTime.now())) {
+            throw new BadRequestException("Deadline must be after now.");
+        }
         task.setDeadline(request.getDeadline());
         task.setPriority(request.getPriority());
         if (request.getAttachments() != null) {
@@ -288,6 +306,12 @@ public class TaskServiceImpl implements TaskService {
             task.setParentTask(getTask(request.getParentTaskId()));
         task.setColor(request.getColor());
         task.setIcon(request.getIcon());
+        try {
+            TaskStatus status = TaskStatus.valueOf(request.getStatus().toUpperCase());
+            task.setStatus(status);
+        } catch (IllegalArgumentException ex) {
+            throw new BadRequestException("Invalid task status.");
+        }
         return task;
     }
 
@@ -303,7 +327,7 @@ public class TaskServiceImpl implements TaskService {
                     new TaskMemberId(task.getTaskId(), assigneeId),
                     task,
                     userService.getUserById(assigneeId)
-                            .orElseThrow(() -> new RuntimeException("Can not find user"))
+                            .orElseThrow(() -> new NotFoundException("Can not find user"))
             ));
 
             updateProductivity(task.getProject().getProjectId(), assigneeId, +1);
@@ -312,10 +336,11 @@ public class TaskServiceImpl implements TaskService {
 
     @EnableSoftDeleteFilter
     public List<UUID> getAssigneeIds(Task task) {
-        return taskMemberRepository.findAll().stream()
-                .filter(tm -> tm.getTask().getTaskId().equals(task.getTaskId()))
+        UUID taskId = task.getTaskId();
+        return taskMemberRepository.findByTask_TaskId(taskId)
+                .stream()
                 .map(tm -> tm.getUser().getUserId())
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private void createSubTasks(Task parentTask, List<String> subTaskNames) {
@@ -336,7 +361,7 @@ public class TaskServiceImpl implements TaskService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     private void logActivity(Task task, UUID actorId, String type, String description) {
         User user = userService.getUserById(actorId)
-                .orElseThrow(() -> new RuntimeException("Can not find user"));
+                .orElseThrow(() -> new NotFoundException("Can not find user"));
 
         ActivityHistory history = new ActivityHistory();
         history.setUser(user);
@@ -365,33 +390,49 @@ public class TaskServiceImpl implements TaskService {
         if (request.getDescription() != null)
             task.setDescription(request.getDescription());
 
-        if (request.getDeadline() != null)
-            task.setDeadline(request.getDeadline());
+        if (request.getDeadline() != null && request.getDeadline().isBefore(LocalDateTime.now())) {
+            throw new BadRequestException("Deadline must be after now.");
+        }
+
+        task.setDeadline(request.getDeadline());
 
         if (request.getPriority() != null)
             task.setPriority(request.getPriority());
 
-        if (request.getAttachments() != null) {
-            for (TaskAttachmentRequest att : request.getAttachments()) {
-                TaskAttachment a = new TaskAttachment();
-                a.setTask(task);
-                a.setFileName(att.getFileName());
-                a.setFileUrl(att.getFileUrl());
-                a.setFileType(att.getFileType());
-                a.setUploadedAt(LocalDateTime.now());
-                taskAttachmentRepository.save(a);
+        List<TaskAttachmentRequest> newRequests = request.getAttachments();
+        List<TaskAttachment> oldAttachments = taskAttachmentService.getByTaskIdRaw(task.getTaskId());
+        Set<String> oldUrls = oldAttachments.stream().map(TaskAttachment::getFileUrl).collect(Collectors.toSet());
+        Set<String> newUrls = newRequests.stream().map(TaskAttachmentRequest::getFileUrl).collect(Collectors.toSet());
+
+        for (TaskAttachment oldAttach : oldAttachments) {
+            if (!newUrls.contains(oldAttach.getFileUrl())) {
+                taskAttachmentService.delete(oldAttach.getId());
             }
         }
 
+        for (TaskAttachmentRequest newAttach : newRequests) {
+            if (!oldUrls.contains(newAttach.getFileUrl())) {
+                taskAttachmentService.createTaskAttachment(newAttach);
+            }
+        }
+
+
         if (request.getApproverId() != null)
             task.setApprover(userService.getUserById(request.getApproverId())
-                    .orElseThrow(() -> new RuntimeException("Can not find user")));
+                    .orElseThrow(() -> new NotFoundException("Can not find user")));
 
         if (request.getLabelId() != null)
             task.setLabel(labelRepository.findById(request.getLabelId()).orElse(null));
 
         if (request.getParentTaskId() != null)
             task.setParentTask(getTask(request.getParentTaskId()));
+
+        try {
+            TaskStatus status = TaskStatus.valueOf(request.getStatus().toUpperCase());
+            task.setStatus(status);
+        } catch (IllegalArgumentException ex) {
+            throw new BadRequestException("Invalid task status.");
+        }
     }
 
     public TaskResponse updateTaskStatus(UUID taskId, TaskStatusRequest rq, UUID userId) {
@@ -401,26 +442,36 @@ public class TaskServiceImpl implements TaskService {
             throw new AccessDeniedException("Only the approver has permission to update task's status");
         }
 
-        if (task.getStatus().equalsIgnoreCase(rq.getStatus())) return TaskMapper.toResponse(task);
-
-        if (rq.getStatus() != null)
-        {
-            if (("DONE".equalsIgnoreCase(task.getStatus())) && !("DONE".equalsIgnoreCase(rq.getStatus())))
-                for (UUID assignee : getAssigneeIds(task)) {
-                    updateProductivity(task.getProject().getProjectId(), assignee, -1);
-                }
-
-            if ("DONE".equalsIgnoreCase(rq.getStatus())) {
-                for (UUID assignee : getAssigneeIds(task)) {
-                    updateProductivity(task.getProject().getProjectId(), assignee, +1);
-                }
-            }
-
-            task.setStatus(rq.getStatus().toUpperCase());
+        if (rq.getStatus() == null || rq.getStatus().isBlank()) {
+            throw new BadRequestException("Task status must not be empty.");
         }
+
+        TaskStatus newStatus;
+        try {
+            newStatus = TaskStatus.valueOf(rq.getStatus().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new BadRequestException("Invalid task status.");
+        }
+
+        if (task.getStatus() == newStatus) {
+            return TaskMapper.toResponse(task);
+        }
+
+        if (task.getStatus() == TaskStatus.DONE && newStatus != TaskStatus.DONE) {
+            for (UUID assignee : getAssigneeIds(task)) {
+                updateProductivity(task.getProject().getProjectId(), assignee, -1);
+            }
+        }
+        if (task.getStatus() != TaskStatus.DONE && newStatus == TaskStatus.DONE) {
+            for (UUID assignee : getAssigneeIds(task)) {
+                updateProductivity(task.getProject().getProjectId(), assignee, +1);
+            }
+        }
+
+        task.setStatus(newStatus);
         taskRepository.save(task);
 
-        logActivity(task, userId, "STATUS_CHANGE", "Task " + task.getTaskName() + " has its status changed to " + rq.getStatus());
+        logActivity(task, userId, "STATUS_CHANGE", "Task " + task.getTaskName() + " has its status changed to " + newStatus.name());
         return TaskMapper.toResponse(task);
     }
 
@@ -429,7 +480,7 @@ public class TaskServiceImpl implements TaskService {
         PersonalProductivityId id = new PersonalProductivityId(userId, projectId);
         PersonalProductivity productivity = productivityRepository.findById(id)
                 .orElse(new PersonalProductivity(id, userService.getUserById(userId)
-                        .orElseThrow(() -> new RuntimeException("Can not find user")), projectRepository.getReferenceById(projectId), 0));
+                        .orElseThrow(() -> new NotFoundException("Can not find user")), projectRepository.getReferenceById(projectId), 0, LocalDateTime.now()));
 
         int updated = productivity.getCompletedTasks() + change;
         productivity.setCompletedTasks(Math.max(updated, 0));
