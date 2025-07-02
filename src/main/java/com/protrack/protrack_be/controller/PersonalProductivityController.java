@@ -5,11 +5,13 @@ import com.protrack.protrack_be.dto.response.PersonalProductivityResponse;
 import com.protrack.protrack_be.model.id.PersonalProductivityId;
 import com.protrack.protrack_be.repository.PersonalProductivityRepository;
 import com.protrack.protrack_be.service.PersonalProductivityService;
+import com.protrack.protrack_be.validation.CreateGroup;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -45,7 +47,7 @@ public class PersonalProductivityController {
 
     @Operation(summary = "Tạo hoặc cập nhật năng suất cá nhân")
     @PostMapping
-    public ResponseEntity<?> createOrUpdateProductivity(@RequestBody @Valid PersonalProductivityRequest request) {
+    public ResponseEntity<?> createOrUpdateProductivity(@RequestBody @Validated(CreateGroup.class) PersonalProductivityRequest request) {
         PersonalProductivityResponse response = service.save(request);
         return ResponseEntity.ok(response);
     }

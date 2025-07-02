@@ -1,11 +1,13 @@
 package com.protrack.protrack_be.service.impl;
 
 import com.protrack.protrack_be.annotation.EnableSoftDeleteFilter;
+import com.protrack.protrack_be.dto.request.ActivityHistoryRequest;
 import com.protrack.protrack_be.dto.request.CommentRequest;
 import com.protrack.protrack_be.dto.request.NotificationRequest;
 import com.protrack.protrack_be.dto.request.ProjectRequest;
 import com.protrack.protrack_be.dto.response.CommentResponse;
 import com.protrack.protrack_be.dto.response.ProjectResponse;
+import com.protrack.protrack_be.enums.ProjectFunctionCode;
 import com.protrack.protrack_be.exception.NotFoundException;
 import com.protrack.protrack_be.mapper.CommentMapper;
 import com.protrack.protrack_be.mapper.ProjectMapper;
@@ -15,6 +17,8 @@ import com.protrack.protrack_be.service.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -42,16 +46,20 @@ public class CommentServiceImpl implements CommentService {
     @Autowired
     private final NotificationService notificationService;
 
+    @Autowired
+    private final ActivityHistoryService activityHistoryService;
+
+    @Autowired
+    private final ProjectPermissionService projectPermissionService;
+
     @Override
     @EnableSoftDeleteFilter
-    public List<CommentResponse> getCommentsByTask(UUID taskId) {
+    public Page<CommentResponse> getCommentsByTask(UUID taskId, Pageable pageable) {
         Task task = taskService.getTask(taskId);
-        if (!taskService.isVisibleToUser(task, userService.getCurrentUser().getUserId())) throw new AccessDeniedException("Bạn không được xem task này");
+        if (!taskService.isVisibleToUser(task, userService.getCurrentUser().getUserId())) throw new AccessDeniedException("You are not permitted to view this task");
 
-        return repo.findByTask_TaskIdOrderByCreatedAtAsc(taskId)
-                .stream()
-                .map(CommentMapper::toResponse)
-                .toList();
+        return repo.findByTask_TaskIdOrderByCreatedAtAsc(taskId, pageable)
+                .map(CommentMapper::toResponse);
     }
 
     @Transactional
@@ -61,11 +69,10 @@ public class CommentServiceImpl implements CommentService {
         User user = userService.getCurrentUser();
 
         if (!taskService.isVisibleToUser(task, user.getUserId())) {
-            throw new AccessDeniedException("Bạn không có quyền bình luận task này");
+            throw new AccessDeniedException("You are not permitted to comment on this task");
         }
 
         Comment comment = new Comment();
-        comment.setCommentId(UUID.randomUUID());
         comment.setTask(task);
         comment.setUser(user);
         comment.setContent(request.getContent());
@@ -81,6 +88,14 @@ public class CommentServiceImpl implements CommentService {
                     ""
             ));
         }
+
+        activityHistoryService.create(
+                new ActivityHistoryRequest(
+                        comment.getTask().getTaskId(),
+                        "COMMENT_CREATED",
+                        user.getName() + " has commented: \"" + request.getContent() + "\""
+                )
+        );
         return CommentMapper.toResponse(saved);
     }
 
@@ -92,9 +107,28 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentResponse update(UUID id, CommentRequest request){
         Comment comment = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Can not find project"));
+                .orElseThrow(() -> new NotFoundException("Can not find comment"));
+        User user = userService.getCurrentUser();
+        Task task = comment.getTask();
 
+        if (!comment.getUser().getUserId().equals(user.getUserId())) {
+            throw new AccessDeniedException("You are not the comment's owner");
+        }
+
+        if(request.getTaskId() != null) {
+            comment.setTask(task);
+        }
+
+        String oldContent = comment.getContent();
         if(request.getContent() != null) comment.setContent(request.getContent());
+
+        activityHistoryService.create(
+                new ActivityHistoryRequest(
+                        comment.getTask().getTaskId(),
+                        "COMMENT_UPDATED",
+                        user.getName() + " has updated their comment from: \"" + oldContent + "\" to \"" + request.getContent() + "\""
+                )
+        );
 
         Comment saved = repo.save(comment);
 
@@ -102,7 +136,24 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public void delete(UUID id){
+        Comment comment = repo.findById(id)
+                .orElseThrow(() -> new NotFoundException("Can not find comment"));
+        User user = userService.getCurrentUser();
+        Task task = taskService.getTask(comment.getTask().getTaskId());
+
+        if (!(comment.getUser().getUserId().equals(user.getUserId()) || !projectPermissionService.hasPermission(task.getProject().getProjectId(), user.getUserId(), ProjectFunctionCode.EDIT_TASK))) {
+            throw new AccessDeniedException("You must be the comment's owner or permitted to delete comment in this project");
+        }
+
+        activityHistoryService.create(
+                new ActivityHistoryRequest(
+                        comment.getTask().getTaskId(),
+                        "COMMENT_DELETED",
+                        user.getName() + " has removed a comment"
+                )
+        );
         repo.deleteById(id);
     }
 

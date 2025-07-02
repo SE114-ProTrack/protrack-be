@@ -3,6 +3,7 @@ package com.protrack.protrack_be.service.impl;
 import com.protrack.protrack_be.annotation.EnableSoftDeleteFilter;
 import com.protrack.protrack_be.dto.request.FunctionRequest;
 import com.protrack.protrack_be.dto.response.FunctionResponse;
+import com.protrack.protrack_be.exception.BadRequestException;
 import com.protrack.protrack_be.mapper.FunctionMapper;
 import com.protrack.protrack_be.model.Function;
 import com.protrack.protrack_be.repository.FunctionRepository;
@@ -27,6 +28,12 @@ public class FunctionServiceImpl implements FunctionService {
     @Override
     public List<Function> getDefaults() {
         return repo.findByFunctionCodeIn(List.of("VIEW_TASK"));
+    }
+
+    @Override
+    @EnableSoftDeleteFilter
+    public List<Function> getAllEntities() {
+        return repo.findAll();
     }
 
     @Override
@@ -57,7 +64,11 @@ public class FunctionServiceImpl implements FunctionService {
     }
 
     @Override
+    @EnableSoftDeleteFilter
     public FunctionResponse create(FunctionRequest request){
+        if (repo.findByFunctionCode(request.getFunctionCode()).isPresent()) {
+            throw new BadRequestException("Function code already exists!");
+        }
         Function function = toEntity(request);
         Function saved = repo.save(function);
         return toResponse(saved);
@@ -67,9 +78,14 @@ public class FunctionServiceImpl implements FunctionService {
     @EnableSoftDeleteFilter
     public FunctionResponse update(UUID id, FunctionRequest request){
         Function function = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy chức năng"));
+                .orElseThrow(() -> new RuntimeException("Function not found"));
 
-        if(request.getFuctionName() != null) function.setFunctionName(request.getFuctionName());
+        if(request.getFunctionName() != null) {
+            if (repo.findByFunctionCode(request.getFunctionCode()).isPresent()) {
+                throw new BadRequestException("Function code already exists!");
+            }
+            function.setFunctionName(request.getFunctionName());
+        }
         if(request.getScreenName() != null) function.setScreenName(request.getScreenName());
 
         Function saved = repo.save(function);

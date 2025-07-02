@@ -1,5 +1,6 @@
 package com.protrack.protrack_be.dto.request;
 
+import com.protrack.protrack_be.validation.CreateGroup;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -8,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProjectRequest {
-    @NotBlank(message = "Tên dự án không được để trống")
+    @NotBlank(groups = CreateGroup.class, message = "Tên dự án không được để trống")
     @Size(max = 100)
     private String projectName;
 

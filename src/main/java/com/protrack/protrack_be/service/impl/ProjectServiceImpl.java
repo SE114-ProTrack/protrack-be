@@ -106,15 +106,7 @@ public class ProjectServiceImpl implements ProjectService {
         projectMember.setRole("Owner");
         projectMemberRepository.save(projectMember);
 
-        List<Function> allFunctions = functionRepository.findAll();
-        allFunctions.forEach(function -> {
-            ProjectPermission projectPermission = new ProjectPermission();
-            projectPermission.setProject(saved);
-            projectPermission.setUser(user);
-            projectPermission.setFunction(function);
-            projectPermission.setIsActive(true);
-            projectPermissionRepository.save(projectPermission);
-        });
+        projectPermissionService.grantAllPermissions(user.getUserId(), saved.getProjectId());
 
         return ProjectMapper.toResponse(saved);
     }

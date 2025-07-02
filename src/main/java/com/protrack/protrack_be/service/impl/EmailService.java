@@ -24,7 +24,7 @@ public class EmailService {
             helper.setFrom("phanduyminh1262@gmail.com");
             mailSender.send(message);
         }  catch (MessagingException e) {
-        throw new RuntimeException("Không thể gửi email: " + e.getMessage(), e);
+        throw new RuntimeException("Cannot send email: " + e.getMessage(), e);
         }
     }
 }

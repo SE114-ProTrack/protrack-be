@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ChangePasswordRequest {
 
-    @NotBlank
+    @NotBlank(message = "Mật khẩu cũ không được để trống")
     private String oldPassword;
 
-    @NotBlank(message = "Mật khẩu không được để trống")
+    @NotBlank(message = "Mật khẩu mới không được để trống")
     private String newPassword;
 }

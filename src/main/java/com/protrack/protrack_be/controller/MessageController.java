@@ -4,11 +4,13 @@ import com.protrack.protrack_be.dto.request.MessageRequest;
 import com.protrack.protrack_be.dto.response.MessagePreviewResponse;
 import com.protrack.protrack_be.dto.response.MessageResponse;
 import com.protrack.protrack_be.service.MessageService;
+import com.protrack.protrack_be.validation.CreateGroup;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -55,7 +57,7 @@ public class MessageController {
 
     @Operation(summary = "Cập nhật tin nhắn")
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateMessage(@PathVariable UUID id, @RequestBody @Valid MessageRequest request) {
+    public ResponseEntity<?> updateMessage(@PathVariable UUID id, @RequestBody @Validated(CreateGroup.class) MessageRequest request) {
         MessageResponse response = service.update(id, request);
         return ResponseEntity.ok(response);
     }

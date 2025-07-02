@@ -17,7 +17,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "nhancongviec")
+@Table(name = "nhancongviec", uniqueConstraints = @UniqueConstraint(columnNames = {"id_duan", "tennhan"}))
 public class Label extends BaseEntity {
     @Id
     @GeneratedValue
