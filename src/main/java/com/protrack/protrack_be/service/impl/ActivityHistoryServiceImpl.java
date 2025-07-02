@@ -15,6 +15,8 @@ import com.protrack.protrack_be.service.ActivityHistoryService;
 import com.protrack.protrack_be.service.TaskService;
 import com.protrack.protrack_be.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -39,10 +41,9 @@ public class ActivityHistoryServiceImpl implements ActivityHistoryService {
     TaskService taskService;
 
     @Override
-    public List<ActivityHistoryResponse> getAll(){
-        return repo.findAll().stream()
-                .map(ActivityHistoryMapper::toResponse)
-                .collect(Collectors.toList());
+    public Page<ActivityHistoryResponse> getAll(Pageable pageable){
+        return repo.findAll(pageable)
+                .map(ActivityHistoryMapper::toResponse);
     }
 
     @Override
@@ -52,21 +53,18 @@ public class ActivityHistoryServiceImpl implements ActivityHistoryService {
     }
 
     @Override
-    public List<ActivityHistoryResponse> getActivityHistoryByTask(UUID taskId) {
+    public Page<ActivityHistoryResponse> getActivityHistoryByTask(UUID taskId, Pageable pageable) {
         Task task = taskService.getTask(taskId);
         if (!taskService.isVisibleToUser(task, userService.getCurrentUser().getUserId())) throw new AccessDeniedException("Bạn không được xem task này");
 
-        return repo.findByTask_TaskIdOrderByTimestampAsc(taskId)
-                .stream()
-                .map(ActivityHistoryMapper::toResponse)
-                .toList();
+        return repo.findByTask_TaskIdOrderByTimestampAsc(taskId, pageable)
+                .map(ActivityHistoryMapper::toResponse);
     }
 
     @Override
     public ActivityHistoryResponse create(ActivityHistoryRequest request){
         ActivityHistory activityHistory = new ActivityHistory();
-        User user = userService.getUserById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
+        User user = userService.getCurrentUser();
         Task task = taskService.getTask(request.getTaskId());
 
         activityHistory.setUser(user);
@@ -79,6 +77,4 @@ public class ActivityHistoryServiceImpl implements ActivityHistoryService {
 
         return toResponse(saved);
     }
-
-
 }

@@ -12,9 +12,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ActivityHistoryRequest {
 
-    @NotNull(groups = CreateGroup.class, message = "ID người dùng không được để trống")
-    private UUID userId;
-
     @NotNull(groups = CreateGroup.class, message = "ID công việc không được để trống")
     private UUID taskId;
 

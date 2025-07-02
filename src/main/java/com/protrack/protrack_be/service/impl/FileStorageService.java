@@ -25,7 +25,7 @@ public class FileStorageService {
 
         long maxSize = 10 * 1024 * 1024;
         if (file.getSize() > maxSize) {
-            throw new RuntimeException("File vượt quá kích thước cho phép (10MB)");
+            throw new RuntimeException("File size is too large (Only up to 10MB)");
         }
 
         try {

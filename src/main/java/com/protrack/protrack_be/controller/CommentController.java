@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -33,9 +35,11 @@ public class CommentController {
     }
 
     @Operation(summary = "Lấy bình luận theo ID của task")
-    @GetMapping("/{taskId}")
-    public ResponseEntity<List<CommentResponse>> getComments(@PathVariable UUID taskId) {
-        List<CommentResponse> responses = service.getCommentsByTask(taskId);
+    @GetMapping("/task/{taskId}")
+    public ResponseEntity<Page<CommentResponse>> getComments(@PathVariable UUID taskId,
+                                                             @RequestParam int page,
+                                                             @RequestParam int size) {
+        Page<CommentResponse> responses = service.getCommentsByTask(taskId, PageRequest.of(page, size));
         return ResponseEntity.ok(responses);
     }
 
@@ -55,7 +59,7 @@ public class CommentController {
     }
 
     @Operation(summary = "Cập nhật bình luận")
-    @PutMapping
+    @PutMapping("/{id}")
     public ResponseEntity<?> updateComment(@PathVariable UUID iD, @RequestBody @Valid CommentRequest request) {
         CommentResponse response = service.update(iD, request);
         return ResponseEntity.ok(response);

@@ -2,6 +2,10 @@ package com.protrack.protrack_be.controller;
 
 import com.protrack.protrack_be.dto.request.LabelRequest;
 import com.protrack.protrack_be.dto.response.LabelResponse;
+import com.protrack.protrack_be.enums.ProjectFunctionCode;
+import com.protrack.protrack_be.exception.AccessDeniedException;
+import com.protrack.protrack_be.exception.NotFoundException;
+import com.protrack.protrack_be.model.Project;
 import com.protrack.protrack_be.service.LabelService;
 import com.protrack.protrack_be.validation.CreateGroup;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,7 +33,8 @@ public class LabelController {
     @GetMapping
     public ResponseEntity<List<LabelResponse>> getAllLabels() {
         List<LabelResponse> responses = service.getAll();
-        return ResponseEntity.ok(responses);
+        //return ResponseEntity.ok(responses);
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @Operation(summary = "Lấy nhãn theo ID")
@@ -39,6 +44,13 @@ public class LabelController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @GetMapping
+    public ResponseEntity<List<LabelResponse>> getLabelsByProject(@RequestParam UUID projectId) {
+        List<LabelResponse> responses = service.getByProject(projectId);
+        return ResponseEntity.ok(responses);
+    }
+
 
     @Operation(summary = "Tạo nhãn")
     @PostMapping
