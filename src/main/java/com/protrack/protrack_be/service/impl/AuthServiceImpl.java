@@ -174,7 +174,7 @@
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email has not been verified");
             }
 
-            User user = userRepo.findByAccount(account).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User không tồn tại"));
+            User user = userRepo.findByAccount(account).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found"));
 
             user.setName(rq.getName());
             user.setDob(rq.getDob());

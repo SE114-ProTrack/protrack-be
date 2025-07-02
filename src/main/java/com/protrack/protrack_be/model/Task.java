@@ -1,6 +1,7 @@
 package com.protrack.protrack_be.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.protrack.protrack_be.enums.TaskStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -62,7 +63,8 @@ public class Task {
     private LocalDateTime createdTime;
 
     @Column(name = "trangthai")
-    private String status; // TO_DO, IN_PROGRESS, DONE
+    @Enumerated(EnumType.STRING)
+    private TaskStatus status; // TO_DO, IN_PROGRESS, DONE
 
     @Column(name = "icon")
     private String icon;

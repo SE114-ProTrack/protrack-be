@@ -2,6 +2,8 @@ package com.protrack.protrack_be.repository;
 
 import com.protrack.protrack_be.dto.response.MessagePreviewResponse;
 import com.protrack.protrack_be.model.Message;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,9 +16,14 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
             "(m.sender.userId = :user1 AND m.receiver.userId = :user2) OR " +
             "(m.sender.userId = :user2 AND m.receiver.userId = :user1)" +
             "ORDER BY m.sentAt DESC")
-    List<Message> findMessagesBetweenUsers(@Param("user1") UUID user1,
-                                           @Param("user2") UUID user2);
+    Page<Message> findMessagesBetweenUsers(@Param("user1") UUID user1,
+                                           @Param("user2") UUID user2,
+                                           Pageable pageable);
 
+    @Query("SELECT COUNT(m) > 0 FROM Message m " +
+            "WHERE (m.sender.userId = :user1 AND m.receiver.userId = :user2) " +
+            "   OR (m.sender.userId = :user2 AND m.receiver.userId = :user1)")
+    boolean existsConversationBetween(@Param("user1") UUID user1, @Param("user2") UUID user2);
 
     @Query(value = """
             SELECT
@@ -62,5 +69,12 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
             ORDER BY sub.thoigiangui DESC
             """, nativeQuery = true)
     List<MessagePreviewResponse> findPreviewsByUserId(@Param("currentUserId") UUID currentUserId);
+
+    @Query("SELECT m FROM Message m " +
+            "WHERE (m.sender.userId = :userId OR m.receiver.userId = :userId) " +
+            "AND LOWER(m.content) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    Page<Message> searchByUserAndContent(@Param("userId") UUID userId,
+                                         @Param("keyword") String keyword,
+                                         Pageable pageable);
 }
 

@@ -18,4 +18,5 @@ public interface FunctionService {
     FunctionResponse create(FunctionRequest request);
     FunctionResponse update(UUID id, FunctionRequest request);
     void delete(UUID id);
+    boolean existsById(UUID functionId);
 }

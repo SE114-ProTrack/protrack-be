@@ -21,4 +21,5 @@ public interface ProjectPermissionService {
     void delete(ProjectPermissionId id);
     void grantDefaultPermissions(UUID userId, UUID projectId);
     void grantAllPermissions(UUID userId, UUID projectId);
+    void deleteAllPermissionsOfUserInProject(UUID projectId, UUID userId);
 }
