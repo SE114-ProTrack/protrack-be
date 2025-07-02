@@ -19,4 +19,7 @@ public interface ProjectPermissionService {
     ProjectPermissionResponse create(ProjectPermissionRequest request);
     void update(UUID projectId, UUID userId, Map<String, Boolean> permissionMap);
     void delete(ProjectPermissionId id);
+    void grantDefaultPermissions(UUID userId, UUID projectId);
+    void grantAllPermissions(UUID userId, UUID projectId);
+    void deleteAllPermissionsOfUserInProject(UUID projectId, UUID userId);
 }

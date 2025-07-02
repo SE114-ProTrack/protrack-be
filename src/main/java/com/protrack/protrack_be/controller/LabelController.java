@@ -2,12 +2,18 @@ package com.protrack.protrack_be.controller;
 
 import com.protrack.protrack_be.dto.request.LabelRequest;
 import com.protrack.protrack_be.dto.response.LabelResponse;
+import com.protrack.protrack_be.enums.ProjectFunctionCode;
+import com.protrack.protrack_be.exception.AccessDeniedException;
+import com.protrack.protrack_be.exception.NotFoundException;
+import com.protrack.protrack_be.model.Project;
 import com.protrack.protrack_be.service.LabelService;
+import com.protrack.protrack_be.validation.CreateGroup;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -23,11 +29,12 @@ public class LabelController {
     @Autowired
     LabelService service;
 
-    @Operation(summary = "Lấy tất cả các nhãn")
-    @GetMapping
+
+    //@GetMapping
     public ResponseEntity<List<LabelResponse>> getAllLabels() {
         List<LabelResponse> responses = service.getAll();
-        return ResponseEntity.ok(responses);
+        //return ResponseEntity.ok(responses);
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @Operation(summary = "Lấy nhãn theo ID")
@@ -38,9 +45,17 @@ public class LabelController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Lấy tất cả các nhãn theo project")
+    @GetMapping
+    public ResponseEntity<List<LabelResponse>> getLabelsByProject(@RequestParam UUID projectId) {
+        List<LabelResponse> responses = service.getByProject(projectId);
+        return ResponseEntity.ok(responses);
+    }
+
+
     @Operation(summary = "Tạo nhãn")
     @PostMapping
-    public ResponseEntity<?> createLabel(@RequestBody @Valid LabelRequest request) {
+    public ResponseEntity<?> createLabel(@RequestBody @Validated(CreateGroup.class) LabelRequest request) {
         LabelResponse response = service.create(request);
         return ResponseEntity.ok(response);
     }

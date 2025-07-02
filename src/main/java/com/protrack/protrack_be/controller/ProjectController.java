@@ -1,5 +1,6 @@
 package com.protrack.protrack_be.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.protrack.protrack_be.dto.request.ProjectRequest;
 import com.protrack.protrack_be.dto.response.ProjectResponse;
 
@@ -7,12 +8,20 @@ import com.protrack.protrack_be.dto.response.TaskResponse;
 import com.protrack.protrack_be.model.Project;
 import com.protrack.protrack_be.service.ProjectService;
 import com.protrack.protrack_be.service.impl.FileStorageService;
+import com.protrack.protrack_be.validation.CreateGroup;
+import com.protrack.protrack_be.validation.UpdateGroup;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.*;
+import org.springframework.validation.Validator;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,10 +41,14 @@ public class ProjectController {
     @Autowired
     private FileStorageService fileStorageService;
 
+    @Autowired
+    private org.springframework.validation.SmartValidator validator;
+
     @Operation(summary = "Lấy tất cả dự án")
     @GetMapping
-    public ResponseEntity<List<ProjectResponse>> getAllProjects() {
-        List<ProjectResponse> responses = service.getAll();
+    public ResponseEntity<Page<ProjectResponse>> getAllProjects(@RequestParam int page,
+                                                                @RequestParam int size) {
+        Page<ProjectResponse> responses = service.getAll(PageRequest.of(page, size));
         return ResponseEntity.ok(responses);
     }
 
@@ -47,19 +60,77 @@ public class ProjectController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @Operation(summary = "Tạo dự án")
-    @PostMapping
-    public ResponseEntity<?> createProject(@RequestBody @Valid ProjectRequest request) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ProjectResponse> createProject(
+            @Parameter(
+                    description = "Thông tin dự án ở dạng JSON",
+                    required = true,
+                    example = """
+                    {
+                      "projectName": "Tên dự án mẫu",
+                      "description": "Nội dung mô tả"
+                    }
+                    """
+            )
+            @RequestPart("project") String rawProjectJson,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+
+        ObjectMapper mapper = new ObjectMapper();
+        ProjectRequest request;
+
+        try {
+            request = mapper.readValue(rawProjectJson, ProjectRequest.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Dữ liệu project không hợp lệ", e);
+        }
+
+        BindingResult result = new BeanPropertyBindingResult(request, "projectRequest");
+        validator.validate(request, result, CreateGroup.class);
+        if (result.hasErrors()) {
+            throw new IllegalArgumentException(result.getAllErrors().get(0).getDefaultMessage());
+        }
+
+        if (file != null && !file.isEmpty()) {
+            String bannerUrl = fileStorageService.store(file);
+            request.setBannerUrl(bannerUrl);
+        }
+
         ProjectResponse response = service.create(request);
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Cập nhật dự án")
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateProject(@PathVariable UUID id, @RequestBody @Valid ProjectRequest request) {
+
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Cập nhật dự án (kèm ảnh banner)")
+    public ResponseEntity<ProjectResponse> updateProject(
+            @PathVariable UUID id,
+            @RequestPart("project") String rawProjectJson,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+
+        ObjectMapper mapper = new ObjectMapper();
+        ProjectRequest request;
+
+        try {
+            request = mapper.readValue(rawProjectJson, ProjectRequest.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Dữ liệu JSON không hợp lệ", e);
+        }
+
+        BindingResult result = new BeanPropertyBindingResult(request, "projectRequest");
+        validator.validate(request, result, UpdateGroup.class);
+        if (result.hasErrors()) {
+            throw new IllegalArgumentException(result.getAllErrors().get(0).getDefaultMessage());
+        }
+
+        if (file != null && !file.isEmpty()) {
+            String bannerUrl = fileStorageService.store(file);
+            request.setBannerUrl(bannerUrl);
+        }
+
         ProjectResponse response = service.update(id, request);
         return ResponseEntity.ok(response);
     }
+
 
     @Operation(summary = "Xóa dự án")
     @DeleteMapping("/{id}")
@@ -70,8 +141,10 @@ public class ProjectController {
 
     @Operation(summary = "Lấy tất cả dự án theo user")
     @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getByUser(@PathVariable UUID userId){
-        List<ProjectResponse> responses = service.getProjectsByUser(userId);
+    public ResponseEntity<?> getByUser(@PathVariable UUID userId,
+                                       @RequestParam int page,
+                                       @RequestParam int size){
+        Page<ProjectResponse> responses = service.getProjectsByUser(userId, PageRequest.of(page, size));
         return ResponseEntity.ok(responses);
     }
 
@@ -82,9 +155,11 @@ public class ProjectController {
         return ResponseEntity.ok(responses);
     }
 
+    @PostMapping(value = "/{id}/uploadBanner", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Thay đổi ảnh bìa dự án")
-    @PostMapping("/{id}/uploadBanner")
-    public ResponseEntity<String> uploadProjectBanner(@PathVariable UUID id, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<String> uploadProjectBanner(
+            @PathVariable UUID id,
+            @RequestPart("file") MultipartFile file) {
         String fileUrl = fileStorageService.store(file);
         ProjectResponse projectResponse = service.updateProjectBanner(id, fileUrl);
         return ResponseEntity.ok(fileUrl);

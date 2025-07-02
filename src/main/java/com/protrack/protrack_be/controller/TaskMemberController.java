@@ -4,11 +4,15 @@ import com.protrack.protrack_be.dto.request.TaskMemberRequest;
 import com.protrack.protrack_be.dto.response.TaskMemberResponse;
 import com.protrack.protrack_be.model.id.TaskMemberId;
 import com.protrack.protrack_be.service.TaskMemberService;
+import com.protrack.protrack_be.validation.CreateGroup;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.*;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -31,6 +35,15 @@ public class TaskMemberController {
         return ResponseEntity.ok(responses);
     }
 
+    @Operation(summary = "Lấy tất cả thành viên của một công việc")
+    @GetMapping("/{taskId}/members")
+    public ResponseEntity<Page<TaskMemberResponse>> getMembersByTask(
+            @PathVariable UUID taskId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(service.getMembersByTask(taskId, PageRequest.of(page, size)));
+    }
+
     @Operation(summary = "Lấy thành viên công việc theo ID")
     @GetMapping("/{taskId}/{userId}")
     public ResponseEntity<TaskMemberResponse> getTaskMember(
@@ -44,7 +57,7 @@ public class TaskMemberController {
 
     @Operation(summary = "Thêm thành viên công việc")
     @PostMapping
-    public ResponseEntity<?> addTaskMember(@RequestBody @Valid TaskMemberRequest request) {
+    public ResponseEntity<?> addTaskMember(@RequestBody @Validated(CreateGroup.class) TaskMemberRequest request) {
         TaskMemberResponse response = service.create(request);
         return ResponseEntity.ok(response);
     }

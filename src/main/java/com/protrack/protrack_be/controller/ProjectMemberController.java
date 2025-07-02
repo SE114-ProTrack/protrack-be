@@ -4,12 +4,16 @@ import com.protrack.protrack_be.dto.request.ProjectMemberRequest;
 import com.protrack.protrack_be.dto.response.ProjectMemberResponse;
 import com.protrack.protrack_be.model.id.ProjectMemberId;
 import com.protrack.protrack_be.service.ProjectMemberService;
+import com.protrack.protrack_be.validation.CreateGroup;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.*;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,6 +35,16 @@ public class ProjectMemberController {
         return ResponseEntity.ok(responses);
     }
 
+    @Operation(summary = "Lấy tất cả thành viên của 1 dự án")
+    @GetMapping("/project/{projectId}")
+    public ResponseEntity<Page<ProjectMemberResponse>> getMembersByProject(
+            @PathVariable UUID projectId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Page<ProjectMemberResponse> responses = service.getMembersOfProject(projectId, PageRequest.of(page, size));
+        return ResponseEntity.ok(responses);
+    }
+
     @Operation(summary = "Lấy thành viên dự án theo ID dự án và ID người dùng")
     @GetMapping("/{projectId}/{userId}")
     public ResponseEntity<ProjectMemberResponse> getProjectMemberById(@PathVariable UUID projectId, @PathVariable UUID userId) {
@@ -42,7 +56,7 @@ public class ProjectMemberController {
 
     @Operation(summary = "Thêm thành viên dự án")
     @PostMapping
-    public ResponseEntity<?> addProjectMember(@RequestBody @Valid ProjectMemberRequest request) {
+    public ResponseEntity<?> addProjectMember(@RequestBody @Validated(CreateGroup.class) ProjectMemberRequest request) {
         ProjectMemberResponse response = service.create(request);
         return ResponseEntity.ok(response);
     }
@@ -61,5 +75,11 @@ public class ProjectMemberController {
         ProjectMemberId id = new ProjectMemberId(projectId, userId);
         service.delete(id);
         return ResponseEntity.ok("Xóa thành công");
+    }
+
+    @DeleteMapping("/leave/{projectId}")
+    public ResponseEntity<?> leaveProject(@PathVariable UUID projectId) {
+        service.leaveProject(projectId);
+        return ResponseEntity.ok("You have left the project.");
     }
 }

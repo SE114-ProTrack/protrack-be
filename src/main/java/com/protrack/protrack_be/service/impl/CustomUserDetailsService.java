@@ -18,7 +18,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Account account = accountRepo.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy tài khoản với email: " + email));
+                .orElseThrow(() -> new UsernameNotFoundException("Cannot find an account with: " + email));
         return new CustomUserDetails(account);
     }
 }

@@ -3,16 +3,20 @@ package com.protrack.protrack_be.model;
 import com.protrack.protrack_be.model.id.PersonalProductivityId;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.SQLDelete;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-
+@EqualsAndHashCode(callSuper = false)
 @Entity
+@SQLDelete(sql = "UPDATE hieusuatcanhan SET da_xoa = true WHERE id_nguoidung = ? AND id_duan = ?")
+@Filter(name = "deletedFilter", condition = "da_xoa = :isDeleted")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "hieusuatcanhan")
-public class PersonalProductivity {
+public class PersonalProductivity extends BaseEntity {
 
     @EmbeddedId
     private PersonalProductivityId id;
@@ -29,7 +33,4 @@ public class PersonalProductivity {
 
     @Column(name = "sotaskhoanthanh", nullable = false)
     private Integer completedTasks;
-
-    @Column(name = "ngaycapnhat", nullable = false)
-    private LocalDateTime lastUpdated;
 }

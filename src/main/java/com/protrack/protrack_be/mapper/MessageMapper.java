@@ -9,7 +9,7 @@ public class MessageMapper {
         return new MessageResponse(
                 entity.getMessageId(),
                 entity.getContent(),
-                entity.getSentAt(),
+                entity.getCreatedAt(),
                 entity.getUpdatedAt(),
                 entity.getSender().getUserId(),
                 entity.getSender().getName(),

@@ -3,15 +3,23 @@ package com.protrack.protrack_be.controller;
 import com.protrack.protrack_be.dto.request.MessageRequest;
 import com.protrack.protrack_be.dto.response.MessagePreviewResponse;
 import com.protrack.protrack_be.dto.response.MessageResponse;
+import com.protrack.protrack_be.exception.BadRequestException;
 import com.protrack.protrack_be.service.MessageService;
+import com.protrack.protrack_be.validation.CreateGroup;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.*;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,8 +49,10 @@ public class MessageController {
 
     @Operation(summary = "Lấy chi tiết cuộc trò chuyện")
     @GetMapping("/with/{userId}")
-    public ResponseEntity<List<MessageResponse>> getConversationWithUser(@PathVariable UUID userId) {
-        List<MessageResponse> responses = service.getConversation(userId);
+    public ResponseEntity<Page<MessageResponse>> getConversationWithUser(@PathVariable UUID userId,
+                                                                         @RequestParam int page,
+                                                                         @RequestParam int size) {
+        Page<MessageResponse> responses = service.getConversation(userId, PageRequest.of(page, size));
         return ResponseEntity.ok(responses);
     }
 
@@ -55,7 +65,7 @@ public class MessageController {
 
     @Operation(summary = "Cập nhật tin nhắn")
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateMessage(@PathVariable UUID id, @RequestBody @Valid MessageRequest request) {
+    public ResponseEntity<?> updateMessage(@PathVariable UUID id, @RequestBody @Validated(CreateGroup.class) MessageRequest request) {
         MessageResponse response = service.update(id, request);
         return ResponseEntity.ok(response);
     }
@@ -65,6 +75,16 @@ public class MessageController {
     public ResponseEntity<?> deleteMessage(@PathVariable UUID id) {
         service.delete(id);
         return ResponseEntity.ok("Xóa thành công");
+    }
+
+    @Operation(summary = "Tìm kiếm tin nhắn trong một cuộc trò chuyện")
+    @GetMapping("/search")
+    public ResponseEntity<Page<MessageResponse>> searchMessages(
+            @RequestParam String keyword,
+            @RequestParam int page,
+            @RequestParam int size) {
+        Page<MessageResponse> result = service.searchMessages(keyword, PageRequest.of(page, size));
+        return ResponseEntity.ok(result);
     }
 
     @Operation(summary = "Lấy danh sách cuộc trò chuyện")

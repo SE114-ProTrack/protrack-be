@@ -64,10 +64,11 @@ public class JwtUtil {
     }
 
     // Tạo token lời mời
-    public String generateInvitationToken(String email, UUID project) {
+    public String generateInvitationToken(String email, UUID project, String role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("type", "INVITE");
         claims.put("projectId", project);
+        claims.put("role", role);
 
         return createToken(claims, email);
     }

@@ -2,6 +2,7 @@ package com.protrack.protrack_be.mapper;
 
 import com.protrack.protrack_be.dto.request.TaskRequest;
 import com.protrack.protrack_be.dto.response.TaskResponse;
+import com.protrack.protrack_be.enums.TaskStatus;
 import com.protrack.protrack_be.model.Task;
 import com.protrack.protrack_be.model.TaskAttachment;
 
@@ -26,8 +27,8 @@ public class TaskMapper {
                 task.getParentTask() != null ? task.getParentTask().getTaskId() : null,
                 task.getApprover().getUserId(),
                 task.getApprover().getName(),
-                task.getCreatedTime(),
-                task.getStatus(),
+                task.getCreatedAt(),
+                task.getStatus().toString(),
                 task.getIcon(),
                 task.getColor()
         );
@@ -40,7 +41,7 @@ public class TaskMapper {
         task.setDeadline(request.getDeadline());
         task.setPriority(request.getPriority());
         task.setIsMain(request.getIsMain());
-        task.setStatus(request.getStatus());
+        task.setStatus(TaskStatus.valueOf(request.getStatus()));
         task.setIcon(request.getIcon());
         task.setColor(request.getColor());
 

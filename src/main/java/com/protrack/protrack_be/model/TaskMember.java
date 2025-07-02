@@ -4,16 +4,22 @@ import com.protrack.protrack_be.model.id.TaskMemberId;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.SQLDelete;
 
 import java.util.UUID;
 
+@EqualsAndHashCode(callSuper = false)
 @Entity
+@SQLDelete(sql = "UPDATE nguoithuchiencv SET da_xoa = true WHERE id_congviec = ? AND id_nguoidung = ?")
+@Filter(name = "deletedFilter", condition = "da_xoa = :isDeleted")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "nguoithuchiencv")
-public class TaskMember {
+public class TaskMember extends BaseEntity {
 
     @EmbeddedId
     private TaskMemberId id;

@@ -3,6 +3,8 @@ package com.protrack.protrack_be.service.impl;
 import com.protrack.protrack_be.enums.ProjectFunctionCode;
 import com.protrack.protrack_be.dto.request.ProjectPermissionRequest;
 import com.protrack.protrack_be.dto.response.ProjectPermissionResponse;
+import com.protrack.protrack_be.exception.AccessDeniedException;
+import com.protrack.protrack_be.exception.BadRequestException;
 import com.protrack.protrack_be.mapper.ProjectPermissionMapper;
 import com.protrack.protrack_be.model.Function;
 import com.protrack.protrack_be.model.Project;
@@ -12,6 +14,7 @@ import com.protrack.protrack_be.model.id.ProjectPermissionId;
 import com.protrack.protrack_be.repository.ProjectPermissionRepository;
 import com.protrack.protrack_be.service.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -40,6 +43,7 @@ public class ProjectPermissionServiceImpl implements ProjectPermissionService {
     FunctionService functionService;
 
     @Autowired
+            @Lazy
     ProjectMemberService projectMemberService;
 
     @Override
@@ -63,7 +67,6 @@ public class ProjectPermissionServiceImpl implements ProjectPermissionService {
 
     @Override
     public ProjectPermissionResponse create(ProjectPermissionRequest request){
-
         ProjectPermission projectPermission = new ProjectPermission();
         Project project = projectService.getEntityById(request.getProjectId())
                 .orElseThrow(() -> new RuntimeException("Can not find project"));
@@ -72,6 +75,20 @@ public class ProjectPermissionServiceImpl implements ProjectPermissionService {
         Function function = functionService.getEntityById(request.getFunctionId())
                 .orElseThrow(() -> new RuntimeException("Can not find function"));
 
+        if (!projectMemberService.isMember(project.getProjectId(), user.getUserId())) {
+            throw new BadRequestException("User is not a member of this project.");
+        }
+
+        if (!functionService.existsById(function.getFunctionId())) {
+            throw new BadRequestException("Function ID is invalid.");
+        }
+
+        ProjectPermissionId id = new ProjectPermissionId(project.getProjectId(), user.getUserId(), function.getFunctionId());
+        Optional<ProjectPermission> existing = repo.findById(id);
+        if (existing.isPresent()) {
+            throw new BadRequestException("Permission already exists. Use update instead.");
+        }
+        projectPermission.setId(id);
         projectPermission.setProject(project);
         projectPermission.setUser(user);
         projectPermission.setFunction(function);
@@ -84,6 +101,17 @@ public class ProjectPermissionServiceImpl implements ProjectPermissionService {
 
     @Override
     public void update(UUID projectId, UUID userId, Map<String, Boolean> permissionMap) {
+        if (!projectService.hasProjectRight(projectId, userService.getCurrentUser().getUserId(), ProjectFunctionCode.EDIT_MEMBER)) {
+            throw new AccessDeniedException("You are not permitted to manage project permissions.");
+        }
+
+        if (!projectMemberService.isMember(projectId, userId)) {
+            throw new BadRequestException("User is not a member of this project.");
+        }
+
+        if (projectMemberService.isProjectOwner(projectId, userId)) {
+            throw new AccessDeniedException("You are not permitted to change permissions of the project owner.");
+        }
 
         for (Map.Entry<String, Boolean> entry : permissionMap.entrySet()) {
             String functionCode = entry.getKey();
@@ -101,7 +129,24 @@ public class ProjectPermissionServiceImpl implements ProjectPermissionService {
 
 
     @Override
-    public void delete(ProjectPermissionId id){ repo.deleteById(id); }
+    public void delete(ProjectPermissionId id){
+        ProjectPermission projectPermission = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Project Permission not found"));
+
+        if (!projectService.hasProjectRight(projectPermission.getId().getProjectId(), userService.getCurrentUser().getUserId(), ProjectFunctionCode.EDIT_MEMBER)) {
+            throw new AccessDeniedException("You are not permitted to manage project permissions.");
+        }
+
+        if (!projectMemberService.isMember(projectPermission.getProject().getProjectId(), projectPermission.getUser().getUserId())) {
+            throw new BadRequestException("User is not a member of this project.");
+        }
+
+        if (projectMemberService.isProjectOwner(projectPermission.getProject().getProjectId(), projectPermission.getUser().getUserId())) {
+            throw new AccessDeniedException("You are not permitted to change permissions of the project owner.");
+        }
+
+        repo.deleteById(id);
+    }
 
     @Override
     public boolean hasPermission(UUID userId, UUID projectId, ProjectFunctionCode functionCode) {
@@ -109,4 +154,30 @@ public class ProjectPermissionServiceImpl implements ProjectPermissionService {
                 userId, projectId, functionCode.name()
         );
     }
+
+    @Override
+    public void grantDefaultPermissions(UUID userId, UUID projectId) {
+        List<Function> defaults = functionService.getDefaults();
+        for (Function func : defaults) {
+            ProjectPermissionId id = new ProjectPermissionId(projectId, userId, func.getFunctionId());
+            ProjectPermission permission = new ProjectPermission(id, projectService.getEntityById(projectId).get(), userService.getUserById(userId).get(), func, true);
+            repo.save(permission);
+        }
+    }
+
+    @Override
+    public void grantAllPermissions(UUID userId, UUID projectId) {
+        List<Function> all = functionService.getAllEntities();
+        for (Function func : all) {
+            ProjectPermissionId id = new ProjectPermissionId(projectId, userId, func.getFunctionId());
+            ProjectPermission permission = new ProjectPermission(id, projectService.getEntityById(projectId).get(), userService.getUserById(userId).get(), func, true);
+            repo.save(permission);
+        }
+    }
+
+    @Override
+    public void deleteAllPermissionsOfUserInProject(UUID projectId, UUID userId) {
+        repo.deleteByProject_ProjectIdAndUser_UserId(projectId, userId);
+    }
+
 }

@@ -5,11 +5,16 @@ import com.protrack.protrack_be.dto.response.ActivityHistoryResponse;
 import com.protrack.protrack_be.dto.response.CommentResponse;
 import com.protrack.protrack_be.model.ActivityHistory;
 import com.protrack.protrack_be.service.ActivityHistoryService;
+import com.protrack.protrack_be.validation.CreateGroup;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -27,8 +32,9 @@ public class ActivityHistoryController {
 
     @Operation(summary = "Lấy toàn bộ lịch sử hoạt động")
     @GetMapping
-    public ResponseEntity<List<ActivityHistoryResponse>> getAllActivityHistory() {
-        List<ActivityHistoryResponse> responses = service.getAll();
+    public ResponseEntity<Page<ActivityHistoryResponse>> getAllActivityHistory(@RequestParam int page,
+                                                                               @RequestParam int size) {
+        Page<ActivityHistoryResponse> responses = service.getAll(PageRequest.of(page, size));
         return ResponseEntity.ok(responses);
     }
 
@@ -42,14 +48,16 @@ public class ActivityHistoryController {
 
     @Operation(summary = "Lấy bình luận theo ID của lịch sử hoạt động")
     @GetMapping("/{taskId}")
-    public ResponseEntity<List<ActivityHistoryResponse>> getComments(@PathVariable UUID taskId) {
-        List<ActivityHistoryResponse> responses = service.getActivityHistoryByTask(taskId);
+    public ResponseEntity<Page<ActivityHistoryResponse>> getComments(@PathVariable UUID taskId,
+                                                                     @RequestParam int page,
+                                                                     @RequestParam int size) {
+        Page<ActivityHistoryResponse> responses = service.getActivityHistoryByTask(taskId, PageRequest.of(page, size));
         return ResponseEntity.ok(responses);
     }
 
     @Operation(summary = "Tạo lịch sử hoạt động")
     @PostMapping
-    public ResponseEntity<?> createActivityHistory(@RequestBody @Valid ActivityHistoryRequest request) {
+    public ResponseEntity<?> createActivityHistory(@RequestBody @Validated(CreateGroup.class) ActivityHistoryRequest request) {
         ActivityHistoryResponse response = service.create(request);
         return ResponseEntity.ok(response);
     }

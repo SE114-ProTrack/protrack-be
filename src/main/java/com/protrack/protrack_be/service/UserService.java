@@ -5,6 +5,7 @@ import com.protrack.protrack_be.dto.request.UpdateProfileRequest;
 import com.protrack.protrack_be.dto.response.UserResponse;
 import com.protrack.protrack_be.model.User;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,4 +16,5 @@ public interface UserService {
     UserResponse updateProfile(UUID userId, UpdateProfileRequest rq);
     UserResponse changePassword(UUID userId, ChangePasswordRequest rq);
     void updateUserAvatar(UUID userId, String avatarUrl);
+    List<UserResponse> getUsersSharingProjects();
 }

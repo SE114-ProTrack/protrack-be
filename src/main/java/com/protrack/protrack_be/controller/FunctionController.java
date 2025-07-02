@@ -4,11 +4,13 @@ import com.protrack.protrack_be.dto.request.FunctionRequest;
 import com.protrack.protrack_be.dto.response.FunctionResponse;
 
 import com.protrack.protrack_be.service.FunctionService;
+import com.protrack.protrack_be.validation.CreateGroup;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,7 +43,7 @@ public class FunctionController {
 
     @Operation(summary = "Tạo chức năng")
     @PostMapping
-    public ResponseEntity<?> createFunction(@RequestBody FunctionRequest request) {
+    public ResponseEntity<?> createFunction(@Validated(CreateGroup.class) @RequestBody FunctionRequest request) {
         FunctionResponse response = service.create(request);
         return ResponseEntity.ok(response);
     }

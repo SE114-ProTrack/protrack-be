@@ -1,19 +1,22 @@
 package com.protrack.protrack_be.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
+import lombok.*;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.SQLDelete;
+
 import java.time.LocalDate;
 import java.util.UUID;
 
+@EqualsAndHashCode(callSuper = false)
 @Entity
+@SQLDelete(sql = "UPDATE task SET da_xoa = true WHERE id_congviec = ?")
+@Filter(name = "deletedFilter", condition = "da_xoa = :isDeleted")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "nguoidung")
-public class User {
+public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id_nguoidung")

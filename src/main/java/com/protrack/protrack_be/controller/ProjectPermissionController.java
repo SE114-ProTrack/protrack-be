@@ -4,12 +4,14 @@ import com.protrack.protrack_be.dto.request.ProjectPermissionRequest;
 import com.protrack.protrack_be.dto.response.ProjectPermissionResponse;
 import com.protrack.protrack_be.model.id.ProjectPermissionId;
 import com.protrack.protrack_be.service.ProjectPermissionService;
+import com.protrack.protrack_be.validation.CreateGroup;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -55,7 +57,7 @@ public class ProjectPermissionController {
 
     @Operation(summary = "Tạo quyền dự án")
     @PostMapping
-    public ResponseEntity<?> createPermission(@RequestBody @Valid ProjectPermissionRequest request) {
+    public ResponseEntity<?> createPermission(@RequestBody @Validated(CreateGroup.class) ProjectPermissionRequest request) {
         ProjectPermissionResponse response = service.create(request);
         return ResponseEntity.ok(response);
     }

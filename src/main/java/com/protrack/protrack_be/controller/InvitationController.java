@@ -3,11 +3,13 @@ package com.protrack.protrack_be.controller;
 import com.protrack.protrack_be.dto.request.InvitationRequest;
 import com.protrack.protrack_be.dto.response.InvitationResponse;
 import com.protrack.protrack_be.service.InvitationService;
+import com.protrack.protrack_be.validation.CreateGroup;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,7 +40,7 @@ public class InvitationController {
     @Operation(summary = "Tạo lời mời (email hoặc notification)")
     @PostMapping
     public ResponseEntity<InvitationResponse> create(
-            @RequestBody @Valid InvitationRequest req
+            @RequestBody @Validated(CreateGroup.class) InvitationRequest req
     ) {
         InvitationResponse resp = invitationService.create(req);
         return ResponseEntity

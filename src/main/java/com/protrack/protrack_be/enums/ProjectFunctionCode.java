@@ -5,6 +5,8 @@ public enum ProjectFunctionCode {
     EDIT_TASK,
     DELETE_TASK,
     VIEW_TASK,
-    EDIT_PROJECT
+    EDIT_PROJECT,
+    EDIT_MEMBER,
+    INVITE_MEMBER
 }
 

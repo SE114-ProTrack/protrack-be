@@ -12,6 +12,9 @@ public class NotificationResponse {
 
     private UUID notificationId;
 
+    private String senderAvt;
+    private String senderName;
+
     private UUID receiverId;
     private String receiverFullName;
 
@@ -19,4 +22,6 @@ public class NotificationResponse {
     private String content;
     private Boolean isRead;
     private LocalDateTime timestamp;
+
+    private String actionUrl;
 }

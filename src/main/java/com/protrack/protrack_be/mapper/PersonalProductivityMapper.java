@@ -12,7 +12,7 @@ public class PersonalProductivityMapper {
                 entity.getProject().getProjectId(),
                 entity.getProject().getProjectName(),
                 entity.getCompletedTasks(),
-                entity.getLastUpdated()
+                entity.getUpdatedAt()
         );
     }
 }

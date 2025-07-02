@@ -1,6 +1,9 @@
 package com.protrack.protrack_be.repository;
 
 import com.protrack.protrack_be.model.Project;
+import lombok.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,10 +14,12 @@ import java.util.UUID;
 public interface ProjectRepository extends JpaRepository<Project, UUID> {
     @Query(value = """
             SELECT * FROM duan d
-            JOIN thanhvienduan tv ON tv.id_duan = d.id_duan
-            WHERE tv.id_nguoidung = :userId
+            WHERE d.id_duan IN (
+                SELECT id_duan FROM thanhvienduan WHERE id_nguoidung = :userId
+            )
+            AND d.da_xoa = false
             """, nativeQuery = true)
-    List<Project> findProjectsByUserId(@Param("userId") UUID userId);
+    Page<Project> findProjectsByUserId(@Param("userId") UUID userId, Pageable pageable);
 
     @Query("SELECT COUNT(t.taskId) FROM Task t WHERE t.project.projectId = :projectId")
     int getNumberOfTasks(@Param("projectId") UUID projectId);
@@ -24,12 +29,16 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
 
     @Query(value = """
             SELECT * FROM duan d
-            JOIN thanhvienduan tv ON tv.id_duan = d.id_duan
-            WHERE tv.id_nguoidung = :userId
-            ORDER BY d.createTime DESC
+            WHERE d.id_duan IN (
+                SELECT id_duan FROM thanhvienduan WHERE id_nguoidung = :userId
+            )
+            AND d.da_xoa = false
+            ORDER BY d.thoigiantao DESC
             LIMIT 3
             """, nativeQuery = true)
     List<Project> findTop3ProjectsByUserId(@Param("userId") UUID userId);
 
     List<Project> findByProjectNameContainingIgnoreCase(String keyword);
+
+    Page<Project> findAll(Pageable pageable);
 }
