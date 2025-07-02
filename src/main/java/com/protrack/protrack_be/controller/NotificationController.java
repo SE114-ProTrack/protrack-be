@@ -4,11 +4,13 @@ import com.protrack.protrack_be.dto.request.NotificationRequest;
 import com.protrack.protrack_be.dto.response.NotificationResponse;
 import com.protrack.protrack_be.model.Notification;
 import com.protrack.protrack_be.service.NotificationService;
+import com.protrack.protrack_be.validation.CreateGroup;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -40,7 +42,7 @@ public class NotificationController {
 
     @Operation(summary = "Tạo thông báo")
     @PostMapping
-    public ResponseEntity<?> createNotification(@RequestBody @Valid NotificationRequest request) {
+    public ResponseEntity<?> createNotification(@RequestBody @Validated(CreateGroup.class) NotificationRequest request) {
         NotificationResponse response = service.create(request);
         return  ResponseEntity.ok(response);
     }

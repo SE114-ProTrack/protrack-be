@@ -60,6 +60,9 @@ public class InvitationServiceImpl implements InvitationService {
     @Autowired
     ProjectService projectService;
 
+    @Autowired
+    ProjectPermissionService projectPermissionService;
+
     @Override
     public List<InvitationResponse> getAll(){
         return repo.findAll().stream()
@@ -148,16 +151,7 @@ public class InvitationServiceImpl implements InvitationService {
         member.setIsProjectOwner(false);
         projectMemberRepository.save(member);
 
-        List<Function> defaultFunctions = functionService.getDefaults(); // VIEW_TASK
-        for (Function func : defaultFunctions) {
-            ProjectPermission permission = new ProjectPermission();
-            permission.setId(new ProjectPermissionId(project.getProjectId(), user.getUserId(), func.getFunctionId()));
-            permission.setProject(project);
-            permission.setUser(user);
-            permission.setFunction(func);
-            permission.setIsActive(true);
-            projectPermissionRepository.save(permission);
-        }
+        projectPermissionService.grantDefaultPermissions(user.getUserId(), project.getProjectId());
 
         return toResponse(saved);
     }

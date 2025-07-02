@@ -1,5 +1,6 @@
 package com.protrack.protrack_be.dto.request;
 
+import com.protrack.protrack_be.validation.CreateGroup;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -11,13 +12,13 @@ import java.util.UUID;
 @AllArgsConstructor
 public class PersonalProductivityRequest {
 
-    @NotNull(message = "ID người dùng không được để trống")
+    @NotNull(groups = CreateGroup.class, message = "ID người dùng không được để trống")
     private UUID userId;
 
-    @NotNull(message = "ID dự án không được để trống")
+    @NotNull(groups = CreateGroup.class, message = "ID dự án không được để trống")
     private UUID projectId;
 
-    @NotNull(message = "Số task hoàn thành không được để trống")
+    @NotNull(groups = CreateGroup.class, message = "Số task hoàn thành không được để trống")
     private Integer completedTasks;
 
 }

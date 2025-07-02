@@ -4,11 +4,13 @@ import com.protrack.protrack_be.dto.request.CommentRequest;
 import com.protrack.protrack_be.dto.response.CommentResponse;
 import com.protrack.protrack_be.dto.response.ProjectResponse;
 import com.protrack.protrack_be.service.CommentService;
+import com.protrack.protrack_be.validation.CreateGroup;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -47,7 +49,7 @@ public class CommentController {
 
     @Operation(summary = "Tạo bình luận")
     @PostMapping
-    public ResponseEntity<?> createComment(@RequestBody @Valid CommentRequest request) {
+    public ResponseEntity<?> createComment(@RequestBody @Validated(CreateGroup.class) CommentRequest request) {
         CommentResponse response = service.createComment(request);
         return ResponseEntity.ok(response);
     }

@@ -3,11 +3,13 @@ package com.protrack.protrack_be.controller;
 import com.protrack.protrack_be.dto.request.LabelRequest;
 import com.protrack.protrack_be.dto.response.LabelResponse;
 import com.protrack.protrack_be.service.LabelService;
+import com.protrack.protrack_be.validation.CreateGroup;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -40,7 +42,7 @@ public class LabelController {
 
     @Operation(summary = "Tạo nhãn")
     @PostMapping
-    public ResponseEntity<?> createLabel(@RequestBody @Valid LabelRequest request) {
+    public ResponseEntity<?> createLabel(@RequestBody @Validated(CreateGroup.class) LabelRequest request) {
         LabelResponse response = service.create(request);
         return ResponseEntity.ok(response);
     }

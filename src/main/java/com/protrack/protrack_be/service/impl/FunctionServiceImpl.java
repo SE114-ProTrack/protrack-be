@@ -29,6 +29,11 @@ public class FunctionServiceImpl implements FunctionService {
     }
 
     @Override
+    public List<Function> getAllEntities() {
+        return repo.findAll();
+    }
+
+    @Override
     public List<FunctionResponse> getAll(){
         return repo.findAll().stream()
                 .map(FunctionMapper::toResponse)
@@ -61,7 +66,7 @@ public class FunctionServiceImpl implements FunctionService {
     @Override
     public FunctionResponse update(UUID id, FunctionRequest request){
         Function function = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy chức năng"));
+                .orElseThrow(() -> new RuntimeException("Function not found"));
 
         if(request.getFuctionName() != null) function.setFunctionName(request.getFuctionName());
         if(request.getScreenName() != null) function.setScreenName(request.getScreenName());

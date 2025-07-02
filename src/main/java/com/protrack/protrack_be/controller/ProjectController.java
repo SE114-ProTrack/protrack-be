@@ -8,6 +8,8 @@ import com.protrack.protrack_be.dto.response.TaskResponse;
 import com.protrack.protrack_be.model.Project;
 import com.protrack.protrack_be.service.ProjectService;
 import com.protrack.protrack_be.service.impl.FileStorageService;
+import com.protrack.protrack_be.validation.CreateGroup;
+import com.protrack.protrack_be.validation.UpdateGroup;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,6 +17,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.validation.Validator;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,6 +38,9 @@ public class ProjectController {
 
     @Autowired
     private FileStorageService fileStorageService;
+
+    @Autowired
+    private org.springframework.validation.SmartValidator validator;
 
     @Operation(summary = "Lấy tất cả dự án")
     @GetMapping
@@ -73,6 +81,12 @@ public class ProjectController {
             throw new RuntimeException("Dữ liệu project không hợp lệ", e);
         }
 
+        BindingResult result = new BeanPropertyBindingResult(request, "projectRequest");
+        validator.validate(request, result, CreateGroup.class);
+        if (result.hasErrors()) {
+            throw new IllegalArgumentException(result.getAllErrors().get(0).getDefaultMessage());
+        }
+
         if (file != null && !file.isEmpty()) {
             String bannerUrl = fileStorageService.store(file);
             request.setBannerUrl(bannerUrl);
@@ -97,6 +111,12 @@ public class ProjectController {
             request = mapper.readValue(rawProjectJson, ProjectRequest.class);
         } catch (Exception e) {
             throw new RuntimeException("Dữ liệu JSON không hợp lệ", e);
+        }
+
+        BindingResult result = new BeanPropertyBindingResult(request, "projectRequest");
+        validator.validate(request, result, UpdateGroup.class);
+        if (result.hasErrors()) {
+            throw new IllegalArgumentException(result.getAllErrors().get(0).getDefaultMessage());
         }
 
         if (file != null && !file.isEmpty()) {

@@ -109,4 +109,25 @@ public class ProjectPermissionServiceImpl implements ProjectPermissionService {
                 userId, projectId, functionCode.name()
         );
     }
+
+    @Override
+    public void grantDefaultPermissions(UUID userId, UUID projectId) {
+        List<Function> defaults = functionService.getDefaults();
+        for (Function func : defaults) {
+            ProjectPermissionId id = new ProjectPermissionId(projectId, userId, func.getFunctionId());
+            ProjectPermission permission = new ProjectPermission(id, projectService.getEntityById(projectId).get(), userService.getUserById(userId).get(), func, true);
+            repo.save(permission);
+        }
+    }
+
+    @Override
+    public void grantAllPermissions(UUID userId, UUID projectId) {
+        List<Function> all = functionService.getAllEntities();
+        for (Function func : all) {
+            ProjectPermissionId id = new ProjectPermissionId(projectId, userId, func.getFunctionId());
+            ProjectPermission permission = new ProjectPermission(id, projectService.getEntityById(projectId).get(), userService.getUserById(userId).get(), func, true);
+            repo.save(permission);
+        }
+    }
+
 }

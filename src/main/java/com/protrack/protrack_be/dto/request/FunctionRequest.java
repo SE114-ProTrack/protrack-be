@@ -1,5 +1,6 @@
 package com.protrack.protrack_be.dto.request;
 
+import com.protrack.protrack_be.validation.CreateGroup;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -7,14 +8,14 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FunctionRequest {
-    @NotBlank(message = "Code chức năng không được để trống")
+    @NotBlank(groups = CreateGroup.class, message = "Code chức năng không được để trống")
     private String functionCode;
 
-    @NotBlank(message = "Tên chức năng không được để trống")
+    @NotBlank(groups = CreateGroup.class, message = "Tên chức năng không được để trống")
     @Size(max = 100)
     private String fuctionName;
 
-    @NotBlank(message = "Tên màn hình không được để trống")
+    @NotBlank(groups = CreateGroup.class, message = "Tên màn hình không được để trống")
     @Size(max = 100)
     private String screenName;
 }

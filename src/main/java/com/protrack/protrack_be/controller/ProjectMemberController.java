@@ -4,12 +4,14 @@ import com.protrack.protrack_be.dto.request.ProjectMemberRequest;
 import com.protrack.protrack_be.dto.response.ProjectMemberResponse;
 import com.protrack.protrack_be.model.id.ProjectMemberId;
 import com.protrack.protrack_be.service.ProjectMemberService;
+import com.protrack.protrack_be.validation.CreateGroup;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,7 +44,7 @@ public class ProjectMemberController {
 
     @Operation(summary = "Thêm thành viên dự án")
     @PostMapping
-    public ResponseEntity<?> addProjectMember(@RequestBody @Valid ProjectMemberRequest request) {
+    public ResponseEntity<?> addProjectMember(@RequestBody @Validated(CreateGroup.class) ProjectMemberRequest request) {
         ProjectMemberResponse response = service.create(request);
         return ResponseEntity.ok(response);
     }

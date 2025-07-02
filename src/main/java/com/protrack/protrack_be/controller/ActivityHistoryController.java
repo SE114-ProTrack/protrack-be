@@ -5,11 +5,13 @@ import com.protrack.protrack_be.dto.response.ActivityHistoryResponse;
 import com.protrack.protrack_be.dto.response.CommentResponse;
 import com.protrack.protrack_be.model.ActivityHistory;
 import com.protrack.protrack_be.service.ActivityHistoryService;
+import com.protrack.protrack_be.validation.CreateGroup;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -49,7 +51,7 @@ public class ActivityHistoryController {
 
     @Operation(summary = "Tạo lịch sử hoạt động")
     @PostMapping
-    public ResponseEntity<?> createActivityHistory(@RequestBody @Valid ActivityHistoryRequest request) {
+    public ResponseEntity<?> createActivityHistory(@RequestBody @Validated(CreateGroup.class) ActivityHistoryRequest request) {
         ActivityHistoryResponse response = service.create(request);
         return ResponseEntity.ok(response);
     }
