@@ -13,6 +13,9 @@ public class ResetPasswordRequest {
     @NotBlank
     private String token;
 
+    @NotBlank
+    private String email;
+
     @Size(min = 6)
     private String newPassword;
 }

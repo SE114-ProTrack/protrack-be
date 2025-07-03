@@ -33,8 +33,8 @@ public class AuthController {
 
     @Operation(summary = "Xác minh email", description = "Xác minh tài khoản bằng token trong email")
     @GetMapping("/verify-email")
-    public ResponseEntity<AuthResponse> verifyEmail(@RequestParam String token) {
-        return ResponseEntity.ok(authService.verifyEmail(token)); // Xác minh token và trả về thông tin người dùng
+    public ResponseEntity<AuthResponse> verifyEmail(@RequestParam String token, @RequestParam String email) {
+        return ResponseEntity.ok(authService.verifyEmail(token, email));
     }
 
     @Operation(summary = "Hoàn tất hồ sơ người dùng", description = "Sau khi xác minh email thành công")
@@ -61,14 +61,14 @@ public class AuthController {
     @Operation(summary = "Xác minh token khôi phục mật khẩu")
     @PostMapping("/forgot-password/verify")
     public ResponseEntity<?> verifyResetToken(@RequestBody @Valid VerifyResetTokenRequest rq) {
-        authService.verifyResetToken(rq.getToken());
+        authService.verifyResetToken(rq.getToken(), rq.getEmail());
         return ResponseEntity.ok("Token hợp lệ");
     }
 
     @Operation(summary = "Đặt lại mật khẩu mới")
     @PostMapping("/forgot-password/reset")
     public ResponseEntity<?> resetPassword(@RequestBody @Valid ResetPasswordRequest rq) {
-        authService.resetPassword(rq.getToken(), rq.getNewPassword());
+        authService.resetPassword(rq.getToken(), rq.getEmail(), rq.getNewPassword());
         return ResponseEntity.ok("Đặt lại mật khẩu thành công");
     }
 }

@@ -11,4 +11,7 @@ import lombok.NoArgsConstructor;
 public class VerifyResetTokenRequest {
     @NotBlank
     private String token;
+
+    @NotBlank
+    private String email;
 }

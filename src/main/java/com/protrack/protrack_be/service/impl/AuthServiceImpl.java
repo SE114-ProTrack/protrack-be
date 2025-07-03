@@ -8,7 +8,9 @@
     import com.protrack.protrack_be.model.*;
     import com.protrack.protrack_be.repository.*;
     import com.protrack.protrack_be.service.AuthService;
+    import com.protrack.protrack_be.service.UserService;
     import com.protrack.protrack_be.util.JwtUtil;
+    import lombok.RequiredArgsConstructor;
     import org.springframework.beans.factory.annotation.Autowired;
     import org.springframework.http.HttpStatus;
     import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,36 +18,38 @@
     import org.springframework.web.server.ResponseStatusException;
 
     import java.time.Instant;
-    import java.time.LocalDateTime;
-    import java.time.ZoneOffset;
     import java.time.temporal.ChronoUnit;
     import java.util.Optional;
     import java.util.UUID;
 
     @Service
+    @RequiredArgsConstructor
     public class AuthServiceImpl implements AuthService {
 
         @Autowired
-        private AccountRepository accountRepo;
+        private final AccountRepository accountRepo;
 
         @Autowired
-        private UserRepository userRepo;
+        private final UserRepository userRepo;
 
         @Autowired
-        private JwtUtil jwtUtil;
+        private final JwtUtil jwtUtil;
 
         @Autowired
-        private PasswordEncoder passwordEncoder;
+        private final PasswordEncoder passwordEncoder;
 
         @Autowired
-        private EmailVerificationTokenRepository tokenRepo;
+        private final EmailVerificationTokenRepository tokenRepo;
         @Autowired
-        private EmailService emailService;
+        private final EmailService emailService;
         @Autowired
-        private PasswordResetTokenRepository resetTokenRepo;
+        private final PasswordResetTokenRepository resetTokenRepo;
 
         @Autowired
-        InvitationRepository invitationRepo;
+        private final InvitationRepository invitationRepo;
+
+        @Autowired
+        private final UserService userService;
 
 
 //        @Override
@@ -132,10 +136,9 @@
         }
 
         @Override
-        public AuthResponse verifyEmail(String token) {
+        public AuthResponse verifyEmail(String token, String email) {
             EmailVerificationToken tokenEntity = tokenRepo.findByToken(token)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token invalid"));
-
             if (tokenEntity.isVerified()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token has been used");
             }
@@ -143,6 +146,11 @@
             if (tokenEntity.getExpiredAt().isBefore(Instant.now())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token has expired");
             }
+
+            if (!tokenEntity.getAccount().getEmail().equalsIgnoreCase(email)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token/email mismatch");
+            }
+
 
             Account acc = tokenEntity.getAccount();
             acc.setActive(true);
@@ -205,7 +213,6 @@
             if (existing.isPresent() && existing.get().getExpiredAt().isAfter(Instant.now())) {
                 token = existing.get().getToken(); // dùng lại token cũ
             } else {
-                token = UUID.randomUUID().toString();
                 EmailVerificationToken tokenEntity = new EmailVerificationToken(token, acc, Instant.now().plus(15, ChronoUnit.MINUTES));
                 tokenRepo.save(tokenEntity);
             }
@@ -246,14 +253,14 @@
             tokenEntity.setVerified(false);
             resetTokenRepo.save(tokenEntity);
 
-            String link = "" + "/reset-password?token=" + token;
+            String link = "..." + "/reset-password?token=" + token;
             String body = "<p>Tap here to reset password: </p><a href=\"" + link + "\">Reset password</a>";
 
             emailService.send(email, "Reset password", body);
         }
 
         @Override
-        public void verifyResetToken(String token) {
+        public void verifyResetToken(String token, String email) {
             PasswordResetToken tokenEntity = resetTokenRepo.findByToken(token)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token invalid"));
 
@@ -263,17 +270,25 @@
             if (tokenEntity.getExpiredAt().isBefore(Instant.now()))
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token has expired");
 
+            if (!tokenEntity.getAccount().getEmail().equalsIgnoreCase(email)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token/email mismatch");
+            }
+
             tokenEntity.setVerified(true);
             resetTokenRepo.save(tokenEntity);
         }
 
         @Override
-        public void resetPassword(String token, String newPassword) {
+        public void resetPassword(String token, String email, String newPassword) {
             PasswordResetToken tokenEntity = resetTokenRepo.findByToken(token)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token invalid"));
 
             if (!tokenEntity.isVerified())
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token has not been verified");
+
+            if (!tokenEntity.getAccount().getEmail().equalsIgnoreCase(email)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token/email mismatch");
+            }
 
             Account acc = tokenEntity.getAccount();
             acc.setPassword(passwordEncoder.encode(newPassword));
