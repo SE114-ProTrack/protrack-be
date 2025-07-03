@@ -34,6 +34,7 @@ public class TaskMapper {
                 task.getTaskId(),
                 task.getTaskName(),
                 task.getDescription(),
+                task.getCreator(),
                 task.getDeadline(),
                 task.getPriority(),
                 task.getIsMain(),
