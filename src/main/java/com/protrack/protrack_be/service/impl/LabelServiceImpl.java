@@ -10,7 +10,6 @@ import com.protrack.protrack_be.mapper.LabelMapper;
 import com.protrack.protrack_be.model.Label;
 import com.protrack.protrack_be.model.Project;
 import com.protrack.protrack_be.repository.LabelRepository;
-import com.protrack.protrack_be.repository.ProjectPermissionRepository;
 import com.protrack.protrack_be.service.LabelService;
 import com.protrack.protrack_be.service.ProjectPermissionService;
 import com.protrack.protrack_be.service.ProjectService;
@@ -62,7 +61,7 @@ public class LabelServiceImpl implements LabelService {
         Project project = projectService.getEntityById(projectId)
                 .orElseThrow(() -> new NotFoundException("Project not found"));
         UUID userId = userService.getCurrentUser().getUserId();
-        if (!projectService.hasProjectRight(project.getProjectId(), userId, ProjectFunctionCode.VIEW_TASK)) {
+        if (projectService.hasProjectRight(project.getProjectId(), userId, ProjectFunctionCode.VIEW_TASK)) {
             throw new com.protrack.protrack_be.exception.AccessDeniedException("You are not permitted to view labels of this project");
         }
         return repo.findByProject_ProjectId(projectId)
@@ -78,7 +77,7 @@ public class LabelServiceImpl implements LabelService {
                 .orElseThrow(() -> new NotFoundException("Project not found"));
         UUID userId = userService.getCurrentUser().getUserId();
 
-        if (!projectService.hasProjectRight(project.getProjectId(), userId, ProjectFunctionCode.EDIT_PROJECT)) {
+        if (projectService.hasProjectRight(project.getProjectId(), userId, ProjectFunctionCode.EDIT_PROJECT)) {
             throw new AccessDeniedException("You are not permitted to manage labels in this project");
         }
 
@@ -104,7 +103,7 @@ public class LabelServiceImpl implements LabelService {
                 .orElseThrow(() -> new NotFoundException("Project not found"));
         UUID userId = userService.getCurrentUser().getUserId();
 
-        if (!projectService.hasProjectRight(project.getProjectId(), userId, ProjectFunctionCode.EDIT_PROJECT)) {
+        if (projectService.hasProjectRight(project.getProjectId(), userId, ProjectFunctionCode.EDIT_PROJECT)) {
             throw new AccessDeniedException("You are not permitted to manage labels in this project");
         }
 
@@ -131,7 +130,7 @@ public class LabelServiceImpl implements LabelService {
         Project project = label.getProject();
         UUID userId = userService.getCurrentUser().getUserId();
 
-        if (!projectService.hasProjectRight(project.getProjectId(), userId, ProjectFunctionCode.EDIT_PROJECT)) {
+        if (projectService.hasProjectRight(project.getProjectId(), userId, ProjectFunctionCode.EDIT_PROJECT)) {
             throw new AccessDeniedException("You are not permitted to manage labels in this project");
         }
 

@@ -38,6 +38,23 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
             """, nativeQuery = true)
     List<Project> findTop3ProjectsByUserId(@Param("userId") UUID userId);
 
+    @Query(value = """
+            SELECT DISTINCT d.*
+            FROM duan d
+            LEFT JOIN thanhvienduan tv ON d.id_duan = tv.id_duan AND tv.da_xoa = false
+            LEFT JOIN phanquyenduan pq ON d.id_duan = pq.id_duan AND pq.trangthai = true
+            LEFT JOIN chucnang cn ON pq.id_chucnang = cn.id_chucnang
+            WHERE d.da_xoa = false
+            AND (
+            d.id_nguoidung = :userId OR (
+                    tv.id_nguoidung = :userId
+                    AND pq.id_nguoidung = :userId
+                    AND cn.functioncode = 'CREATE_TASK'
+                )
+            )
+            """, nativeQuery = true)
+    List<Project> findAbleToAddTask(@Param("userId") UUID userId);
+
     List<Project> findByProjectNameContainingIgnoreCase(String keyword);
 
     Page<Project> findAll(Pageable pageable);

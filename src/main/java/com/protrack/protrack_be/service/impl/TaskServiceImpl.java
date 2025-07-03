@@ -85,7 +85,7 @@ public class TaskServiceImpl implements TaskService {
     public TaskResponse createTask(TaskRequest request, UUID userId) {
         try {
 
-            if (!projectService.hasProjectRight(request.getProjectId(), userId, ProjectFunctionCode.CREATE_TASK)) {
+            if (projectService.hasProjectRight(request.getProjectId(), userId, ProjectFunctionCode.CREATE_TASK)) {
                 throw new AccessDeniedException("You are not permitted to create task in this project");
             }
 
@@ -108,10 +108,6 @@ public class TaskServiceImpl implements TaskService {
             Task saved = taskRepository.save(task);
 
             assignUsersToTask(task, request.getAssigneeIds(), request.getApproverId());
-
-            if (Boolean.TRUE.equals(request.getIsMain())) {
-                createSubTasks(task, request.getSubTasks());
-            }
 
         User user = userService.getUserById(userId)
                 .orElseThrow(() -> new NotFoundException("Can not find user"));
@@ -138,7 +134,7 @@ public class TaskServiceImpl implements TaskService {
     @EnableSoftDeleteFilter
     public TaskResponse updateTask(UUID taskId, TaskRequest request, UUID userId) {
         Task task = getTask(taskId);
-        if (!projectService.hasProjectRight(task.getProject().getProjectId(), userId, ProjectFunctionCode.EDIT_TASK)) {
+        if (projectService.hasProjectRight(task.getProject().getProjectId(), userId, ProjectFunctionCode.EDIT_TASK)) {
             throw new AccessDeniedException("You are not permitted to edit this task");
         }
 
@@ -175,7 +171,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public void deleteTask(UUID taskId, UUID userId) {
         Task task = getTask(taskId);
-        if (!projectService.hasProjectRight(task.getProject().getProjectId(), userId, ProjectFunctionCode.DELETE_TASK)) {
+        if (projectService.hasProjectRight(task.getProject().getProjectId(), userId, ProjectFunctionCode.DELETE_TASK)) {
             throw new AccessDeniedException("You are not permitted to delete this task");
         }
 
@@ -254,7 +250,7 @@ public class TaskServiceImpl implements TaskService {
 
         return taskMemberRepository.existsByTask_TaskIdAndUser_UserId(task.getTaskId(), userId)
                 || projectMemberService.isProjectOwner(projectId, userId)
-                || projectPermissionService.hasPermission(userId, projectId, ProjectFunctionCode.VIEW_TASK);
+                || task.getCreator().equals(userId);
     }
 
     private void checkMembership(UUID projectId, UUID userId) {
@@ -337,21 +333,6 @@ public class TaskServiceImpl implements TaskService {
                 .stream()
                 .map(tm -> tm.getUser().getUserId())
                 .collect(Collectors.toList());
-    }
-
-    private void createSubTasks(Task parentTask, List<String> subTaskNames) {
-        if (subTaskNames == null) return;
-        for (String name : subTaskNames) {
-            Task sub = new Task();
-            sub.setProject(parentTask.getProject());
-            sub.setTaskName(name);
-            sub.setIsMain(false);
-            sub.setDeadline(parentTask.getDeadline());
-            sub.setApprover(parentTask.getApprover());
-            sub.setStatus(parentTask.getStatus());
-            sub.setParentTask(parentTask);
-            taskRepository.save(sub);
-        }
     }
 
     private void logActivity(Task task, UUID actorId, String type, String description) {

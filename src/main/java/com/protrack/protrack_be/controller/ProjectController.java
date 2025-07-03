@@ -168,4 +168,11 @@ public class ProjectController {
         return ResponseEntity.ok(fileUrl);
     }
 
+    @Operation(summary = "Lấy dự án mà user hiện tại có thể thêm công việc")
+    @GetMapping("/user/can_create_task")
+    public ResponseEntity<?> getCanCreateTask(){
+        List<ProjectResponse> responses = service.getCanCreateTask();
+        return ResponseEntity.ok(responses);
+    }
+
 }

@@ -1,15 +1,11 @@
 package com.protrack.protrack_be.service.impl;
 
 import com.protrack.protrack_be.annotation.EnableSoftDeleteFilter;
-import com.protrack.protrack_be.dto.request.ProjectMemberRequest;
 import com.protrack.protrack_be.dto.request.ProjectRequest;
 import com.protrack.protrack_be.dto.response.ProjectResponse;
-import com.protrack.protrack_be.dto.response.TaskResponse;
-import com.protrack.protrack_be.dto.response.UserResponse;
 import com.protrack.protrack_be.enums.ProjectFunctionCode;
 import com.protrack.protrack_be.exception.NotFoundException;
 import com.protrack.protrack_be.mapper.ProjectMapper;
-import com.protrack.protrack_be.mapper.TaskMapper;
 import com.protrack.protrack_be.model.*;
 import com.protrack.protrack_be.model.id.ProjectMemberId;
 import com.protrack.protrack_be.repository.FunctionRepository;
@@ -20,10 +16,7 @@ import com.protrack.protrack_be.service.ProjectMemberService;
 import com.protrack.protrack_be.service.ProjectPermissionService;
 import com.protrack.protrack_be.service.ProjectService;
 import com.protrack.protrack_be.service.UserService;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
@@ -31,7 +24,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -120,7 +112,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .orElseThrow(() -> new RuntimeException("Can not find project"));
         User user = userService.getCurrentUser();
 
-        if (!hasProjectRight(project.getProjectId(), user.getUserId(), ProjectFunctionCode.EDIT_PROJECT)) {
+        if (hasProjectRight(project.getProjectId(), user.getUserId(), ProjectFunctionCode.EDIT_PROJECT)) {
             throw new AccessDeniedException("You are not permitted to edit this project");
         }
 
@@ -184,8 +176,16 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @EnableSoftDeleteFilter
     public boolean hasProjectRight(UUID projectId, UUID userId, ProjectFunctionCode function) {
-        return projectMemberService.isProjectOwner(projectId, userId)
-                || projectPermissionService.hasPermission(userId, projectId, function);
+        return !projectMemberService.isProjectOwner(projectId, userId)
+                && !projectPermissionService.hasPermission(userId, projectId, function);
+    }
+
+    @Override
+    public List<ProjectResponse> getCanCreateTask(){
+        return repo.findAbleToAddTask(userService.getCurrentUser().getUserId())
+                .stream()
+                .map(ProjectMapper::toResponse)
+                .collect(Collectors.toList());
     }
 
 }

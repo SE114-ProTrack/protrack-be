@@ -7,7 +7,6 @@ import com.protrack.protrack_be.enums.ProjectFunctionCode;
 import com.protrack.protrack_be.exception.AccessDeniedException;
 import com.protrack.protrack_be.exception.BadRequestException;
 import com.protrack.protrack_be.exception.NotFoundException;
-import com.protrack.protrack_be.mapper.InvitationMapper;
 import com.protrack.protrack_be.mapper.ProjectMemberMapper;
 import com.protrack.protrack_be.model.Project;
 import com.protrack.protrack_be.model.ProjectMember;
@@ -19,7 +18,6 @@ import com.protrack.protrack_be.service.ProjectPermissionService;
 import com.protrack.protrack_be.service.ProjectService;
 import com.protrack.protrack_be.service.UserService;
 import jakarta.transaction.Transactional;
-import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.text.WordUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import lombok.RequiredArgsConstructor;
@@ -84,7 +82,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
                 .orElseThrow(() -> new NotFoundException("Can not find project"));
         User user = userService.getCurrentUser();
 
-        if (!projectService.hasProjectRight(project.getProjectId(), user.getUserId(), ProjectFunctionCode.EDIT_PROJECT)) {
+        if (projectService.hasProjectRight(project.getProjectId(), user.getUserId(), ProjectFunctionCode.EDIT_PROJECT)) {
             throw new com.protrack.protrack_be.exception.AccessDeniedException("You are not permitted to edit members of this project");
         }
 
@@ -114,7 +112,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
                 .orElseThrow(() -> new NotFoundException("Can not find project"));
         User user = userService.getCurrentUser();
 
-        if (!projectService.hasProjectRight(project.getProjectId(), user.getUserId(), ProjectFunctionCode.EDIT_MEMBER)) {
+        if (projectService.hasProjectRight(project.getProjectId(), user.getUserId(), ProjectFunctionCode.EDIT_MEMBER)) {
             throw new com.protrack.protrack_be.exception.AccessDeniedException("You are not permitted to edit members of this project");
         }
 
@@ -138,7 +136,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
         Project project = projectMember.getProject();
         User user = userService.getCurrentUser();
 
-        if (!projectService.hasProjectRight(project.getProjectId(), user.getUserId(), ProjectFunctionCode.EDIT_MEMBER)) {
+        if (projectService.hasProjectRight(project.getProjectId(), user.getUserId(), ProjectFunctionCode.EDIT_MEMBER)) {
             throw new com.protrack.protrack_be.exception.AccessDeniedException("You are not permitted to edit members of this project");
         }
 
