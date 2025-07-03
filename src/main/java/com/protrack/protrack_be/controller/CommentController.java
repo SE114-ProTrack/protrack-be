@@ -60,8 +60,8 @@ public class CommentController {
 
     @Operation(summary = "Cập nhật bình luận")
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateComment(@PathVariable UUID iD, @RequestBody @Valid CommentRequest request) {
-        CommentResponse response = service.update(iD, request);
+    public ResponseEntity<?> updateComment(@PathVariable UUID id, @RequestBody @Valid CommentRequest request) {
+        CommentResponse response = service.update(id, request);
         return ResponseEntity.ok(response);
     }
 

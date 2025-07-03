@@ -2,6 +2,7 @@ package com.protrack.protrack_be.service.impl;
 
 import com.protrack.protrack_be.annotation.EnableSoftDeleteFilter;
 import com.protrack.protrack_be.dto.request.ActivityHistoryRequest;
+import com.protrack.protrack_be.dto.request.NotificationRequest;
 import com.protrack.protrack_be.dto.request.TaskMemberRequest;
 import com.protrack.protrack_be.dto.response.TaskMemberResponse;
 import com.protrack.protrack_be.enums.ProjectFunctionCode;
@@ -50,6 +51,9 @@ public class TaskMemberServiceImpl implements TaskMemberService {
 
     @Autowired
     ProjectMemberService projectMemberService;
+
+    @Autowired
+    NotificationService notificationService;
 
     @Override
     @EnableSoftDeleteFilter
@@ -103,6 +107,14 @@ public class TaskMemberServiceImpl implements TaskMemberService {
                 )
         );
 
+        notificationService.create(new NotificationRequest(
+                userService.getCurrentUser().getUserId(),
+                user.getUserId(),
+                "TASK_NEW_ASSIGNEE",
+                "You have been assigned to the task: " + task.getTaskName(),
+                ""
+        ));
+
         return toResponse(saved);
     }
 
@@ -129,6 +141,14 @@ public class TaskMemberServiceImpl implements TaskMemberService {
                         user.getName() + " has removed +\"" + user.getName() + "\" from the task: " + taskMember.getTask().getTaskName()
                 )
         );
+
+        notificationService.create(new NotificationRequest(
+                userService.getCurrentUser().getUserId(),
+                taskMember.getUser().getUserId(),
+                "TASK_REMOVED",
+                "You have been removed from the task: " + taskMember.getTask().getTaskName(),
+                ""
+        ));
 
         repo.deleteById(id);
     }
