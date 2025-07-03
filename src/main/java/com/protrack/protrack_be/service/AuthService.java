@@ -13,12 +13,12 @@ public interface AuthService {
 //    AuthResponse register(RegisterRequest rq);
     AuthResponse login(LoginRequest rq);
     void preRegister(RegisterRequest rq);
-    AuthResponse verifyEmail(String token);
+    AuthResponse verifyEmail(String token, String email);
     CompleteRegistrationResponse completeRegistration(UUID accountId, CompleteProfileRequest rq);
     void resendVerification(String email);
 
     void forgotPassword(String email);
-    void verifyResetToken(String token);
-    void resetPassword(String token, String newPassword);
+    void verifyResetToken(String token, String email);
+    void resetPassword(String token, String email, String newPassword);
 
 }

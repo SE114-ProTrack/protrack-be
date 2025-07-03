@@ -46,8 +46,8 @@ public class ActivityHistoryController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @Operation(summary = "Lấy bình luận theo ID của lịch sử hoạt động")
-    @GetMapping("/{taskId}")
+    @Operation(summary = "Lấy lịch sử hoạt động của một công việc")
+    @GetMapping("/task/{taskId}")
     public ResponseEntity<Page<ActivityHistoryResponse>> getComments(@PathVariable UUID taskId,
                                                                      @RequestParam int page,
                                                                      @RequestParam int size) {

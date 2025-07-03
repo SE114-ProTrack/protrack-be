@@ -18,6 +18,7 @@ public interface MessageService {
     MessageResponse update(UUID id, MessageRequest request);
     void markAsRead(UUID id);
     void delete(UUID id);
-    Page<MessageResponse> searchMessages(String keyword, Pageable pageable);
+    Page<MessageResponse> searchMessagesInConversation(UUID withUserId, String keyword, Pageable pageable);
+    List<MessagePreviewResponse> searchConversationsByName(String keyword);
     List<MessagePreviewResponse> getPreviews();
 }

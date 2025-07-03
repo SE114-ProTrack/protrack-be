@@ -2,7 +2,9 @@ package com.protrack.protrack_be.controller;
 
 import com.protrack.protrack_be.dto.request.ChangePasswordRequest;
 import com.protrack.protrack_be.dto.request.UpdateProfileRequest;
+import com.protrack.protrack_be.dto.response.ProfileResponse;
 import com.protrack.protrack_be.dto.response.UserResponse;
+import com.protrack.protrack_be.model.User;
 import com.protrack.protrack_be.service.UserService;
 import com.protrack.protrack_be.service.impl.FileStorageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -68,5 +70,10 @@ public class UserController {
     public ResponseEntity<List<UserResponse>> getUsersSameProjectButNoChat() {
         List<UserResponse> responses = userService.getUsersSharingProjects();
         return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<ProfileResponse> getUserProfile() {
+        return ResponseEntity.ok(userService.getUserProfile());
     }
 }

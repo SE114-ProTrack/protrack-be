@@ -26,7 +26,7 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
             SELECT * FROM congviec c
             JOIN nguoithuchiencv nth ON nth.id_congviec = c.id_congviec
             WHERE nth.id_nguoidung = :userId AND c.da_xoa = false
-            ORDER BY c.thoigiantao DESC
+            ORDER BY c.thoi_gian_tao DESC
             LIMIT 3
             """, nativeQuery = true)
     List<Task> findTop3TasksByUserId(@Param("userId") UUID userId);

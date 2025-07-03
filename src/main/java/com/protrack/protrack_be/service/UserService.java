@@ -2,6 +2,7 @@ package com.protrack.protrack_be.service;
 
 import com.protrack.protrack_be.dto.request.ChangePasswordRequest;
 import com.protrack.protrack_be.dto.request.UpdateProfileRequest;
+import com.protrack.protrack_be.dto.response.ProfileResponse;
 import com.protrack.protrack_be.dto.response.UserResponse;
 import com.protrack.protrack_be.model.User;
 
@@ -17,4 +18,5 @@ public interface UserService {
     UserResponse changePassword(UUID userId, ChangePasswordRequest rq);
     void updateUserAvatar(UUID userId, String avatarUrl);
     List<UserResponse> getUsersSharingProjects();
+    ProfileResponse getUserProfile();
 }

@@ -35,9 +35,13 @@ public class Task extends BaseEntity {
     @Column(name = "mota")
     private String description;
 
-    @ManyToOne
-    @JoinColumn(name = "id_nhan")
-    private Label label;
+    @ManyToMany
+    @JoinTable(
+            name = "task_label",
+            joinColumns = @JoinColumn(name = "id_congviec"),
+            inverseJoinColumns = @JoinColumn(name = "id_nhan")
+    )
+    private List<Label> labels;
 
     @Column(name = "deadline", nullable = false)
     private LocalDateTime deadline;

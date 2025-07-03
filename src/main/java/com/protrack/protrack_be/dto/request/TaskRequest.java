@@ -22,7 +22,7 @@ public class TaskRequest {
 
     private String description;
 
-    private UUID labelId;
+    private List<UUID> labelIds;
 
     @NotNull(groups = CreateGroup.class, message = "Deadline không được để trống")
     private LocalDateTime deadline;
