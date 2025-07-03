@@ -45,5 +45,4 @@ public class TaskRequest {
     private String color;
 
     private List<UUID> assigneeIds;
-    private List<String> subTasks;
 }

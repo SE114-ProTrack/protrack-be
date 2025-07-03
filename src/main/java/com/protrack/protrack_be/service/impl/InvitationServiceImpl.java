@@ -10,7 +10,6 @@ import com.protrack.protrack_be.exception.NotFoundException;
 import com.protrack.protrack_be.mapper.InvitationMapper;
 import com.protrack.protrack_be.model.*;
 import com.protrack.protrack_be.model.id.ProjectMemberId;
-import com.protrack.protrack_be.model.id.ProjectPermissionId;
 import com.protrack.protrack_be.repository.InvitationRepository;
 import com.protrack.protrack_be.repository.ProjectMemberRepository;
 import com.protrack.protrack_be.repository.ProjectPermissionRepository;
@@ -20,7 +19,6 @@ import com.protrack.protrack_be.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.Email;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -88,7 +86,7 @@ public class InvitationServiceImpl implements InvitationService {
     @Override
     @EnableSoftDeleteFilter
     public InvitationResponse create(InvitationRequest request){
-        if (!projectService.hasProjectRight(request.getProjectId(), userService.getCurrentUser().getUserId(), ProjectFunctionCode.INVITE_MEMBER)) {
+        if (projectService.hasProjectRight(request.getProjectId(), userService.getCurrentUser().getUserId(), ProjectFunctionCode.INVITE_MEMBER)) {
             throw new AccessDeniedException("You are not permitted to invite new members");
         }
 
@@ -202,7 +200,7 @@ public class InvitationServiceImpl implements InvitationService {
         Project project = invitation.getProject();
         UUID userId = userService.getCurrentUser().getUserId();
 
-        if (!projectService.hasProjectRight(project.getProjectId(), userId, ProjectFunctionCode.INVITE_MEMBER)) {
+        if (projectService.hasProjectRight(project.getProjectId(), userId, ProjectFunctionCode.INVITE_MEMBER)) {
             throw new AccessDeniedException("You are not permitted to delete this invitation");
         }
 

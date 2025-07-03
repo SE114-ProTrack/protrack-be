@@ -35,7 +35,7 @@ public class Task extends BaseEntity {
     @Column(name = "mota")
     private String description;
 
-    @Column(name = "nguoitao")
+    @Column(name = "id_nguoitao")
     private UUID creator;
 
     @ManyToMany

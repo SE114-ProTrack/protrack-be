@@ -23,4 +23,5 @@ public interface ProjectService {
     List<ProjectResponse> findByKeyword(String keyword);
     ProjectResponse updateProjectBanner(UUID projectId, String bannerUrl);
     boolean hasProjectRight(UUID projectId, UUID userId, ProjectFunctionCode function);
+    List<ProjectResponse> getCanCreateTask();
 }

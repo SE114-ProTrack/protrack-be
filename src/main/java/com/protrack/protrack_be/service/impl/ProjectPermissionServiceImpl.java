@@ -101,7 +101,7 @@ public class ProjectPermissionServiceImpl implements ProjectPermissionService {
 
     @Override
     public void update(UUID projectId, UUID userId, Map<String, Boolean> permissionMap) {
-        if (!projectService.hasProjectRight(projectId, userService.getCurrentUser().getUserId(), ProjectFunctionCode.EDIT_MEMBER)) {
+        if (projectService.hasProjectRight(projectId, userService.getCurrentUser().getUserId(), ProjectFunctionCode.EDIT_MEMBER)) {
             throw new AccessDeniedException("You are not permitted to manage project permissions.");
         }
 
@@ -133,7 +133,7 @@ public class ProjectPermissionServiceImpl implements ProjectPermissionService {
         ProjectPermission projectPermission = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Project Permission not found"));
 
-        if (!projectService.hasProjectRight(projectPermission.getId().getProjectId(), userService.getCurrentUser().getUserId(), ProjectFunctionCode.EDIT_MEMBER)) {
+        if (projectService.hasProjectRight(projectPermission.getId().getProjectId(), userService.getCurrentUser().getUserId(), ProjectFunctionCode.EDIT_MEMBER)) {
             throw new AccessDeniedException("You are not permitted to manage project permissions.");
         }
 
