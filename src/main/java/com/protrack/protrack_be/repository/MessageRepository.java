@@ -61,10 +61,9 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
                     ) latest
                     ON (
                         (
-                            t.id_nguoigui = :currentUserId AND t.id_nguoinhan = latest.user_id
-                        )
-                        OR (
-                            t.id_nguoinhan = :currentUserId AND t.id_nguoigui = latest.user_id
+                            (t.id_nguoigui = :currentUserId AND t.id_nguoinhan = latest.user_id)
+                        OR
+                            (t.id_nguoinhan = :currentUserId AND t.id_nguoigui = latest.user_id)
                         )
                         AND t.thoi_gian_tao = latest.max_time
                     )
