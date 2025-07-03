@@ -307,7 +307,6 @@ public class TaskServiceImpl implements TaskService {
     private void assignUsersToTask(Task task, List<UUID> assigneeIds, UUID approverId) {
 
         Set<UUID> assigneeSet = assigneeIds == null ? new HashSet<>() : new HashSet<>(assigneeIds);
-
         if (approverId != null) {
             assigneeSet.add(approverId);
         }
