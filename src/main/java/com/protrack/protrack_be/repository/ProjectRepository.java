@@ -33,7 +33,7 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
                 SELECT id_duan FROM thanhvienduan WHERE id_nguoidung = :userId
             )
             AND d.da_xoa = false
-            ORDER BY d.thoigiantao DESC
+            ORDER BY d.thoi_gian_tao DESC
             LIMIT 3
             """, nativeQuery = true)
     List<Project> findTop3ProjectsByUserId(@Param("userId") UUID userId);

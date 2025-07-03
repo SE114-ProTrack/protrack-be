@@ -18,12 +18,11 @@ public class TaskResponse {
     private LocalDateTime deadline;
     private String priority;
     private Boolean isMain;
-    private List<TaskAttachment> attachments;
+    private List<TaskAttachmentResponse> attachments;
     private UUID projectId;
     private String projectName;
 
-    private UUID labelId;
-    private String labelName;
+    private List<LabelResponse> labels;
 
     private UUID parentTaskId;
 

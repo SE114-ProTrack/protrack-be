@@ -8,12 +8,14 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class MessagePreviewResponse {
+    private UUID userId;
     private String partnerName;
     private String avatarUrl;
     private String messageContent;
     private LocalDateTime sentAt;
     private int unreadCount;
 }
+

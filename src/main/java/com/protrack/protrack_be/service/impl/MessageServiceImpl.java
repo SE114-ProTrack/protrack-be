@@ -21,8 +21,11 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -142,16 +145,46 @@ public class MessageServiceImpl implements MessageService {
         repo.deleteById(id);
     }
 
-    @Override
     public List<MessagePreviewResponse> getPreviews() {
         User current = userService.getCurrentUser();
-        return repo.findPreviewsByUserId(current.getUserId());
+        List<Object[]> rawList = repo.findPreviewsByUserId(current.getUserId());
+
+        return rawList.stream().map(obj -> new MessagePreviewResponse(
+                (UUID) obj[0],
+                (String) obj[1],
+                (String) obj[2],
+                (String) obj[3],
+                ((Instant) obj[4]).atZone(ZoneId.systemDefault()).toLocalDateTime(),
+                ((Number) obj[5]).intValue()
+        )).toList();
     }
 
     @Override
-    public Page<MessageResponse> searchMessages(String keyword, Pageable pageable) {
-        UUID userId = userService.getCurrentUser().getUserId();
-        return repo.searchByUserAndContent(userId, keyword, pageable)
+    public List<MessagePreviewResponse> searchConversationsByName(String keyword) {
+        UUID currentUserId = userService.getCurrentUser().getUserId();
+        List<Object[]> rawList = repo.searchConversationsByName(currentUserId, keyword);
+        return rawList.stream()
+                .map(obj -> new MessagePreviewResponse(
+                        (UUID) obj[0],
+                        (String) obj[1],
+                        (String) obj[2],
+                        (String) obj[3],
+                        ((Instant) obj[4]).atZone(ZoneId.systemDefault()).toLocalDateTime(),
+                        ((Number) obj[5]).intValue()
+                ))
+                .toList();
+    }
+
+
+
+    @Override
+    @EnableSoftDeleteFilter
+    public Page<MessageResponse> searchMessagesInConversation(UUID withUserId, String keyword, Pageable pageable) {
+        UUID currentUserId = userService.getCurrentUser().getUserId();
+        if (!currentUserId.equals(withUserId) && !repo.existsConversationBetween(currentUserId, withUserId)) {
+            throw new AccessDeniedException("You are not permitted to view this conversation.");
+        }
+        return repo.searchMessagesInConversation(currentUserId, withUserId, keyword, pageable)
                 .map(MessageMapper::toResponse);
     }
 

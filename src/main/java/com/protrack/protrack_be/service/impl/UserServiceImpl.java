@@ -3,15 +3,15 @@ package com.protrack.protrack_be.service.impl;
 import com.protrack.protrack_be.annotation.EnableSoftDeleteFilter;
 import com.protrack.protrack_be.dto.request.ChangePasswordRequest;
 import com.protrack.protrack_be.dto.request.UpdateProfileRequest;
+import com.protrack.protrack_be.dto.response.ProfileResponse;
 import com.protrack.protrack_be.dto.response.UserResponse;
 import com.protrack.protrack_be.mapper.UserMapper;
 import com.protrack.protrack_be.model.Account;
 import com.protrack.protrack_be.model.User;
-import com.protrack.protrack_be.repository.AccountRepository;
-import com.protrack.protrack_be.repository.UserRepository;
+import com.protrack.protrack_be.repository.*;
 import com.protrack.protrack_be.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,16 +24,26 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     @Autowired
-    private UserRepository repo;
+    private final UserRepository repo;
 
     @Autowired
-    private AccountRepository accRepo;
+    private final AccountRepository accRepo;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private final ProjectMemberRepository projectMemberRepository;
+
+    @Autowired
+    private final TaskMemberRepository taskMemberRepository;
+
+    @Autowired
+    private final MessageRepository messageRepository;
 
     @Override
     public User getCurrentUser(){
@@ -114,4 +124,25 @@ public class UserServiceImpl implements UserService {
         List<User> users = repo.findUsersInSameProjectWithoutConversation(currentUserId);
         return users.stream().map(UserMapper::toResponse).toList();
     }
+
+    @Override
+    public ProfileResponse getUserProfile() {
+        User user = getCurrentUser();
+        UUID userId = user.getUserId();
+
+        int projectCount = projectMemberRepository.countProjectsByUser(userId);
+        int taskCount = taskMemberRepository.countTasksByUser(userId);
+        int contactCount = messageRepository.countContactUsersByUserId(userId);
+
+        return new ProfileResponse(
+                user.getUserId(),
+                user.getName(),
+                user.getAccount().getEmail(),
+                user.getAvatarUrl(),
+                projectCount,
+                taskCount,
+                contactCount
+        );
+    }
+
 }

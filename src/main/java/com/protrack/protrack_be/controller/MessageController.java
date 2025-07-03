@@ -77,15 +77,28 @@ public class MessageController {
         return ResponseEntity.ok("Xóa thành công");
     }
 
-    @Operation(summary = "Tìm kiếm tin nhắn trong một cuộc trò chuyện")
-    @GetMapping("/search")
-    public ResponseEntity<Page<MessageResponse>> searchMessages(
+    @Operation(summary = "Tìm kiếm tin nhắn trong một cuộc trò chuyện với một user cụ thể")
+    @GetMapping("/search-in-conversation")
+    public ResponseEntity<Page<MessageResponse>> searchMessagesInConversation(
+            @RequestParam UUID withUserId,
             @RequestParam String keyword,
             @RequestParam int page,
-            @RequestParam int size) {
-        Page<MessageResponse> result = service.searchMessages(keyword, PageRequest.of(page, size));
+            @RequestParam int size
+    ) {
+        Page<MessageResponse> result = service.searchMessagesInConversation(withUserId, keyword, PageRequest.of(page, size));
         return ResponseEntity.ok(result);
     }
+
+    @Operation(summary = "Tìm kiếm các cuộc trò chuyện theo tên người nhận")
+    @GetMapping("/search-by-name")
+    public ResponseEntity<List<MessagePreviewResponse>> searchConversationsByReceiverName(
+            @RequestParam String keyword
+    ) {
+        List<MessagePreviewResponse> result = service.searchConversationsByName(keyword);
+        return ResponseEntity.ok(result);
+    }
+
+
 
     @Operation(summary = "Lấy danh sách cuộc trò chuyện")
     @GetMapping("/previews")
