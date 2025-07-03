@@ -15,6 +15,7 @@ public class TaskResponse {
     private UUID taskId;
     private String taskName;
     private String description;
+    private UUID creator;
     private LocalDateTime deadline;
     private String priority;
     private Boolean isMain;

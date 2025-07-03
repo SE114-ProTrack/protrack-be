@@ -35,9 +35,12 @@ public class Task extends BaseEntity {
     @Column(name = "mota")
     private String description;
 
+    @Column(name = "nguoitao")
+    private UUID creator;
+
     @ManyToMany
     @JoinTable(
-            name = "task_label",
+            name = "gannhancongviec",
             joinColumns = @JoinColumn(name = "id_congviec"),
             inverseJoinColumns = @JoinColumn(name = "id_nhan")
     )

@@ -274,6 +274,7 @@ public class TaskServiceImpl implements TaskService {
         if (request.getDeadline() != null && request.getDeadline().isBefore(LocalDateTime.now())) {
             throw new BadRequestException("Deadline must be after now.");
         }
+        task.setCreator(userService.getCurrentUser().getUserId());
         task.setDeadline(request.getDeadline());
         task.setPriority(request.getPriority());
         task.setIsMain(request.getIsMain());

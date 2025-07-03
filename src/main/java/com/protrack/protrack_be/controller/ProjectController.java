@@ -7,6 +7,7 @@ import com.protrack.protrack_be.dto.response.ProjectResponse;
 import com.protrack.protrack_be.dto.response.TaskResponse;
 import com.protrack.protrack_be.model.Project;
 import com.protrack.protrack_be.service.ProjectService;
+import com.protrack.protrack_be.service.UserService;
 import com.protrack.protrack_be.service.impl.FileStorageService;
 import com.protrack.protrack_be.validation.CreateGroup;
 import com.protrack.protrack_be.validation.UpdateGroup;
@@ -37,6 +38,9 @@ public class ProjectController {
 
     @Autowired
     private ProjectService service;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private FileStorageService fileStorageService;
@@ -139,19 +143,18 @@ public class ProjectController {
         return ResponseEntity.ok("Xóa thành công");
     }
 
-    @Operation(summary = "Lấy tất cả dự án theo user")
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getByUser(@PathVariable UUID userId,
-                                       @RequestParam int page,
+    @Operation(summary = "Lấy tất cả dự án theo user hiện tại")
+    @GetMapping("/user")
+    public ResponseEntity<?> getByUser(@RequestParam int page,
                                        @RequestParam int size){
-        Page<ProjectResponse> responses = service.getProjectsByUser(userId, PageRequest.of(page, size));
+        Page<ProjectResponse> responses = service.getProjectsByUser(userService.getCurrentUser().getUserId(), PageRequest.of(page, size));
         return ResponseEntity.ok(responses);
     }
 
-    @Operation(summary = "Lấy 3 dự án tạo gần nhất theo user")
-    @GetMapping("/user/{userId}/get3")
-    public ResponseEntity<?> getTop3ByUser(@PathVariable UUID userId){
-        List<ProjectResponse> responses = service.get3ByUser(userId);
+    @Operation(summary = "Lấy 3 dự án tạo gần nhất theo user hiện tại")
+    @GetMapping("/user/get3")
+    public ResponseEntity<?> getTop3ByUser(){
+        List<ProjectResponse> responses = service.get3ByUser(userService.getCurrentUser().getUserId());
         return ResponseEntity.ok(responses);
     }
 

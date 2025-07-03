@@ -85,17 +85,17 @@ public class TaskController {
         return ResponseEntity.ok("Delete task successfully");
     }
 
-    @Operation(summary = "Lấy tất cả công việc theo user")
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getByUser(@PathVariable UUID userId){
-        List<TaskResponse> responses = service.getTasksByUser(userId);
+    @Operation(summary = "Lấy tất cả công việc theo user hiện tại")
+    @GetMapping("/user")
+    public ResponseEntity<?> getByUser(){
+        List<TaskResponse> responses = service.getTasksByUser(userService.getCurrentUser().getUserId());
         return ResponseEntity.ok(responses);
     }
 
-    @Operation(summary = "Lấy 3 công việc tạo gần nhất theo user")
-    @GetMapping("/user/{userId}/get3")
-    public ResponseEntity<?> getTop3ByUser(@PathVariable UUID userId){
-        List<TaskResponse> responses = service.get3ByUser(userId);
+    @Operation(summary = "Lấy 3 công việc tạo gần nhất theo user hiện tại")
+    @GetMapping("/user/get3")
+    public ResponseEntity<?> getTop3ByUser(){
+        List<TaskResponse> responses = service.get3ByUser(userService.getCurrentUser().getUserId());
         return ResponseEntity.ok(responses);
     }
 
