@@ -150,7 +150,14 @@ public class ProjectServiceImpl implements ProjectService {
     public List<ProjectResponse> get3ByUser(UUID userId){
         return repo.findTop3ProjectsByUserId(userId)
                 .stream()
-                .map(ProjectMapper::toResponse)
+                .map(project -> {
+                    ProjectResponse res = ProjectMapper.toResponse(project);
+
+                    res.setAllTasks(repo.getNumberOfTasks(project.getProjectId()));
+                    res.setCompletedTasks(repo.getNumberOfCompletedTasks(project.getProjectId()));
+
+                    return res;
+                })
                 .collect(Collectors.toList());
     }
 
