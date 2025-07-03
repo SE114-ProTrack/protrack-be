@@ -245,7 +245,7 @@ public class TaskServiceImpl implements TaskService {
     @EnableSoftDeleteFilter
     private void validateUserIsProjectMember(UUID projectId, UUID userId) {
         if (!projectMemberService.isMember(projectId, userId)) {
-            throw new BadRequestException("User " + userId + " is not a member of project " + projectId);
+            throw new AccessDeniedException("User " + userId + " is not a member of project " + projectId);
         }
     }
     @EnableSoftDeleteFilter
@@ -259,7 +259,7 @@ public class TaskServiceImpl implements TaskService {
 
     private void checkMembership(UUID projectId, UUID userId) {
         if (!projectMemberService.isMember(projectId, userId)) {
-            throw new AccessDeniedException("You are not a member of this project");
+            throw new AccessDeniedException(userId.toString() + " is not a member of this project");
         }
     }
 
@@ -307,7 +307,6 @@ public class TaskServiceImpl implements TaskService {
     private void assignUsersToTask(Task task, List<UUID> assigneeIds, UUID approverId) {
 
         Set<UUID> assigneeSet = assigneeIds == null ? new HashSet<>() : new HashSet<>(assigneeIds);
-
         if (approverId != null) {
             assigneeSet.add(approverId);
         }
